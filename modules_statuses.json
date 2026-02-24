@@ -1,0 +1,9 @@
+{
+    "Platform": true,
+    "IAM": true,
+    "Academic": true,
+    "Assessment": true,
+    "Communication": true,
+    "Gamification": true,
+    "Commerce": true
+}
