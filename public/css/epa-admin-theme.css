@@ -1,0 +1,64 @@
+/* EduPulse (EPA) - Custom Filament Theme */
+
+/* LOGIN PAGE BACKGROUND IMAGE */
+.fi-simple-layout {
+    background-color: #1e1b4b !important;
+    background-image: url('https://images.unsplash.com/photo-1522202176988-66273c2fd55f?q=80&w=1920&auto=format&fit=crop') !important;
+    background-size: cover !important;
+    background-position: center center !important;
+    background-attachment: fixed !important;
+    background-repeat: no-repeat !important;
+    min-height: 100vh;
+}
+.fi-simple-layout::before {
+    content: '';
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    /* Dark overlay to make the login box pop */
+    background: linear-gradient(135deg, rgba(30,27,75,0.85) 0%, rgba(49,46,129,0.7) 100%) !important;
+    pointer-events: none;
+    z-index: 0;
+}
+
+/* LOGIN CARD GLASSMORPHISM */
+.fi-simple-page {
+    position: relative;
+    z-index: 1;
+    background: rgba(255, 255, 255, 0.95) !important;
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border-radius: 1.5rem !important;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255,255,255,0.2) inset !important;
+    padding: 3.5rem 2.5rem !important;
+    width: 100% !important;
+    max-width: 30rem !important;
+}
+
+/* LOGO FIX ON LOGIN PAGE */
+.fi-simple-page .fi-logo {
+    display: flex !important;
+    justify-content: center !important;
+    width: 100% !important;
+    margin-bottom: 2rem !important;
+}
+.fi-simple-header-heading { display: none !important; }
+
+/* BUTTON COLOR - OVERRIDING ORANGE WITH INDIGO */
+[class*='fi-btn'][style*='--c-'] {
+    --c-50: 238 242 255; --c-100: 224 231 255; --c-200: 199 210 254;
+    --c-300: 165 180 252; --c-400: 129 140 248; --c-500: 99 102 241;
+    --c-600: 79 70 229; --c-700: 67 56 202; --c-800: 55 48 163;
+    --c-900: 49 46 129; --c-950: 30 27 75;
+}
+
+/* SIDEBAR & HEADER LOGO */
+.fi-sidebar { background: #1e1b4b !important; border-right: 1px solid rgba(99,102,241,0.2) !important; }
+.fi-sidebar-header { background: #312e81 !important; border-bottom: 1px solid rgba(165,180,252,0.2) !important; }
+.fi-sidebar-header .fi-logo img { max-height: 2.5rem !important; border-radius: 0.3rem; }
+.fi-sidebar-header .fi-logo span { color: #ffffff !important; font-size: 1.1rem !important; }
+.fi-sidebar-item-label, .fi-sidebar-group-label { color: rgba(196,181,253,0.9) !important; }
+.fi-sidebar-item.fi-active .fi-sidebar-item-label { color: #fff !important; }
+.fi-sidebar-item.fi-active { background: rgba(99,102,241,0.3) !important; border-left: 3px solid #818cf8 !important; }
+.fi-sidebar-item:hover:not(.fi-active) { background: rgba(99,102,241,0.15) !important; }
+.fi-topbar { background: #ffffff !important; border-bottom: 1px solid #e5e7eb !important; box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05) !important; }
+input:focus, input:focus-visible { border-color: rgb(99,102,241) !important; box-shadow: 0 0 0 3px rgba(99,102,241,0.25) !important; outline: none !important; }
