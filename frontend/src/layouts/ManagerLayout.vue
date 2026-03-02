@@ -1,28 +1,36 @@
 <script setup>
-import { ref } from 'vue';
-import { useRouter } from 'vue-router';
+import { computed, ref } from 'vue';
+import { useRouter, useRoute } from 'vue-router';
+import { useAuthStore } from '../../stores/auth';
 
 const router = useRouter();
+const route = useRoute();
+const authStore = useAuthStore();
 const isMobileMenuOpen = ref(false);
 
-const user = ref({
-  name: 'Academy Admin',
-  email: 'admin@academy.com',
-  role: 'Campus Manager',
-  avatar: 'https://ui-avatars.com/api/?name=Academy+Admin&background=4f46e5&color=fff'
+const tenantCode = computed(() => route.params.tenantCode);
+
+const user = computed(() => {
+  const u = authStore.user || {};
+  return {
+    name: u.name || 'Manager',
+    email: u.email || 'admin@academy.com',
+    role: authStore.roles[0] || 'Manager',
+    avatar: `https://ui-avatars.com/api/?name=${encodeURIComponent(u.name || 'Manager')}&background=4f46e5&color=fff`
+  }
 });
 
-const navigation = [
-  { name: 'Dashboard', href: '/manager', current: true },
-  { name: 'Users & Roles', href: '/manager/users', current: false },
-  { name: 'Courses Directory', href: '/manager/courses', current: false },
-  { name: 'Financials', href: '/manager/finance', current: false },
-  { name: 'Settings', href: '/manager/settings', current: false },
-];
+const navigation = computed(() => [
+  { name: 'Dashboard', href: `/${tenantCode.value}/manager`, current: true },
+  { name: 'Users & Roles', href: `/${tenantCode.value}/manager/users`, current: false },
+  { name: 'Courses Directory', href: `/${tenantCode.value}/manager/courses`, current: false },
+  { name: 'Financials', href: `/${tenantCode.value}/manager/finance`, current: false },
+  { name: 'Settings', href: `/${tenantCode.value}/manager/settings`, current: false },
+]);
 
-const logout = () => {
-  localStorage.removeItem('access_token');
-  router.push('/login');
+const logout = async () => {
+  await authStore.logout();
+  router.push(`/${tenantCode.value}/login`);
 };
 </script>
 

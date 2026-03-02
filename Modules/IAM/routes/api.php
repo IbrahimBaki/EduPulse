@@ -1,8 +1,13 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-use Modules\IAM\Http\Controllers\IAMController;
+use Modules\IAM\Http\Controllers\AuthController;
 
-Route::middleware(['auth:sanctum'])->prefix('v1')->group(function () {
-    Route::apiResource('iams', IAMController::class)->names('iam');
+Route::prefix('v1/{tenant_code}/auth')->middleware('tenant')->group(function () {
+    Route::post('/login', [AuthController::class, 'login']);
+
+    Route::middleware(['auth:sanctum'])->group(function () {
+        Route::get('/me', [AuthController::class, 'me']);
+        Route::post('/logout', [AuthController::class, 'logout']);
+    });
 });

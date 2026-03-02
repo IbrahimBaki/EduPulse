@@ -13,7 +13,7 @@ class Tenant extends Model
     /**
      * The attributes that are mass assignable.
      */
-    protected $fillable = [];
+    protected $fillable = ['name', 'code', 'status'];
 
     // protected static function newFactory(): TenantFactory
     // {

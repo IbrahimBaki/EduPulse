@@ -1,9 +1,12 @@
 <script setup>
 import { ref } from 'vue';
-import { useRouter } from 'vue-router';
-// import api from '../utils/axios'; // Uncomment to use real API
+import { useRouter, useRoute } from 'vue-router';
+import { useAuthStore } from '../../stores/auth';
 
 const router = useRouter();
+const route = useRoute();
+const authStore = useAuthStore();
+
 const email = ref('');
 const password = ref('');
 const isLoading = ref(false);
@@ -14,22 +17,26 @@ const handleLogin = async () => {
   errorMsg.value = '';
   
   try {
-    // Await API request to Sanctum
-    // const response = await api.post('/auth/login', {
-    //   email: email.value,
-    //   password: password.value,
-    // });
+    const tenantCode = route.params.tenantCode;
     
-    // For demo purposes, simply mocking a success delay
-    await new Promise(resolve => setTimeout(resolve, 800));
+    // Execute real login against the backend via the Auth Store
+    await authStore.login(tenantCode, email.value, password.value);
     
-    // Simulate setting token
-    // localStorage.setItem('access_token', response.data.access_token);
-    // localStorage.setItem('user', JSON.stringify(response.data.user));
-    
-    router.push('/');
+    // Redirect the user to their respective dashboard based on their Spatie Role
+    if (authStore.hasRole('manager')) {
+        router.push(`/${tenantCode}/manager`);
+    } else if (authStore.hasRole('teacher')) {
+        router.push(`/${tenantCode}/teacher`);
+    } else if (authStore.hasRole('student')) {
+        router.push(`/${tenantCode}/student`);
+    } else if (authStore.hasRole('parent')) {
+        router.push(`/${tenantCode}/parent`);
+    } else {
+        router.push('/');
+    }
   } catch (err) {
-    errorMsg.value = err.response?.data?.message || 'Failed to login. Please check your credentials.';
+    // Elegant error handling extracting messages from Laravel JSON exception responses
+    errorMsg.value = err.response?.data?.message || err.response?.data?.error || 'Failed to login. Please check your credentials.';
   } finally {
     isLoading.value = false;
   }

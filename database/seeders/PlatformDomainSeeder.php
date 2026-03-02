@@ -28,7 +28,7 @@ class PlatformDomainSeeder extends Seeder
 
         // 2. Create Dummy Academies (Tenants)
         $alphaAcademy = Tenant::firstOrCreate(
-            ['domain' => 'alpha.localhost'],
+            ['code' => 'alpha-academy'],
             [
                 'name' => 'Alpha International Academy',
                 'status' => 'active',
@@ -36,7 +36,7 @@ class PlatformDomainSeeder extends Seeder
         );
 
         $betaSchool = Tenant::firstOrCreate(
-            ['domain' => 'beta.localhost'],
+            ['code' => 'beta-school'],
             [
                 'name' => 'Beta High School',
                 'status' => 'active',
