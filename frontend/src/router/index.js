@@ -19,12 +19,26 @@ const TeacherDashboard = () => import('../views/teacher/Dashboard.vue');
 const TeacherCourses = () => import('../views/teacher/Courses.vue');
 const ParentDashboard = () => import('../views/parent/Dashboard.vue');
 const ManagerDashboard = () => import('../views/manager/Dashboard.vue');
+const ManagerUsers = () => import('../views/manager/Users.vue');
+const ManagerCourses = () => import('../views/manager/Courses.vue');
+const ManagerSettings = () => import('../views/manager/Settings.vue');
 
 const routes = [
     {
         path: '/',
         name: 'Home',
         component: Home,
+    },
+    {
+        path: '/manager',
+        component: ManagerLayout,
+        meta: { requiresAuth: true, role: 'manager' },
+        children: [
+            { path: '', name: 'ManagerDashboard', component: ManagerDashboard },
+            { path: 'users', name: 'ManagerUsers', component: ManagerUsers },
+            { path: 'courses', name: 'ManagerCourses', component: ManagerCourses },
+            { path: 'settings', name: 'ManagerSettings', component: ManagerSettings }
+        ]
     },
     {
         // Wrapper for all tenant-specific routes
@@ -62,14 +76,6 @@ const routes = [
                 children: [
                     { path: '', name: 'ParentDashboard', component: ParentDashboard }
                 ]
-            },
-            {
-                path: 'manager',
-                component: ManagerLayout,
-                meta: { requiresAuth: true, role: 'manager' }, // Matches the Spatie role initialized in seeding
-                children: [
-                    { path: '', name: 'ManagerDashboard', component: ManagerDashboard }
-                ]
             }
         ]
     }
@@ -86,15 +92,14 @@ router.beforeEach((to, from, next) => {
 
     // Check if route requires auth
     if (to.meta.requiresAuth && !authStore.isAuthenticated) {
-        // Redirect to that specific tenant's login component
-        return next(`/${to.params.tenantCode}/login`);
+        // Fallback login redirect. If no tenantCode in route, try to get from store.
+        const code = to.params.tenantCode || authStore.tenantCode || 'alpha';
+        return next(`/${code}/login`);
     }
 
     // Role-based authorization
     if (to.meta.requiresAuth && to.meta.role) {
         if (!authStore.hasRole(to.meta.role)) {
-            // E.g. A teacher trying to access /manager
-            // Send back to home or a 403 fallback
             return next('/');
         }
     }
@@ -102,10 +107,10 @@ router.beforeEach((to, from, next) => {
     // If logged in, block access to guest routes (e.g., login)
     if (to.meta.guest && authStore.isAuthenticated) {
         // Redirect to their respective dashboard based on role
-        if (authStore.hasRole('manager')) return next(`/${to.params.tenantCode}/manager`);
-        if (authStore.hasRole('teacher')) return next(`/${to.params.tenantCode}/teacher`);
-        if (authStore.hasRole('student')) return next(`/${to.params.tenantCode}/student`);
-        if (authStore.hasRole('parent')) return next(`/${to.params.tenantCode}/parent`);
+        if (authStore.hasRole('manager')) return next(`/manager`);
+        if (authStore.hasRole('teacher')) return next(`/${to.params.tenantCode || authStore.tenantCode}/teacher`);
+        if (authStore.hasRole('student')) return next(`/${to.params.tenantCode || authStore.tenantCode}/student`);
+        if (authStore.hasRole('parent')) return next(`/${to.params.tenantCode || authStore.tenantCode}/parent`);
 
         return next('/');
     }

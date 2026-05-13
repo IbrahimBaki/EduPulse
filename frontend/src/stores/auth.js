@@ -29,9 +29,11 @@ export const useAuthStore = defineStore('auth', {
                     password
                 });
 
-                this.token = response.data.access_token;
-                this.user = response.data.user;
-                this.roles = response.data.user.roles || [];
+                const payload = response.data.data;
+
+                this.token = payload.access_token;
+                this.user = payload.user;
+                this.roles = payload.user.roles || [];
 
                 localStorage.setItem('token', this.token);
                 localStorage.setItem('user', JSON.stringify(this.user));

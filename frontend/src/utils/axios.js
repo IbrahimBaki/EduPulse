@@ -1,12 +1,13 @@
 import axios from 'axios';
 
 const api = axios.create({
-    baseURL: 'http://edupulse.localhost/api/v1',
+    // Use a relative path so all requests go through Vite's dev server proxy
+    // which forwards them to http://edupulse.localhost — no CORS issues!
+    baseURL: '/api/v1',
     headers: {
         'Content-Type': 'application/json',
         'Accept': 'application/json',
     },
-    withCredentials: true, // For Sanctum CSRF cookies if needed
 });
 
 // Request interceptor to attach the Sanctum bearer token

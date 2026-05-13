@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use App\Models\User;
+use Illuminate\Support\Facades\Http;
 use Modules\Platform\Models\Tenant;
 
 class TestController extends Controller
@@ -47,7 +48,6 @@ class TestController extends Controller
                 'id' => $tenant->id,
                 'name' => $tenant->name,
                 'code' => $tenant->code,
-                'domain' => $tenant->domain,
                 'status' => $tenant->status,
             ],
         ]);
@@ -120,6 +120,30 @@ class TestController extends Controller
                 'tenant_id' => $user->tenant_id,
                 'roles' => $user->roles->pluck('name'),
             ],
+        ]);
+    }
+
+    public function ai(Request $request)
+    {
+        $userMessage = $request->input('message', 'اشرح لي الكسور بشكل بسيط');
+
+        $response = Http::withHeaders([
+            'Content-Type' => 'application/json',
+        ])->post('https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=' . env('GEMINI_API_KEY'), [
+            'contents' => [
+                [
+                    'parts' => [
+                        ['text' => $userMessage]
+                    ]
+                ]
+            ]
+        ]);
+
+        $text = $response->json('candidates.0.content.parts.0.text');
+
+        return response()->json([
+            'reply' => $text,
+            'status' => 'ok'
         ]);
     }
 }

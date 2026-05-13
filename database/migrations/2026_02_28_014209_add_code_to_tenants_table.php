@@ -10,18 +10,11 @@ return new class extends Migration {
      */
     public function up(): void
     {
-        Schema::table('tenants', function (Blueprint $table) {
-            $table->renameColumn('domain', 'code');
-        });
+        // columns already defined in the initial tenants migration
     }
 
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
-        Schema::table('tenants', function (Blueprint $table) {
-            $table->renameColumn('code', 'domain');
-        });
+        // nothing to reverse
     }
 };

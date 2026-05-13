@@ -13,7 +13,9 @@ return new class extends Migration
     {
         Schema::create('grade_levels', function (Blueprint $table) {
             $table->id();
-            
+            $table->foreignIdFor(\Modules\Platform\Models\Tenant::class)->constrained()->cascadeOnDelete();
+            $table->string('name');
+            $table->unsignedTinyInteger('level');
             $table->timestamps();
         });
     }

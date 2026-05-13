@@ -4,19 +4,16 @@ namespace Modules\Academic\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-// use Modules\Academic\Database\Factories\SubjectFactory;
+use App\Traits\BelongsToTenant;
 
 class Subject extends Model
 {
-    use HasFactory;
+    use HasFactory, BelongsToTenant;
 
-    /**
-     * The attributes that are mass assignable.
-     */
-    protected $fillable = [];
+    protected $fillable = ['tenant_id', 'name'];
 
-    // protected static function newFactory(): SubjectFactory
-    // {
-    //     // return SubjectFactory::new();
-    // }
+    public function courses()
+    {
+        return $this->hasMany(Course::class);
+    }
 }

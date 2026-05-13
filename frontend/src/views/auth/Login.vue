@@ -24,7 +24,7 @@ const handleLogin = async () => {
     
     // Redirect the user to their respective dashboard based on their Spatie Role
     if (authStore.hasRole('manager')) {
-        router.push(`/${tenantCode}/manager`);
+        router.push(`/manager`);
     } else if (authStore.hasRole('teacher')) {
         router.push(`/${tenantCode}/teacher`);
     } else if (authStore.hasRole('student')) {

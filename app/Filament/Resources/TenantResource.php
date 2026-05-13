@@ -27,11 +27,11 @@ class TenantResource extends Resource
                 Forms\Components\TextInput::make('name')
                     ->required()
                     ->maxLength(255),
-                Forms\Components\TextInput::make('domain')
+                Forms\Components\TextInput::make('code')
                     ->required()
                     ->unique(ignoreRecord: true)
                     ->maxLength(255)
-                    ->helperText('e.g. academy.edupulse.com (without https://)'),
+                    ->helperText('Unique tenant code used in API URLs (e.g. demo-academy)'),
                 Forms\Components\Select::make('status')
                     ->options([
                         'active' => 'Active',
@@ -49,10 +49,10 @@ class TenantResource extends Resource
                 Tables\Columns\TextColumn::make('name')
                     ->searchable()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('domain')
+                Tables\Columns\TextColumn::make('code')
                     ->searchable()
                     ->copyable()
-                    ->copyMessage('Domain copied'),
+                    ->copyMessage('Code copied'),
                 Tables\Columns\TextColumn::make('status')
                     ->badge()
                     ->color(fn(string $state): string => match ($state) {

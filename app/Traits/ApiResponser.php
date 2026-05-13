@@ -8,30 +8,41 @@ trait ApiResponser
 {
     /**
      * Build a success response
-     * @param  string|array $data
-     * @param  int $code
-     * @return Illuminate\Http\JsonResponse
+     *
+     * @param  string|array  $data
+     * @param  string  $message
+     * @param  int  $code
+     * @return \Illuminate\Http\JsonResponse
      */
-    protected function successResponse($data, $code = 200): JsonResponse
+    protected function ReturnSuccess($data = null, $message = 'Success', $code = 200): JsonResponse
     {
         return response()->json([
             'status' => 'success',
-            'data' => $data
+            'message' => $message,
+            'data' => $data,
         ], $code);
     }
 
     /**
      * Build an error response
-     * @param  string $message
-     * @param  int $code
-     * @return Illuminate\Http\JsonResponse
+     *
+     * @param  string  $message
+     * @param  int  $code
+     * @param  string|array|null  $errors
+     * @return \Illuminate\Http\JsonResponse
      */
-    protected function errorResponse($message, $code): JsonResponse
+    protected function ReturnFailed($message = 'Error', $code = 400, $errors = null): JsonResponse
     {
-        return response()->json([
+        $response = [
             'status' => 'error',
             'message' => $message,
             'data' => null
-        ], $code);
+        ];
+
+        if (!is_null($errors)) {
+            $response['errors'] = $errors;
+        }
+
+        return response()->json($response, $code);
     }
 }

@@ -4,19 +4,16 @@ namespace Modules\Academic\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-// use Modules\Academic\Database\Factories\GradeLevelFactory;
+use App\Traits\BelongsToTenant;
 
 class GradeLevel extends Model
 {
-    use HasFactory;
+    use HasFactory, BelongsToTenant;
 
-    /**
-     * The attributes that are mass assignable.
-     */
-    protected $fillable = [];
+    protected $fillable = ['tenant_id', 'name', 'level'];
 
-    // protected static function newFactory(): GradeLevelFactory
-    // {
-    //     // return GradeLevelFactory::new();
-    // }
+    public function courses()
+    {
+        return $this->hasMany(Course::class);
+    }
 }

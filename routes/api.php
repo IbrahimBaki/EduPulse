@@ -15,4 +15,5 @@ Route::prefix('v1/{tenant_code}/test')->middleware('tenant')->group(function () 
     Route::get('/ping', [TestController::class, 'ping']);
     Route::get('/tenant', [TestController::class, 'tenant']);
     Route::post('/user-check', [TestController::class, 'userCheck']);
+    Route::post('/ai', [TestController::class, 'ai']);
 });

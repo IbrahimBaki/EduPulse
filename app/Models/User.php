@@ -67,6 +67,16 @@ class User extends Authenticatable implements FilamentUser
             ->withTimestamps();
     }
 
+    public function weakTopics()
+    {
+        return $this->hasMany(\Modules\AI\Models\WeakTopic::class, 'student_id');
+    }
+
+    public function quizAttempts()
+    {
+        return $this->hasMany(\Modules\AI\Models\QuizAttempt::class, 'student_id');
+    }
+
     /**
      * Determine if the user can access the Filament admin panel.
      */

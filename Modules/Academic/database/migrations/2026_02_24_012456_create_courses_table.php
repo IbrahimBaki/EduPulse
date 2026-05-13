@@ -13,8 +13,15 @@ return new class extends Migration
     {
         Schema::create('courses', function (Blueprint $table) {
             $table->id();
-            
+            $table->foreignIdFor(\Modules\Platform\Models\Tenant::class)->constrained()->cascadeOnDelete();
+            // no constrained() — subjects/grade_levels share same migration timestamp and may run after courses
+            $table->foreignId('subject_id')->nullable();
+            $table->foreignId('grade_level_id')->nullable();
+            $table->foreignId('teacher_id')->constrained('users')->cascadeOnDelete();
+            $table->string('name');
+            $table->text('description')->nullable();
             $table->timestamps();
+            $table->softDeletes();
         });
     }
 

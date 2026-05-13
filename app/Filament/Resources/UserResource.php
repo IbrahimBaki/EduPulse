@@ -25,7 +25,7 @@ class UserResource extends Resource
         return $form
             ->schema([
                 Forms\Components\Select::make('tenant_id')
-                    ->relationship('tenant', 'domain')
+                    ->relationship('tenant', 'name')
                     ->searchable()
                     ->preload(),
                 Forms\Components\TextInput::make('name')
@@ -47,8 +47,8 @@ class UserResource extends Resource
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('tenant.domain')
-                    ->label('Academy Domain')
+                Tables\Columns\TextColumn::make('tenant.name')
+                    ->label('Academy')
                     ->searchable()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('name')
