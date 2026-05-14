@@ -3,57 +3,120 @@
 namespace Modules\Academic\Http\Controllers;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
+use App\Traits\ApiResponser;
+use Modules\Academic\Http\Requests\StoreCourseRequest;
+use Modules\Academic\Http\Requests\UpdateCourseRequest;
+use Modules\Academic\Http\Requests\UpdateCourseStatusRequest;
+use Modules\Academic\Models\Course;
 
 class CourseController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
+    use ApiResponser;
+
     public function index()
     {
-        //
+        $query = Course::with('subject', 'gradeLevel', 'teacher');
 
-        return response()->json([]);
+        if (request('status')) {
+            $query->where('status', request('status'));
+        }
+        if (request('grade_level_id')) {
+            $query->where('grade_level_id', request('grade_level_id'));
+        }
+        if (request('subject_id')) {
+            $query->where('subject_id', request('subject_id'));
+        }
+        if (request('teacher_id')) {
+            $query->where('teacher_id', request('teacher_id'));
+        }
+
+        return $this->ReturnSuccess($query->paginate(15), 'Courses retrieved');
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(Request $request)
+    public function store(StoreCourseRequest $request)
     {
-        //
+        $course = Course::create($request->validated() + [
+            'tenant_id' => app('tenant')->id,
+            'status'    => 'draft',
+        ]);
 
-        return response()->json([]);
+        return $this->ReturnSuccess($course->load('subject', 'gradeLevel', 'teacher'), 'Course created', 201);
     }
 
-    /**
-     * Show the specified resource.
-     */
     public function show($id)
     {
-        //
-
-        return response()->json([]);
+        $course = Course::with('subject', 'gradeLevel', 'teacher')->findOrFail($id);
+        return $this->ReturnSuccess($course, 'Course retrieved');
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, $id)
+    public function update(UpdateCourseRequest $request, $id)
     {
-        //
-
-        return response()->json([]);
+        $course = Course::findOrFail($id);
+        $course->update($request->validated());
+        return $this->ReturnSuccess($course->fresh()->load('subject', 'gradeLevel', 'teacher'), 'Course updated');
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
+    public function updateStatus(UpdateCourseStatusRequest $request, $id)
+    {
+        $course = Course::findOrFail($id);
+
+        $allowed = [
+            'draft'    => ['active'],
+            'active'   => ['archived'],
+            'archived' => [],
+        ];
+
+        if (!in_array($request->status, $allowed[$course->status] ?? [])) {
+            return $this->ReturnFailed("Cannot transition from {$course->status} to {$request->status}", 422);
+        }
+
+        $course->update(['status' => $request->status]);
+        return $this->ReturnSuccess($course->fresh(), 'Course status updated');
+    }
+
     public function destroy($id)
     {
-        //
+        $course = Course::findOrFail($id);
 
-        return response()->json([]);
+        if ($course->status !== 'draft') {
+            return $this->ReturnFailed('Only draft courses can be deleted', 422);
+        }
+
+        if ($course->enrollments()->exists()) {
+            return $this->ReturnFailed('Cannot delete course with enrollments', 422);
+        }
+
+        $course->delete();
+        return $this->ReturnSuccess(null, 'Course deleted');
+    }
+
+    public function myCourses()
+    {
+        $courses = Course::where('teacher_id', auth()->id())
+            ->with('subject', 'gradeLevel')
+            ->paginate(15);
+
+        return $this->ReturnSuccess($courses, 'My courses retrieved');
+    }
+
+    public function students($id)
+    {
+        $course = Course::findOrFail($id);
+
+        if (auth()->user()->hasRole('teacher') && $course->teacher_id !== auth()->id()) {
+            return $this->ReturnFailed('Unauthorized', 403);
+        }
+
+        $students = $course->enrollments()->with('student.studentProfile')->get()->pluck('student');
+        return $this->ReturnSuccess($students, 'Students retrieved');
+    }
+
+    public function enrolledCourses()
+    {
+        $courses = Course::whereHas('enrollments', fn($q) => $q->where('student_id', auth()->id()))
+            ->with('subject', 'gradeLevel', 'teacher')
+            ->paginate(15);
+
+        return $this->ReturnSuccess($courses, 'Enrolled courses retrieved');
     }
 }

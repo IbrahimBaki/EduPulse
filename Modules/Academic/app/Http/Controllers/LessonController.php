@@ -3,57 +3,88 @@
 namespace Modules\Academic\Http\Controllers;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
+use App\Traits\ApiResponser;
+use Modules\AI\Jobs\SendN8nWebhookJob;
+use Modules\Academic\Http\Requests\StoreLessonRequest;
+use Modules\Academic\Models\Course;
+use Modules\Academic\Models\Lesson;
 
 class LessonController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
-    public function index()
-    {
-        //
+    use ApiResponser;
 
-        return response()->json([]);
+    public function index($courseId)
+    {
+        $course = Course::findOrFail($courseId);
+        $lessons = $course->lessons()->orderBy('order')->get();
+        return $this->ReturnSuccess($lessons, 'Lessons retrieved');
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(Request $request)
+    public function store(StoreLessonRequest $request, $courseId)
     {
-        //
+        $course = Course::findOrFail($courseId);
 
-        return response()->json([]);
+        if (auth()->user()->hasRole('teacher') && $course->teacher_id !== auth()->id()) {
+            return $this->ReturnFailed('Unauthorized', 403);
+        }
+
+        $lesson = $course->lessons()->create(
+            $request->validated() + ['tenant_id' => app('tenant')->id]
+        );
+
+        return $this->ReturnSuccess($lesson, 'Lesson created', 201);
     }
 
-    /**
-     * Show the specified resource.
-     */
-    public function show($id)
+    public function update(StoreLessonRequest $request, $courseId, $id)
     {
-        //
+        $course = Course::findOrFail($courseId);
+        $lesson = $course->lessons()->findOrFail($id);
 
-        return response()->json([]);
+        if (auth()->user()->hasRole('teacher') && $course->teacher_id !== auth()->id()) {
+            return $this->ReturnFailed('Unauthorized', 403);
+        }
+
+        $lesson->update($request->validated());
+        return $this->ReturnSuccess($lesson->fresh(), 'Lesson updated');
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, $id)
+    public function publish($courseId, $id)
     {
-        //
+        $course = Course::findOrFail($courseId);
+        $lesson = $course->lessons()->findOrFail($id);
 
-        return response()->json([]);
+        if (auth()->user()->hasRole('teacher') && $course->teacher_id !== auth()->id()) {
+            return $this->ReturnFailed('Unauthorized', 403);
+        }
+
+        $lesson->update(['is_published' => true]);
+
+        SendN8nWebhookJob::dispatch('lesson_published', [
+            'lesson_id' => $lesson->id,
+            'course_id' => $course->id,
+            'title'     => $lesson->title,
+        ], app('tenant')->id);
+
+        return $this->ReturnSuccess($lesson->fresh(), 'Lesson published');
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy($id)
+    public function destroy($courseId, $id)
     {
-        //
+        $course = Course::findOrFail($courseId);
+        $lesson = $course->lessons()->findOrFail($id);
 
-        return response()->json([]);
+        if (auth()->user()->hasRole('teacher') && $course->teacher_id !== auth()->id()) {
+            return $this->ReturnFailed('Unauthorized', 403);
+        }
+
+        $lesson->delete();
+        return $this->ReturnSuccess(null, 'Lesson deleted');
+    }
+
+    public function publishedLessons($courseId)
+    {
+        $course = Course::findOrFail($courseId);
+        $lessons = $course->lessons()->where('is_published', true)->orderBy('order')->get();
+        return $this->ReturnSuccess($lessons, 'Published lessons retrieved');
     }
 }

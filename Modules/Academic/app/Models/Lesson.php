@@ -11,7 +11,16 @@ class Lesson extends Model
 {
     use HasFactory, BelongsToTenant, SoftDeletes;
 
-    protected $fillable = ['tenant_id', 'course_id', 'title', 'description', 'order'];
+    protected $fillable = [
+        'tenant_id', 'course_id', 'title', 'description', 'order',
+        'pdf_path', 'pdf_processed', 'pdf_chunks_count', 'is_published',
+    ];
+
+    protected $casts = [
+        'pdf_processed' => 'boolean',
+        'is_published'  => 'boolean',
+        'pdf_chunks_count' => 'integer',
+    ];
 
     public function course()
     {

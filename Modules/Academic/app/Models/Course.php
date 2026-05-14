@@ -12,7 +12,17 @@ class Course extends Model
 {
     use HasFactory, BelongsToTenant, SoftDeletes;
 
-    protected $fillable = ['tenant_id', 'subject_id', 'grade_level_id', 'teacher_id', 'name', 'description'];
+    protected $fillable = [
+        'tenant_id', 'subject_id', 'grade_level_id', 'teacher_id',
+        'name', 'description', 'cover_image', 'status',
+        'start_date', 'end_date', 'max_students',
+    ];
+
+    protected $casts = [
+        'start_date'  => 'date',
+        'end_date'    => 'date',
+        'max_students' => 'integer',
+    ];
 
     public function lessons()
     {
@@ -37,5 +47,10 @@ class Course extends Model
     public function teacher()
     {
         return $this->belongsTo(User::class, 'teacher_id');
+    }
+
+    public function schedules()
+    {
+        return $this->hasMany(Schedule::class);
     }
 }

@@ -11,9 +11,16 @@ class Enrollment extends Model
 {
     use HasFactory, BelongsToTenant;
 
-    protected $fillable = ['tenant_id', 'course_id', 'student_id', 'enrolled_at'];
+    protected $fillable = [
+        'tenant_id', 'course_id', 'student_id', 'enrolled_at',
+        'fee_amount', 'fee_paid',
+    ];
 
-    protected $casts = ['enrolled_at' => 'datetime'];
+    protected $casts = [
+        'enrolled_at' => 'datetime',
+        'fee_amount'  => 'decimal:2',
+        'fee_paid'    => 'boolean',
+    ];
 
     public function course()
     {

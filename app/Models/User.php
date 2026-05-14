@@ -24,6 +24,10 @@ class User extends Authenticatable implements FilamentUser
         'name',
         'email',
         'password',
+        'phone',
+        'national_id',
+        'is_active',
+        'tenant_id',
     ];
 
     /**
@@ -65,6 +69,16 @@ class User extends Authenticatable implements FilamentUser
     {
         return $this->belongsToMany(User::class, 'parent_student', 'student_id', 'parent_id')
             ->withTimestamps();
+    }
+
+    public function studentProfile()
+    {
+        return $this->hasOne(\Modules\IAM\Models\StudentProfile::class, 'student_id');
+    }
+
+    public function teacherAssignments()
+    {
+        return $this->hasMany(\Modules\IAM\Models\TeacherAssignment::class, 'teacher_id');
     }
 
     public function weakTopics()
