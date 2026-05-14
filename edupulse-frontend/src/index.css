@@ -1,0 +1,102 @@
+/* ─── EduPulse Design Tokens ──────────────────────────────────────────────── */
+
+:root {
+  /* Surfaces — tonal navy steps */
+  --surface-base:     oklch(18% 0.02 255);
+  --surface-panel:    oklch(13.5% 0.022 255);
+  --surface-elevated: oklch(22% 0.02 255);
+  --surface-input:    oklch(21% 0.02 255);
+
+  /* Precision Blue — interactive / active */
+  --color-blue:       oklch(62% 0.26 255);
+  --color-blue-hover: oklch(67% 0.26 255);
+  --color-blue-dim:   oklch(62% 0.26 255 / 0.12);
+  --color-blue-glow:  oklch(62% 0.26 255 / 0.08);
+
+  /* Deadline Amber — urgency / warning only */
+  --color-amber:      oklch(75% 0.18 75);
+  --color-amber-dim:  oklch(75% 0.18 75 / 0.12);
+
+  /* Semantic red — validation errors */
+  --color-red:        oklch(58% 0.22 27);
+  --color-red-dim:    oklch(58% 0.22 27 / 0.12);
+
+  /* Neutrals */
+  --neutral-border:   oklch(32% 0.02 255);
+  --neutral-border-strong: oklch(40% 0.02 255);
+
+  /* Text */
+  --text-primary:     oklch(95% 0.01 255);
+  --text-secondary:   oklch(62% 0.02 255);
+  --text-muted:       oklch(44% 0.015 255);
+
+  /* Typography */
+  --font-sans:        'Plus Jakarta Sans', system-ui, sans-serif;
+  --font-arabic:      'IBM Plex Sans Arabic', system-ui, sans-serif;
+  --font-mono:        ui-monospace, 'Cascadia Code', Consolas, monospace;
+
+  /* Motion */
+  --ease-out-quart:   cubic-bezier(0.25, 1, 0.5, 1);
+  --ease-out-expo:    cubic-bezier(0.16, 1, 0.3, 1);
+  --dur-fast:         150ms;
+  --dur-std:          220ms;
+  --dur-slow:         350ms;
+
+  /* Radii */
+  --radius-sm:  6px;
+  --radius-md:  8px;
+  --radius-lg:  12px;
+  --radius-xl:  16px;
+}
+
+/* ─── Base Reset ──────────────────────────────────────────────────────────── */
+
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  font-size: 16px;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+  color-scheme: dark;
+}
+
+body {
+  font-family: var(--font-sans);
+  font-size: 0.9375rem;
+  line-height: 1.55;
+  color: var(--text-primary);
+  background: var(--surface-base);
+}
+
+:lang(ar) body,
+[dir='rtl'] body {
+  font-family: var(--font-arabic);
+}
+
+#root {
+  min-height: 100svh;
+}
+
+/* ─── Focus ring default ──────────────────────────────────────────────────── */
+
+:focus { outline: none; }
+
+:focus-visible {
+  outline: 2px solid var(--color-blue);
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+
+/* ─── Reduced motion ──────────────────────────────────────────────────────── */
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}

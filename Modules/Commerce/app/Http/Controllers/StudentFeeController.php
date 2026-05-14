@@ -157,6 +157,7 @@ class StudentFeeController extends Controller
     {
         $fees = StudentFee::where('student_id', auth()->id())
             ->with('feeStructure', 'course')
+            ->orderByRaw("CASE status WHEN 'overdue' THEN 0 WHEN 'pending' THEN 1 WHEN 'waived' THEN 2 ELSE 3 END")
             ->paginate(15);
 
         return $this->ReturnSuccess($fees, 'My fees retrieved');

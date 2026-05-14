@@ -126,8 +126,7 @@ class ScheduleController extends Controller
             ->where('status', 'scheduled')
             ->where('starts_at', '>', now())
             ->orderBy('starts_at')
-            ->take(10)
-            ->get();
+            ->paginate(15);
 
         return $this->ReturnSuccess($schedules, 'Upcoming schedules retrieved');
     }

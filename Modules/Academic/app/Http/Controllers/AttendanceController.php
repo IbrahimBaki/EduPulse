@@ -99,11 +99,22 @@ class AttendanceController extends Controller
 
     public function mySummary()
     {
-        $summary = Attendance::where('student_id', auth()->id())
+        $rows = Attendance::where('student_id', auth()->id())
             ->selectRaw('status, COUNT(*) as count')
             ->groupBy('status')
-            ->get();
+            ->get()
+            ->keyBy('status');
 
-        return $this->ReturnSuccess($summary, 'Attendance summary retrieved');
+        $present = $rows->get('present')?->count ?? 0;
+        $total = $rows->sum('count');
+        $rate = $total > 0 ? round(($present / $total) * 100, 2) : 0;
+
+        $data = [
+            'by_status'       => $rows->map(fn($r) => $r->count),
+            'total_sessions'  => $total,
+            'attendance_rate' => $rate,
+        ];
+
+        return $this->ReturnSuccess($data, 'Attendance summary retrieved');
     }
 }

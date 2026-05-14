@@ -84,6 +84,13 @@ class LessonController extends Controller
     public function publishedLessons($courseId)
     {
         $course = Course::findOrFail($courseId);
+
+        // Verify student is enrolled in the course
+        $isEnrolled = $course->enrollments()->where('student_id', auth()->id())->exists();
+        if (!$isEnrolled) {
+            return $this->ReturnFailed('You are not enrolled in this course', 403);
+        }
+
         $lessons = $course->lessons()->where('is_published', true)->orderBy('order')->get();
         return $this->ReturnSuccess($lessons, 'Published lessons retrieved');
     }

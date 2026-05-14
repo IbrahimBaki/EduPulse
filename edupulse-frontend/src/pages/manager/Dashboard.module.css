@@ -1,0 +1,712 @@
+/* ─── Page accent line ────────────────────────────────────────────────────── */
+
+.pageAccent {
+  position: fixed;
+  inset-block-start: 0;
+  inset-inline-start: 204px;
+  inset-inline-end: 0;
+  height: 2px;
+  background: oklch(62% 0.26 255);
+  z-index: 10;
+}
+
+/* ─── Page shell ──────────────────────────────────────────────────────────── */
+
+.page {
+  padding: 40px 40px 56px;
+  max-width: 1440px;
+}
+
+/* ─── Header ──────────────────────────────────────────────────────────────── */
+
+.pageHead {
+  margin-block-end: 32px;
+  animation: fadeSlideUp 0.5s var(--ease-out-expo) both;
+}
+
+.greeting {
+  font-size: clamp(1.5rem, 2.5vw, 1.875rem);
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  color: var(--text-primary);
+  line-height: 1.2;
+}
+
+.greetingDate {
+  font-size: 0.875rem;
+  color: var(--text-muted);
+  margin-block-start: 5px;
+}
+
+/* ─── Stats row ───────────────────────────────────────────────────────────── */
+
+.statsRow {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 14px;
+  margin-block-end: 20px;
+}
+
+.statCard {
+  background: var(--surface-elevated);
+  border: 1px solid var(--neutral-border);
+  border-radius: var(--radius-lg);
+  padding: 20px 22px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  transition:
+    transform 180ms var(--ease-out-quart),
+    box-shadow 180ms var(--ease-out-quart),
+    border-color 180ms var(--ease-out-quart);
+  animation: fadeSlideUp 0.5s var(--ease-out-expo) both;
+}
+
+.statCard:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px oklch(6% 0.015 255 / 0.22), 0 0 0 1px oklch(62% 0.26 255 / 0.15);
+  border-color: oklch(62% 0.26 255 / 0.3);
+}
+
+.statLabel {
+  font-size: 0.6875rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  line-height: 1;
+}
+
+.statValue {
+  display: block;
+  font-size: clamp(2.25rem, 3vw, 3rem);
+  font-weight: 700;
+  color: var(--text-primary);
+  letter-spacing: -0.04em;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+  margin-block-start: 10px;
+}
+
+.statSub {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  margin-block-start: 7px;
+}
+
+/* ─── Middle row ──────────────────────────────────────────────────────────── */
+
+.middleRow {
+  display: grid;
+  grid-template-columns: 3fr 2fr;
+  gap: 14px;
+  margin-block-end: 14px;
+}
+
+/* ─── Bottom row ──────────────────────────────────────────────────────────── */
+
+.bottomRow {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 14px;
+}
+
+/* ─── Panel (shared section container) ───────────────────────────────────── */
+
+.panel {
+  background: var(--surface-elevated);
+  border: 1px solid var(--neutral-border);
+  border-radius: var(--radius-lg);
+  padding: 20px 22px;
+  transition:
+    transform 180ms var(--ease-out-quart),
+    box-shadow 180ms var(--ease-out-quart);
+  animation: fadeSlideUp 0.5s var(--ease-out-expo) both;
+}
+
+.panel:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px oklch(6% 0.015 255 / 0.18);
+}
+
+.panelHead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-block-end: 16px;
+}
+
+.panelTitle {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  letter-spacing: -0.01em;
+  margin: 0;
+}
+
+.panelCount {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+/* ─── Enrollment trend chart ──────────────────────────────────────────────── */
+
+.chartWrap {
+  height: 240px;
+  position: relative;
+}
+
+/* Pulsing dot on latest data point */
+.dotPulse {
+  fill: none;
+  stroke: oklch(62% 0.26 255 / 0.45);
+  stroke-width: 1.5;
+  animation: pulseRing 2s ease-out infinite;
+  transform-box: fill-box;
+  transform-origin: center;
+}
+
+@keyframes pulseRing {
+  0%   { transform: scale(1);   opacity: 0.8; }
+  70%  { transform: scale(2.8); opacity: 0;   }
+  100% { transform: scale(1);   opacity: 0;   }
+}
+
+/* ─── At-risk list ────────────────────────────────────────────────────────── */
+
+.atRiskList {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  max-height: 268px;
+  overflow-y: auto;
+  scrollbar-width: none;
+  list-style: none;
+}
+
+.atRiskList::-webkit-scrollbar {
+  display: none;
+}
+
+.atRiskRow {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  animation: fadeSlideUp 0.28s var(--ease-out-quart) both;
+}
+
+.atRiskList .atRiskRow:nth-child(1) { animation-delay: 0s;    }
+.atRiskList .atRiskRow:nth-child(2) { animation-delay: 0.04s; }
+.atRiskList .atRiskRow:nth-child(3) { animation-delay: 0.08s; }
+.atRiskList .atRiskRow:nth-child(4) { animation-delay: 0.12s; }
+.atRiskList .atRiskRow:nth-child(5) { animation-delay: 0.16s; }
+.atRiskList .atRiskRow:nth-child(6) { animation-delay: 0.2s;  }
+.atRiskList .atRiskRow:nth-child(7) { animation-delay: 0.24s; }
+.atRiskList .atRiskRow:nth-child(8) { animation-delay: 0.28s; }
+
+.atRiskAvatar {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: var(--surface-panel);
+  border: 1px solid var(--neutral-border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.625rem;
+  font-weight: 700;
+  color: var(--text-secondary);
+  flex-shrink: 0;
+  user-select: none;
+}
+
+.atRiskInfo {
+  flex: 1;
+  min-width: 0;
+}
+
+.atRiskName {
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: var(--text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.atRiskScore {
+  font-size: 0.75rem;
+  color: var(--color-amber);
+  font-weight: 600;
+  margin-block-start: 2px;
+}
+
+.atRiskTopics {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 3px;
+  margin-block-start: 5px;
+}
+
+.topicBadge {
+  font-size: 0.625rem;
+  padding: 2px 7px;
+  border-radius: 999px;
+  background: var(--color-amber-dim);
+  color: var(--color-amber);
+  font-weight: 500;
+}
+
+/* ─── Sessions list ───────────────────────────────────────────────────────── */
+
+.sessionList {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  list-style: none;
+}
+
+.sessionRow {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 10px 12px;
+  background: var(--surface-panel);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--neutral-border);
+  transition:
+    background 150ms var(--ease-out-quart),
+    border-color 150ms var(--ease-out-quart);
+  animation: fadeSlideUp 0.28s var(--ease-out-quart) both;
+}
+
+.sessionRow:hover {
+  background: oklch(22% 0.026 255);
+  border-color: oklch(62% 0.26 255 / 0.18);
+}
+
+.sessionList .sessionRow:nth-child(1) { animation-delay: 0s;    }
+.sessionList .sessionRow:nth-child(2) { animation-delay: 0.05s; }
+.sessionList .sessionRow:nth-child(3) { animation-delay: 0.1s;  }
+.sessionList .sessionRow:nth-child(4) { animation-delay: 0.15s; }
+.sessionList .sessionRow:nth-child(5) { animation-delay: 0.2s;  }
+
+.sessionTime {
+  font-size: 0.6875rem;
+  font-weight: 600;
+  color: var(--color-blue);
+  letter-spacing: 0.01em;
+}
+
+.sessionTitle {
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.sessionMeta {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
+.sessionEnrolled {
+  font-size: 0.6875rem;
+  color: var(--text-muted);
+  margin-block-start: 1px;
+}
+
+/* ─── Enrollments list ────────────────────────────────────────────────────── */
+
+.enrollList {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  list-style: none;
+}
+
+.enrollRow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  animation: fadeSlideUp 0.28s var(--ease-out-quart) both;
+}
+
+.enrollList .enrollRow:nth-child(1) { animation-delay: 0s;    }
+.enrollList .enrollRow:nth-child(2) { animation-delay: 0.04s; }
+.enrollList .enrollRow:nth-child(3) { animation-delay: 0.08s; }
+.enrollList .enrollRow:nth-child(4) { animation-delay: 0.12s; }
+.enrollList .enrollRow:nth-child(5) { animation-delay: 0.16s; }
+
+.enrollAvatar {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: var(--color-blue-dim);
+  border: 1px solid oklch(62% 0.26 255 / 0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.625rem;
+  font-weight: 700;
+  color: var(--color-blue);
+  flex-shrink: 0;
+  user-select: none;
+}
+
+.enrollInfo {
+  flex: 1;
+  min-width: 0;
+}
+
+.enrollName {
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: var(--text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.enrollGrade {
+  font-size: 0.6875rem;
+  color: var(--text-muted);
+}
+
+.enrollCode {
+  font-size: 0.6875rem;
+  color: var(--text-muted);
+  font-variant-numeric: tabular-nums;
+  flex-shrink: 0;
+}
+
+/* ─── Finance summary ─────────────────────────────────────────────────────── */
+
+.financeStack {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.financeRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 8px;
+}
+
+.financeLabel {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
+.financeAmount {
+  font-size: 0.9375rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  font-variant-numeric: tabular-nums;
+}
+
+.financeCollected {
+  color: oklch(68% 0.18 148);
+}
+
+.financePending {
+  color: var(--color-amber);
+}
+
+.financeOverdue {
+  color: var(--color-red);
+}
+
+.financeDivider {
+  height: 1px;
+  background: var(--neutral-border);
+}
+
+.progressWrap {
+  background: var(--surface-panel);
+  border-radius: 999px;
+  height: 6px;
+  overflow: hidden;
+}
+
+.progressBar {
+  height: 100%;
+  border-radius: 999px;
+  background: var(--color-blue);
+  transform-origin: left;
+  animation: expandBar 0.9s var(--ease-out-expo) both;
+  animation-delay: 0.15s;
+}
+
+@keyframes expandBar {
+  from { transform: scaleX(0); }
+  to   { transform: scaleX(1); }
+}
+
+.progressRate {
+  font-size: 0.6875rem;
+  color: var(--text-muted);
+  margin-block-start: -2px;
+}
+
+.overdueBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  padding: 3px 8px;
+  border-radius: 999px;
+  background: oklch(58% 0.22 27 / 0.12);
+  color: var(--color-red);
+  animation: throbBadge 2.4s ease-in-out infinite;
+  animation-delay: 1.8s;
+}
+
+/* ─── Error / empty states ────────────────────────────────────────────────── */
+
+.errorBanner {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 16px;
+  background: oklch(58% 0.22 27 / 0.08);
+  border-radius: var(--radius-md);
+  border: 1px solid oklch(58% 0.22 27 / 0.2);
+  color: var(--text-secondary);
+  font-size: 0.875rem;
+  margin-block-end: 20px;
+  animation: slideDown 0.25s var(--ease-out-quart) both;
+}
+
+.errorInline {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.8125rem;
+  color: var(--text-muted);
+  padding: 8px 0;
+}
+
+.retryBtn {
+  margin-inline-start: auto;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: var(--color-blue);
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: var(--radius-sm);
+  transition:
+    background var(--dur-fast) var(--ease-out-quart),
+    transform 100ms var(--ease-out-quart);
+}
+
+.retryBtn:hover   { background: var(--color-blue-dim); }
+.retryBtn:active  { transform: scale(0.95); }
+
+.retryBtn:focus-visible {
+  outline: 2px solid var(--color-blue);
+  outline-offset: 2px;
+}
+
+.retryBtnSmall {
+  margin-inline-start: auto;
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--color-blue);
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 2px 6px;
+  border-radius: var(--radius-sm);
+  transition:
+    background var(--dur-fast) var(--ease-out-quart),
+    transform 100ms var(--ease-out-quart);
+}
+
+.retryBtnSmall:hover  { background: var(--color-blue-dim); }
+.retryBtnSmall:active { transform: scale(0.95); }
+
+.retryBtnSmall:focus-visible {
+  outline: 2px solid var(--color-blue);
+  outline-offset: 2px;
+}
+
+.emptyGood {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.8125rem;
+  color: oklch(68% 0.18 148);
+  padding: 8px 0;
+}
+
+/* ─── Empty state (icon + message + action) ───────────────────────────────── */
+
+.emptyState {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  padding: 24px 16px 16px;
+  text-align: center;
+}
+
+.emptyStateIcon {
+  color: oklch(44% 0.018 255);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.emptyStateMsg {
+  font-size: 0.8125rem;
+  color: var(--text-muted);
+  line-height: 1.45;
+  max-width: 220px;
+}
+
+.emptyStateAction {
+  margin-block-start: 2px;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: var(--color-blue);
+  background: var(--color-blue-dim);
+  border: 1px solid oklch(62% 0.26 255 / 0.2);
+  border-radius: var(--radius-sm);
+  padding: 5px 14px;
+  cursor: pointer;
+  transition:
+    background var(--dur-fast) var(--ease-out-quart),
+    border-color var(--dur-fast) var(--ease-out-quart),
+    transform 100ms var(--ease-out-quart);
+}
+
+.emptyStateAction:hover  { background: oklch(62% 0.26 255 / 0.15); border-color: oklch(62% 0.26 255 / 0.35); }
+.emptyStateAction:active { transform: scale(0.97); }
+
+.emptyStateAction:focus-visible {
+  outline: 2px solid var(--color-blue);
+  outline-offset: 2px;
+}
+
+/* ─── Skeleton ────────────────────────────────────────────────────────────── */
+
+.skeleton {
+  display: block;
+  background: linear-gradient(
+    90deg,
+    var(--surface-panel) 25%,
+    var(--surface-elevated) 37%,
+    var(--surface-panel) 63%
+  );
+  background-size: 400% 100%;
+  animation: shimmer 1.5s ease-in-out infinite;
+}
+
+@keyframes shimmer {
+  0%   { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+/* ─── Attention pulse (amber stat value) ─────────────────────────────────── */
+
+.statValuePulse {
+  animation: attentionPulse 0.55s var(--ease-out-quart) 0.95s both;
+}
+
+@keyframes attentionPulse {
+  0%   { transform: scale(1);    }
+  35%  { transform: scale(1.06); }
+  100% { transform: scale(1);    }
+}
+
+/* ─── Overdue badge throb ─────────────────────────────────────────────────── */
+
+@keyframes throbBadge {
+  0%, 100% { box-shadow: 0 0 0 0 oklch(58% 0.22 27 / 0); }
+  50%       { box-shadow: 0 0 0 3px oklch(58% 0.22 27 / 0.28); }
+}
+
+/* ─── Error banner entrance ───────────────────────────────────────────────── */
+
+@keyframes slideDown {
+  from { opacity: 0; transform: translateY(-8px); }
+  to   { opacity: 1; transform: translateY(0);    }
+}
+
+/* ─── Entrance animation ──────────────────────────────────────────────────── */
+
+@keyframes fadeSlideUp {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.statsRow .statCard:nth-child(1) { animation-delay: 0.04s; }
+.statsRow .statCard:nth-child(2) { animation-delay: 0.08s; }
+.statsRow .statCard:nth-child(3) { animation-delay: 0.12s; }
+.statsRow .statCard:nth-child(4) { animation-delay: 0.16s; }
+
+.middleRow .panel:nth-child(1) { animation-delay: 0.2s; }
+.middleRow .panel:nth-child(2) { animation-delay: 0.24s; }
+
+.bottomRow .panel:nth-child(1) { animation-delay: 0.28s; }
+.bottomRow .panel:nth-child(2) { animation-delay: 0.32s; }
+.bottomRow .panel:nth-child(3) { animation-delay: 0.36s; }
+
+@media (prefers-reduced-motion: reduce) {
+  .pageHead,
+  .statCard,
+  .panel,
+  .atRiskRow,
+  .sessionRow,
+  .enrollRow,
+  .errorBanner,
+  .overdueBadge,
+  .statValuePulse { animation: none; }
+
+  .statCard:hover,
+  .panel:hover { transform: none; }
+
+  .sessionRow { transition: background 150ms var(--ease-out-quart); }
+
+  .dotPulse,
+  .progressBar { animation: none; }
+}
+
+/* ─── Responsive ──────────────────────────────────────────────────────────── */
+
+@media (max-width: 1200px) {
+  .statsRow {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 1024px) {
+  .middleRow {
+    grid-template-columns: 1fr;
+  }
+  .bottomRow {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 899px) {
+  .pageAccent {
+    inset-inline-start: 0;
+  }
+  .page {
+    padding: 24px 16px 48px;
+  }
+  .statsRow {
+    gap: 10px;
+  }
+  .middleRow,
+  .bottomRow {
+    grid-template-columns: 1fr;
+  }
+}

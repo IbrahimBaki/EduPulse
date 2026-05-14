@@ -52,8 +52,7 @@ class Announcement extends Model
                   if ($enrolledCourseIds->isNotEmpty()) {
                       $q2->where('audience', 'course')->whereIn('audience_id', $enrolledCourseIds);
                   }
-              })
-              ->orWhere('audience', 'role');
+              });
         });
     }
 }

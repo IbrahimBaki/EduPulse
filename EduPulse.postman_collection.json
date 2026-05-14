@@ -1,0 +1,2103 @@
+{
+  "info": {
+    "_postman_id": "edupulse-api-collection-v1",
+    "name": "EduPulse API",
+    "description": "Complete REST API collection for EduPulse LMS.\n\n**Setup:**\n1. Set `base_url` to `http://edupulse.localhost/api`\n2. Set `tenant_code` to your tenant code (e.g. `acme`)\n3. Call **Login** — the token is saved automatically to `auth_token`\n4. All other requests inherit Bearer `{{auth_token}}` from collection auth\n\n**Role tokens:** use separate Login calls and copy the token into `manager_token`, `teacher_token`, or `student_token` variables as needed.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{auth_token}}",
+        "type": "string"
+      }
+    ]
+  },
+  "variable": [
+    { "key": "base_url",      "value": "http://edupulse.localhost/api" },
+    { "key": "tenant_code",   "value": "acme" },
+    { "key": "auth_token",    "value": "" },
+    { "key": "teacher_id",    "value": "2" },
+    { "key": "student_id",    "value": "3" },
+    { "key": "parent_id",     "value": "4" },
+    { "key": "course_id",     "value": "1" },
+    { "key": "lesson_id",     "value": "1" },
+    { "key": "schedule_id",   "value": "1" },
+    { "key": "attendance_id", "value": "1" },
+    { "key": "announcement_id","value": "1" },
+    { "key": "notification_id","value": "uuid-here" },
+    { "key": "fee_structure_id","value": "1" },
+    { "key": "student_fee_id","value": "1" },
+    { "key": "grade_level_id","value": "1" },
+    { "key": "subject_id",    "value": "1" },
+    { "key": "enrollment_request_id", "value": "1" },
+    { "key": "assignment_id", "value": "1" },
+    { "key": "chat_session_id","value": "1" }
+  ],
+  "item": [
+
+    {
+      "name": "🔐 Authentication",
+      "item": [
+        {
+          "name": "Login",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var json = pm.response.json();",
+                  "if (json && json.data && json.data.token) {",
+                  "    pm.collectionVariables.set('auth_token', json.data.token);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"email\": \"manager@acme.com\",\n    \"password\": \"password\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{base_url}}/v1/{{tenant_code}}/auth/login",
+              "host": ["{{base_url}}"],
+              "path": ["v1", "{{tenant_code}}", "auth", "login"]
+            },
+            "description": "Authenticate and receive a Sanctum token. Token is auto-saved to `auth_token` variable."
+          },
+          "response": []
+        },
+        {
+          "name": "Get Current User (me)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/v1/{{tenant_code}}/auth/me",
+              "host": ["{{base_url}}"],
+              "path": ["v1", "{{tenant_code}}", "auth", "me"]
+            },
+            "description": "Returns the authenticated user's profile and roles."
+          },
+          "response": []
+        },
+        {
+          "name": "Logout",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/v1/{{tenant_code}}/auth/logout",
+              "host": ["{{base_url}}"],
+              "path": ["v1", "{{tenant_code}}", "auth", "logout"]
+            },
+            "description": "Revokes the current Sanctum token."
+          },
+          "response": []
+        }
+      ]
+    },
+
+    {
+      "name": "👔 Manager / Users",
+      "item": [
+        {
+          "name": "Teachers",
+          "item": [
+            {
+              "name": "List Teachers",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}/v1/{{tenant_code}}/manager/teachers",
+                  "host": ["{{base_url}}"],
+                  "path": ["v1", "{{tenant_code}}", "manager", "teachers"]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Create Teacher",
+              "request": {
+                "method": "POST",
+                "header": [{ "key": "Content-Type", "value": "application/json" }],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n    \"name\": \"Dr. Sarah Ahmed\",\n    \"email\": \"sarah.ahmed@acme.com\",\n    \"password\": \"StrongPass123!\",\n    \"phone\": \"+201012345678\",\n    \"national_id\": \"29901010123456\"\n}",
+                  "options": { "raw": { "language": "json" } }
+                },
+                "url": {
+                  "raw": "{{base_url}}/v1/{{tenant_code}}/manager/teachers",
+                  "host": ["{{base_url}}"],
+                  "path": ["v1", "{{tenant_code}}", "manager", "teachers"]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Get Teacher",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}/v1/{{tenant_code}}/manager/teachers/{{teacher_id}}",
+                  "host": ["{{base_url}}"],
+                  "path": ["v1", "{{tenant_code}}", "manager", "teachers", "{{teacher_id}}"]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Update Teacher",
+              "request": {
+                "method": "PUT",
+                "header": [{ "key": "Content-Type", "value": "application/json" }],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n    \"name\": \"Dr. Sarah Ahmed\",\n    \"email\": \"sarah.ahmed@acme.com\",\n    \"phone\": \"+201012345678\",\n    \"national_id\": \"29901010123456\"\n}",
+                  "options": { "raw": { "language": "json" } }
+                },
+                "url": {
+                  "raw": "{{base_url}}/v1/{{tenant_code}}/manager/teachers/{{teacher_id}}",
+                  "host": ["{{base_url}}"],
+                  "path": ["v1", "{{tenant_code}}", "manager", "teachers", "{{teacher_id}}"]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Delete Teacher",
+              "request": {
+                "method": "DELETE",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}/v1/{{tenant_code}}/manager/teachers/{{teacher_id}}",
+                  "host": ["{{base_url}}"],
+                  "path": ["v1", "{{tenant_code}}", "manager", "teachers", "{{teacher_id}}"]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Toggle Teacher Status",
+              "request": {
+                "method": "PATCH",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}/v1/{{tenant_code}}/manager/teachers/{{teacher_id}}/toggle-status",
+                  "host": ["{{base_url}}"],
+                  "path": ["v1", "{{tenant_code}}", "manager", "teachers", "{{teacher_id}}", "toggle-status"]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Add Teacher Assignment",
+              "request": {
+                "method": "POST",
+                "header": [{ "key": "Content-Type", "value": "application/json" }],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n    \"subject_id\": 1,\n    \"grade_level_id\": 1\n}",
+                  "options": { "raw": { "language": "json" } }
+                },
+                "url": {
+                  "raw": "{{base_url}}/v1/{{tenant_code}}/manager/teachers/{{teacher_id}}/assignments",
+                  "host": ["{{base_url}}"],
+                  "path": ["v1", "{{tenant_code}}", "manager", "teachers", "{{teacher_id}}", "assignments"]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Delete Teacher Assignment",
+              "request": {
+                "method": "DELETE",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}/v1/{{tenant_code}}/manager/teachers/{{teacher_id}}/assignments/{{assignment_id}}",
+                  "host": ["{{base_url}}"],
+                  "path": ["v1", "{{tenant_code}}", "manager", "teachers", "{{teacher_id}}", "assignments", "{{assignment_id}}"]
+                }
+              },
+              "response": []
+            }
+          ]
+        },
+        {
+          "name": "Students",
+          "item": [
+            {
+              "name": "List Students",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}/v1/{{tenant_code}}/manager/students",
+                  "host": ["{{base_url}}"],
+                  "path": ["v1", "{{tenant_code}}", "manager", "students"]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Create Student",
+              "request": {
+                "method": "POST",
+                "header": [{ "key": "Content-Type", "value": "application/json" }],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n    \"name\": \"Ahmed Hassan\",\n    \"email\": \"ahmed.hassan@student.acme.com\",\n    \"password\": \"StrongPass123!\",\n    \"phone\": \"+201098765432\",\n    \"national_id\": \"31001010654321\",\n    \"grade_level_id\": 1\n}",
+                  "options": { "raw": { "language": "json" } }
+                },
+                "url": {
+                  "raw": "{{base_url}}/v1/{{tenant_code}}/manager/students",
+                  "host": ["{{base_url}}"],
+                  "path": ["v1", "{{tenant_code}}", "manager", "students"]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Get Student",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}/v1/{{tenant_code}}/manager/students/{{student_id}}",
+                  "host": ["{{base_url}}"],
+                  "path": ["v1", "{{tenant_code}}", "manager", "students", "{{student_id}}"]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Update Student",
+              "request": {
+                "method": "PUT",
+                "header": [{ "key": "Content-Type", "value": "application/json" }],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n    \"name\": \"Ahmed Hassan\",\n    \"email\": \"ahmed.hassan@student.acme.com\",\n    \"phone\": \"+201098765432\",\n    \"grade_level_id\": 2\n}",
+                  "options": { "raw": { "language": "json" } }
+                },
+                "url": {
+                  "raw": "{{base_url}}/v1/{{tenant_code}}/manager/students/{{student_id}}",
+                  "host": ["{{base_url}}"],
+                  "path": ["v1", "{{tenant_code}}", "manager", "students", "{{student_id}}"]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Toggle Student Status",
+              "request": {
+                "method": "PATCH",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}/v1/{{tenant_code}}/manager/students/{{student_id}}/toggle-status",
+                  "host": ["{{base_url}}"],
+                  "path": ["v1", "{{tenant_code}}", "manager", "students", "{{student_id}}", "toggle-status"]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Enroll Student in Course",
+              "request": {
+                "method": "POST",
+                "header": [{ "key": "Content-Type", "value": "application/json" }],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n    \"course_id\": 1\n}",
+                  "options": { "raw": { "language": "json" } }
+                },
+                "url": {
+                  "raw": "{{base_url}}/v1/{{tenant_code}}/manager/students/{{student_id}}/enroll",
+                  "host": ["{{base_url}}"],
+                  "path": ["v1", "{{tenant_code}}", "manager", "students", "{{student_id}}", "enroll"]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Assign Parent to Student",
+              "request": {
+                "method": "POST",
+                "header": [{ "key": "Content-Type", "value": "application/json" }],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n    \"parent_id\": 4\n}",
+                  "options": { "raw": { "language": "json" } }
+                },
+                "url": {
+                  "raw": "{{base_url}}/v1/{{tenant_code}}/manager/students/{{student_id}}/assign-parent",
+                  "host": ["{{base_url}}"],
+                  "path": ["v1", "{{tenant_code}}", "manager", "students", "{{student_id}}", "assign-parent"]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Remove Parent from Student",
+              "request": {
+                "method": "DELETE",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}/v1/{{tenant_code}}/manager/students/{{student_id}}/parents/{{parent_id}}",
+                  "host": ["{{base_url}}"],
+                  "path": ["v1", "{{tenant_code}}", "manager", "students", "{{student_id}}", "parents", "{{parent_id}}"]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Update Student Fee Status",
+              "request": {
+                "method": "PATCH",
+                "header": [{ "key": "Content-Type", "value": "application/json" }],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n    \"fee_status\": \"paid\"\n}",
+                  "options": { "raw": { "language": "json" } }
+                },
+                "url": {
+                  "raw": "{{base_url}}/v1/{{tenant_code}}/manager/students/{{student_id}}/fee-status",
+                  "host": ["{{base_url}}"],
+                  "path": ["v1", "{{tenant_code}}", "manager", "students", "{{student_id}}", "fee-status"]
+                }
+              },
+              "response": []
+            }
+          ]
+        },
+        {
+          "name": "Parents",
+          "item": [
+            {
+              "name": "List Parents",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}/v1/{{tenant_code}}/manager/parents",
+                  "host": ["{{base_url}}"],
+                  "path": ["v1", "{{tenant_code}}", "manager", "parents"]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Create Parent",
+              "request": {
+                "method": "POST",
+                "header": [{ "key": "Content-Type", "value": "application/json" }],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n    \"name\": \"Mohamed Hassan\",\n    \"email\": \"m.hassan@parent.acme.com\",\n    \"password\": \"StrongPass123!\",\n    \"phone\": \"+201155556789\",\n    \"national_id\": \"27803051234567\"\n}",
+                  "options": { "raw": { "language": "json" } }
+                },
+                "url": {
+                  "raw": "{{base_url}}/v1/{{tenant_code}}/manager/parents",
+                  "host": ["{{base_url}}"],
+                  "path": ["v1", "{{tenant_code}}", "manager", "parents"]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Get Parent",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}/v1/{{tenant_code}}/manager/parents/{{parent_id}}",
+                  "host": ["{{base_url}}"],
+                  "path": ["v1", "{{tenant_code}}", "manager", "parents", "{{parent_id}}"]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Update Parent",
+              "request": {
+                "method": "PUT",
+                "header": [{ "key": "Content-Type", "value": "application/json" }],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n    \"name\": \"Mohamed Hassan\",\n    \"email\": \"m.hassan@parent.acme.com\",\n    \"phone\": \"+201155556789\"\n}",
+                  "options": { "raw": { "language": "json" } }
+                },
+                "url": {
+                  "raw": "{{base_url}}/v1/{{tenant_code}}/manager/parents/{{parent_id}}",
+                  "host": ["{{base_url}}"],
+                  "path": ["v1", "{{tenant_code}}", "manager", "parents", "{{parent_id}}"]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Link Student to Parent",
+              "request": {
+                "method": "POST",
+                "header": [{ "key": "Content-Type", "value": "application/json" }],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n    \"student_id\": 3\n}",
+                  "options": { "raw": { "language": "json" } }
+                },
+                "url": {
+                  "raw": "{{base_url}}/v1/{{tenant_code}}/manager/parents/{{parent_id}}/link-student",
+                  "host": ["{{base_url}}"],
+                  "path": ["v1", "{{tenant_code}}", "manager", "parents", "{{parent_id}}", "link-student"]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Unlink Student from Parent",
+              "request": {
+                "method": "DELETE",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}/v1/{{tenant_code}}/manager/parents/{{parent_id}}/students/{{student_id}}",
+                  "host": ["{{base_url}}"],
+                  "path": ["v1", "{{tenant_code}}", "manager", "parents", "{{parent_id}}", "students", "{{student_id}}"]
+                }
+              },
+              "response": []
+            }
+          ]
+        },
+        {
+          "name": "Enrollment Requests",
+          "item": [
+            {
+              "name": "List Enrollment Requests",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}/v1/{{tenant_code}}/manager/enrollment-requests",
+                  "host": ["{{base_url}}"],
+                  "path": ["v1", "{{tenant_code}}", "manager", "enrollment-requests"]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Approve Enrollment Request",
+              "request": {
+                "method": "PATCH",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}/v1/{{tenant_code}}/manager/enrollment-requests/{{enrollment_request_id}}/approve",
+                  "host": ["{{base_url}}"],
+                  "path": ["v1", "{{tenant_code}}", "manager", "enrollment-requests", "{{enrollment_request_id}}", "approve"]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Reject Enrollment Request",
+              "request": {
+                "method": "PATCH",
+                "header": [{ "key": "Content-Type", "value": "application/json" }],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n    \"reason\": \"Course is full for this semester\"\n}",
+                  "options": { "raw": { "language": "json" } }
+                },
+                "url": {
+                  "raw": "{{base_url}}/v1/{{tenant_code}}/manager/enrollment-requests/{{enrollment_request_id}}/reject",
+                  "host": ["{{base_url}}"],
+                  "path": ["v1", "{{tenant_code}}", "manager", "enrollment-requests", "{{enrollment_request_id}}", "reject"]
+                }
+              },
+              "response": []
+            }
+          ]
+        }
+      ]
+    },
+
+    {
+      "name": "📚 Manager / Academic",
+      "item": [
+        {
+          "name": "Grade Levels",
+          "item": [
+            {
+              "name": "List Grade Levels",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}/v1/{{tenant_code}}/manager/grade-levels",
+                  "host": ["{{base_url}}"],
+                  "path": ["v1", "{{tenant_code}}", "manager", "grade-levels"]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Create Grade Level",
+              "request": {
+                "method": "POST",
+                "header": [{ "key": "Content-Type", "value": "application/json" }],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n    \"name\": \"Grade 10\",\n    \"description\": \"Tenth grade — secondary level\"\n}",
+                  "options": { "raw": { "language": "json" } }
+                },
+                "url": {
+                  "raw": "{{base_url}}/v1/{{tenant_code}}/manager/grade-levels",
+                  "host": ["{{base_url}}"],
+                  "path": ["v1", "{{tenant_code}}", "manager", "grade-levels"]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Update Grade Level",
+              "request": {
+                "method": "PUT",
+                "header": [{ "key": "Content-Type", "value": "application/json" }],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n    \"name\": \"Grade 10\",\n    \"description\": \"Updated description\"\n}",
+                  "options": { "raw": { "language": "json" } }
+                },
+                "url": {
+                  "raw": "{{base_url}}/v1/{{tenant_code}}/manager/grade-levels/{{grade_level_id}}",
+                  "host": ["{{base_url}}"],
+                  "path": ["v1", "{{tenant_code}}", "manager", "grade-levels", "{{grade_level_id}}"]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Delete Grade Level",
+              "request": {
+                "method": "DELETE",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}/v1/{{tenant_code}}/manager/grade-levels/{{grade_level_id}}",
+                  "host": ["{{base_url}}"],
+                  "path": ["v1", "{{tenant_code}}", "manager", "grade-levels", "{{grade_level_id}}"]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Get Grade Level Subjects",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}/v1/{{tenant_code}}/manager/grade-levels/{{grade_level_id}}/subjects",
+                  "host": ["{{base_url}}"],
+                  "path": ["v1", "{{tenant_code}}", "manager", "grade-levels", "{{grade_level_id}}", "subjects"]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Assign Subjects to Grade Level",
+              "request": {
+                "method": "POST",
+                "header": [{ "key": "Content-Type", "value": "application/json" }],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n    \"subject_ids\": [1, 2, 3]\n}",
+                  "options": { "raw": { "language": "json" } }
+                },
+                "url": {
+                  "raw": "{{base_url}}/v1/{{tenant_code}}/manager/grade-levels/{{grade_level_id}}/subjects",
+                  "host": ["{{base_url}}"],
+                  "path": ["v1", "{{tenant_code}}", "manager", "grade-levels", "{{grade_level_id}}", "subjects"]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Remove Subject from Grade Level",
+              "request": {
+                "method": "DELETE",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}/v1/{{tenant_code}}/manager/grade-levels/{{grade_level_id}}/subjects/{{subject_id}}",
+                  "host": ["{{base_url}}"],
+                  "path": ["v1", "{{tenant_code}}", "manager", "grade-levels", "{{grade_level_id}}", "subjects", "{{subject_id}}"]
+                }
+              },
+              "response": []
+            }
+          ]
+        },
+        {
+          "name": "Subjects",
+          "item": [
+            {
+              "name": "List Subjects",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}/v1/{{tenant_code}}/manager/subjects",
+                  "host": ["{{base_url}}"],
+                  "path": ["v1", "{{tenant_code}}", "manager", "subjects"]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Create Subject",
+              "request": {
+                "method": "POST",
+                "header": [{ "key": "Content-Type", "value": "application/json" }],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n    \"name\": \"Mathematics\",\n    \"description\": \"Advanced mathematics including algebra, geometry and calculus\"\n}",
+                  "options": { "raw": { "language": "json" } }
+                },
+                "url": {
+                  "raw": "{{base_url}}/v1/{{tenant_code}}/manager/subjects",
+                  "host": ["{{base_url}}"],
+                  "path": ["v1", "{{tenant_code}}", "manager", "subjects"]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Update Subject",
+              "request": {
+                "method": "PUT",
+                "header": [{ "key": "Content-Type", "value": "application/json" }],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n    \"name\": \"Mathematics\",\n    \"description\": \"Updated description\"\n}",
+                  "options": { "raw": { "language": "json" } }
+                },
+                "url": {
+                  "raw": "{{base_url}}/v1/{{tenant_code}}/manager/subjects/{{subject_id}}",
+                  "host": ["{{base_url}}"],
+                  "path": ["v1", "{{tenant_code}}", "manager", "subjects", "{{subject_id}}"]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Delete Subject",
+              "request": {
+                "method": "DELETE",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}/v1/{{tenant_code}}/manager/subjects/{{subject_id}}",
+                  "host": ["{{base_url}}"],
+                  "path": ["v1", "{{tenant_code}}", "manager", "subjects", "{{subject_id}}"]
+                }
+              },
+              "response": []
+            }
+          ]
+        },
+        {
+          "name": "Courses",
+          "item": [
+            {
+              "name": "List Courses",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}/v1/{{tenant_code}}/manager/courses?status=active",
+                  "host": ["{{base_url}}"],
+                  "path": ["v1", "{{tenant_code}}", "manager", "courses"],
+                  "query": [
+                    { "key": "status",        "value": "active" },
+                    { "key": "grade_level_id","value": null, "disabled": true },
+                    { "key": "subject_id",    "value": null, "disabled": true },
+                    { "key": "teacher_id",    "value": null, "disabled": true }
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Create Course",
+              "request": {
+                "method": "POST",
+                "header": [{ "key": "Content-Type", "value": "application/json" }],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n    \"name\": \"Advanced Mathematics — Grade 10\",\n    \"description\": \"Full-year mathematics course covering quadratic equations, trigonometry and statistics\",\n    \"subject_id\": 1,\n    \"grade_level_id\": 1,\n    \"teacher_id\": 2,\n    \"start_date\": \"2026-09-01\",\n    \"end_date\": \"2027-06-30\",\n    \"max_students\": 30\n}",
+                  "options": { "raw": { "language": "json" } }
+                },
+                "url": {
+                  "raw": "{{base_url}}/v1/{{tenant_code}}/manager/courses",
+                  "host": ["{{base_url}}"],
+                  "path": ["v1", "{{tenant_code}}", "manager", "courses"]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Get Course",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}/v1/{{tenant_code}}/manager/courses/{{course_id}}",
+                  "host": ["{{base_url}}"],
+                  "path": ["v1", "{{tenant_code}}", "manager", "courses", "{{course_id}}"]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Update Course",
+              "request": {
+                "method": "PUT",
+                "header": [{ "key": "Content-Type", "value": "application/json" }],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n    \"name\": \"Advanced Mathematics — Grade 10 (Revised)\",\n    \"description\": \"Updated course description\",\n    \"subject_id\": 1,\n    \"grade_level_id\": 1,\n    \"teacher_id\": 2,\n    \"max_students\": 35\n}",
+                  "options": { "raw": { "language": "json" } }
+                },
+                "url": {
+                  "raw": "{{base_url}}/v1/{{tenant_code}}/manager/courses/{{course_id}}",
+                  "host": ["{{base_url}}"],
+                  "path": ["v1", "{{tenant_code}}", "manager", "courses", "{{course_id}}"]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Update Course Status",
+              "request": {
+                "method": "PATCH",
+                "header": [{ "key": "Content-Type", "value": "application/json" }],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n    \"status\": \"active\"\n}",
+                  "options": { "raw": { "language": "json" } }
+                },
+                "url": {
+                  "raw": "{{base_url}}/v1/{{tenant_code}}/manager/courses/{{course_id}}/status",
+                  "host": ["{{base_url}}"],
+                  "path": ["v1", "{{tenant_code}}", "manager", "courses", "{{course_id}}", "status"]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Delete Course",
+              "request": {
+                "method": "DELETE",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}/v1/{{tenant_code}}/manager/courses/{{course_id}}",
+                  "host": ["{{base_url}}"],
+                  "path": ["v1", "{{tenant_code}}", "manager", "courses", "{{course_id}}"]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Get Course Attendance Report",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}/v1/{{tenant_code}}/manager/courses/{{course_id}}/attendance-report",
+                  "host": ["{{base_url}}"],
+                  "path": ["v1", "{{tenant_code}}", "manager", "courses", "{{course_id}}", "attendance-report"]
+                }
+              },
+              "response": []
+            }
+          ]
+        },
+        {
+          "name": "Manager Schedules",
+          "item": [
+            {
+              "name": "List Course Schedules",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}/v1/{{tenant_code}}/manager/courses/{{course_id}}/schedules",
+                  "host": ["{{base_url}}"],
+                  "path": ["v1", "{{tenant_code}}", "manager", "courses", "{{course_id}}", "schedules"]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Create Schedule",
+              "request": {
+                "method": "POST",
+                "header": [{ "key": "Content-Type", "value": "application/json" }],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n    \"title\": \"Chapter 3 — Quadratic Equations\",\n    \"description\": \"Introduction to solving quadratic equations by factoring and the quadratic formula\",\n    \"starts_at\": \"2026-09-15 10:00:00\",\n    \"ends_at\": \"2026-09-15 11:30:00\",\n    \"type\": \"online\"\n}",
+                  "options": { "raw": { "language": "json" } }
+                },
+                "url": {
+                  "raw": "{{base_url}}/v1/{{tenant_code}}/manager/courses/{{course_id}}/schedules",
+                  "host": ["{{base_url}}"],
+                  "path": ["v1", "{{tenant_code}}", "manager", "courses", "{{course_id}}", "schedules"]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Update Schedule",
+              "request": {
+                "method": "PUT",
+                "header": [{ "key": "Content-Type", "value": "application/json" }],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n    \"title\": \"Chapter 3 — Quadratic Equations (Rescheduled)\",\n    \"starts_at\": \"2026-09-16 10:00:00\",\n    \"ends_at\": \"2026-09-16 11:30:00\",\n    \"type\": \"online\"\n}",
+                  "options": { "raw": { "language": "json" } }
+                },
+                "url": {
+                  "raw": "{{base_url}}/v1/{{tenant_code}}/manager/courses/{{course_id}}/schedules/{{schedule_id}}",
+                  "host": ["{{base_url}}"],
+                  "path": ["v1", "{{tenant_code}}", "manager", "courses", "{{course_id}}", "schedules", "{{schedule_id}}"]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Update Schedule Status",
+              "request": {
+                "method": "PATCH",
+                "header": [{ "key": "Content-Type", "value": "application/json" }],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n    \"status\": \"cancelled\"\n}",
+                  "options": { "raw": { "language": "json" } }
+                },
+                "url": {
+                  "raw": "{{base_url}}/v1/{{tenant_code}}/manager/courses/{{course_id}}/schedules/{{schedule_id}}/status",
+                  "host": ["{{base_url}}"],
+                  "path": ["v1", "{{tenant_code}}", "manager", "courses", "{{course_id}}", "schedules", "{{schedule_id}}", "status"]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Delete Schedule",
+              "request": {
+                "method": "DELETE",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}/v1/{{tenant_code}}/manager/courses/{{course_id}}/schedules/{{schedule_id}}",
+                  "host": ["{{base_url}}"],
+                  "path": ["v1", "{{tenant_code}}", "manager", "courses", "{{course_id}}", "schedules", "{{schedule_id}}"]
+                }
+              },
+              "response": []
+            }
+          ]
+        },
+        {
+          "name": "Dashboards & Reports",
+          "item": [
+            {
+              "name": "Manager Dashboard",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}/v1/{{tenant_code}}/manager/dashboard",
+                  "host": ["{{base_url}}"],
+                  "path": ["v1", "{{tenant_code}}", "manager", "dashboard"]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Students Report",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}/v1/{{tenant_code}}/manager/reports/students",
+                  "host": ["{{base_url}}"],
+                  "path": ["v1", "{{tenant_code}}", "manager", "reports", "students"]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Attendance Report",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}/v1/{{tenant_code}}/manager/reports/attendance",
+                  "host": ["{{base_url}}"],
+                  "path": ["v1", "{{tenant_code}}", "manager", "reports", "attendance"]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Academic Performance Report",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}/v1/{{tenant_code}}/manager/reports/academic-performance",
+                  "host": ["{{base_url}}"],
+                  "path": ["v1", "{{tenant_code}}", "manager", "reports", "academic-performance"]
+                }
+              },
+              "response": []
+            }
+          ]
+        }
+      ]
+    },
+
+    {
+      "name": "📢 Manager / Communication",
+      "item": [
+        {
+          "name": "List Announcements (Manager)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/v1/{{tenant_code}}/manager/announcements",
+              "host": ["{{base_url}}"],
+              "path": ["v1", "{{tenant_code}}", "manager", "announcements"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Create Announcement",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"title\": \"Mid-term Exam Schedule Released\",\n    \"body\": \"Dear students, the mid-term examination schedule for Semester 1 has been published. Please check your student portal for your individual timetable. Exams begin on October 10, 2026.\",\n    \"audience\": \"all\",\n    \"expires_at\": \"2026-10-15 23:59:59\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{base_url}}/v1/{{tenant_code}}/manager/announcements",
+              "host": ["{{base_url}}"],
+              "path": ["v1", "{{tenant_code}}", "manager", "announcements"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Publish Announcement",
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/v1/{{tenant_code}}/manager/announcements/{{announcement_id}}/publish",
+              "host": ["{{base_url}}"],
+              "path": ["v1", "{{tenant_code}}", "manager", "announcements", "{{announcement_id}}", "publish"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Announcement",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/v1/{{tenant_code}}/manager/announcements/{{announcement_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["v1", "{{tenant_code}}", "manager", "announcements", "{{announcement_id}}"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+
+    {
+      "name": "💰 Manager / Commerce",
+      "item": [
+        {
+          "name": "Fee Structures",
+          "item": [
+            {
+              "name": "List Fee Structures",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}/v1/{{tenant_code}}/manager/fee-structures",
+                  "host": ["{{base_url}}"],
+                  "path": ["v1", "{{tenant_code}}", "manager", "fee-structures"]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Create Fee Structure",
+              "request": {
+                "method": "POST",
+                "header": [{ "key": "Content-Type", "value": "application/json" }],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n    \"name\": \"Annual Tuition Fee — Grade 10\",\n    \"description\": \"Full academic year tuition covering all subjects\",\n    \"amount\": 15000.00,\n    \"currency\": \"EGP\",\n    \"due_date\": \"2026-10-01\"\n}",
+                  "options": { "raw": { "language": "json" } }
+                },
+                "url": {
+                  "raw": "{{base_url}}/v1/{{tenant_code}}/manager/fee-structures",
+                  "host": ["{{base_url}}"],
+                  "path": ["v1", "{{tenant_code}}", "manager", "fee-structures"]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Update Fee Structure",
+              "request": {
+                "method": "PUT",
+                "header": [{ "key": "Content-Type", "value": "application/json" }],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n    \"name\": \"Annual Tuition Fee — Grade 10 (Revised)\",\n    \"amount\": 14500.00,\n    \"currency\": \"EGP\",\n    \"due_date\": \"2026-10-15\"\n}",
+                  "options": { "raw": { "language": "json" } }
+                },
+                "url": {
+                  "raw": "{{base_url}}/v1/{{tenant_code}}/manager/fee-structures/{{fee_structure_id}}",
+                  "host": ["{{base_url}}"],
+                  "path": ["v1", "{{tenant_code}}", "manager", "fee-structures", "{{fee_structure_id}}"]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Toggle Fee Structure Active",
+              "request": {
+                "method": "PATCH",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}/v1/{{tenant_code}}/manager/fee-structures/{{fee_structure_id}}/toggle",
+                  "host": ["{{base_url}}"],
+                  "path": ["v1", "{{tenant_code}}", "manager", "fee-structures", "{{fee_structure_id}}", "toggle"]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Assign Fee to Students in Bulk",
+              "request": {
+                "method": "POST",
+                "header": [{ "key": "Content-Type", "value": "application/json" }],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n    \"target\": \"grade_level\",\n    \"target_id\": 1\n}",
+                  "options": { "raw": { "language": "json" } }
+                },
+                "url": {
+                  "raw": "{{base_url}}/v1/{{tenant_code}}/manager/fee-structures/{{fee_structure_id}}/assign-bulk",
+                  "host": ["{{base_url}}"],
+                  "path": ["v1", "{{tenant_code}}", "manager", "fee-structures", "{{fee_structure_id}}", "assign-bulk"]
+                },
+                "description": "target: 'grade_level' or 'course'. target_id is the grade_level_id or course_id."
+              },
+              "response": []
+            }
+          ]
+        },
+        {
+          "name": "Student Fees",
+          "item": [
+            {
+              "name": "List All Student Fees",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}/v1/{{tenant_code}}/manager/student-fees?status=pending",
+                  "host": ["{{base_url}}"],
+                  "path": ["v1", "{{tenant_code}}", "manager", "student-fees"],
+                  "query": [
+                    { "key": "status",     "value": "pending" },
+                    { "key": "student_id", "value": null, "disabled": true },
+                    { "key": "course_id",  "value": null, "disabled": true }
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Create Student Fee (Manual)",
+              "request": {
+                "method": "POST",
+                "header": [{ "key": "Content-Type", "value": "application/json" }],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n    \"student_id\": 3,\n    \"fee_structure_id\": 1,\n    \"description\": \"Lab equipment fee — Semester 1\",\n    \"amount\": 500.00,\n    \"currency\": \"EGP\",\n    \"due_date\": \"2026-11-01\"\n}",
+                  "options": { "raw": { "language": "json" } }
+                },
+                "url": {
+                  "raw": "{{base_url}}/v1/{{tenant_code}}/manager/student-fees",
+                  "host": ["{{base_url}}"],
+                  "path": ["v1", "{{tenant_code}}", "manager", "student-fees"]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Mark Fee as Paid",
+              "request": {
+                "method": "PATCH",
+                "header": [{ "key": "Content-Type", "value": "application/json" }],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n    \"payment_method\": \"bank_transfer\",\n    \"transaction_ref\": \"TXN-20261005-00123\",\n    \"notes\": \"Paid via Banque Misr bank transfer\"\n}",
+                  "options": { "raw": { "language": "json" } }
+                },
+                "url": {
+                  "raw": "{{base_url}}/v1/{{tenant_code}}/manager/student-fees/{{student_fee_id}}/mark-paid",
+                  "host": ["{{base_url}}"],
+                  "path": ["v1", "{{tenant_code}}", "manager", "student-fees", "{{student_fee_id}}", "mark-paid"]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Mark Fee as Overdue",
+              "request": {
+                "method": "PATCH",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}/v1/{{tenant_code}}/manager/student-fees/{{student_fee_id}}/mark-overdue",
+                  "host": ["{{base_url}}"],
+                  "path": ["v1", "{{tenant_code}}", "manager", "student-fees", "{{student_fee_id}}", "mark-overdue"]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Waive Fee",
+              "request": {
+                "method": "PATCH",
+                "header": [{ "key": "Content-Type", "value": "application/json" }],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n    \"notes\": \"Waived due to financial hardship — approved by principal\"\n}",
+                  "options": { "raw": { "language": "json" } }
+                },
+                "url": {
+                  "raw": "{{base_url}}/v1/{{tenant_code}}/manager/student-fees/{{student_fee_id}}/waive",
+                  "host": ["{{base_url}}"],
+                  "path": ["v1", "{{tenant_code}}", "manager", "student-fees", "{{student_fee_id}}", "waive"]
+                }
+              },
+              "response": []
+            }
+          ]
+        },
+        {
+          "name": "Finance Dashboard",
+          "item": [
+            {
+              "name": "Finance Summary",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}/v1/{{tenant_code}}/manager/finance/summary",
+                  "host": ["{{base_url}}"],
+                  "path": ["v1", "{{tenant_code}}", "manager", "finance", "summary"]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Finance Transactions",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}/v1/{{tenant_code}}/manager/finance/transactions",
+                  "host": ["{{base_url}}"],
+                  "path": ["v1", "{{tenant_code}}", "manager", "finance", "transactions"]
+                }
+              },
+              "response": []
+            }
+          ]
+        }
+      ]
+    },
+
+    {
+      "name": "⚙️ Manager / Settings",
+      "item": [
+        {
+          "name": "Get Settings",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/v1/{{tenant_code}}/manager/settings",
+              "host": ["{{base_url}}"],
+              "path": ["v1", "{{tenant_code}}", "manager", "settings"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Update Settings",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"school_name\": \"Acme International School\",\n    \"school_phone\": \"+20222345678\",\n    \"school_email\": \"info@acme-school.com\",\n    \"school_address\": \"123 Education Street, Cairo, Egypt\",\n    \"timezone\": \"Africa/Cairo\",\n    \"academic_year\": \"2026-2027\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{base_url}}/v1/{{tenant_code}}/manager/settings",
+              "host": ["{{base_url}}"],
+              "path": ["v1", "{{tenant_code}}", "manager", "settings"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Upload School Logo",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "logo",
+                  "type": "file",
+                  "src": "",
+                  "description": "PNG or JPEG, max 2MB"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{base_url}}/v1/{{tenant_code}}/manager/settings/logo",
+              "host": ["{{base_url}}"],
+              "path": ["v1", "{{tenant_code}}", "manager", "settings", "logo"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+
+    {
+      "name": "🧑‍🏫 Teacher",
+      "item": [
+        {
+          "name": "Teacher Dashboard",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/v1/{{tenant_code}}/teacher/dashboard",
+              "host": ["{{base_url}}"],
+              "path": ["v1", "{{tenant_code}}", "teacher", "dashboard"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "My Courses",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/v1/{{tenant_code}}/teacher/courses",
+              "host": ["{{base_url}}"],
+              "path": ["v1", "{{tenant_code}}", "teacher", "courses"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Course Students",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/v1/{{tenant_code}}/teacher/courses/{{course_id}}/students",
+              "host": ["{{base_url}}"],
+              "path": ["v1", "{{tenant_code}}", "teacher", "courses", "{{course_id}}", "students"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Course Report",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/v1/{{tenant_code}}/teacher/reports/course/{{course_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["v1", "{{tenant_code}}", "teacher", "reports", "course", "{{course_id}}"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Lessons",
+          "item": [
+            {
+              "name": "List Lessons",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}/v1/{{tenant_code}}/teacher/courses/{{course_id}}/lessons",
+                  "host": ["{{base_url}}"],
+                  "path": ["v1", "{{tenant_code}}", "teacher", "courses", "{{course_id}}", "lessons"]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Create Lesson",
+              "request": {
+                "method": "POST",
+                "header": [{ "key": "Content-Type", "value": "application/json" }],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n    \"title\": \"Introduction to Quadratic Equations\",\n    \"description\": \"This lesson covers the definition, standard form and graphical representation of quadratic equations.\",\n    \"order\": 1\n}",
+                  "options": { "raw": { "language": "json" } }
+                },
+                "url": {
+                  "raw": "{{base_url}}/v1/{{tenant_code}}/teacher/courses/{{course_id}}/lessons",
+                  "host": ["{{base_url}}"],
+                  "path": ["v1", "{{tenant_code}}", "teacher", "courses", "{{course_id}}", "lessons"]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Update Lesson",
+              "request": {
+                "method": "PUT",
+                "header": [{ "key": "Content-Type", "value": "application/json" }],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n    \"title\": \"Introduction to Quadratic Equations (Updated)\",\n    \"description\": \"Revised lesson covering standard form, vertex form and applications.\",\n    \"order\": 1\n}",
+                  "options": { "raw": { "language": "json" } }
+                },
+                "url": {
+                  "raw": "{{base_url}}/v1/{{tenant_code}}/teacher/courses/{{course_id}}/lessons/{{lesson_id}}",
+                  "host": ["{{base_url}}"],
+                  "path": ["v1", "{{tenant_code}}", "teacher", "courses", "{{course_id}}", "lessons", "{{lesson_id}}"]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Publish Lesson",
+              "request": {
+                "method": "PATCH",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}/v1/{{tenant_code}}/teacher/courses/{{course_id}}/lessons/{{lesson_id}}/publish",
+                  "host": ["{{base_url}}"],
+                  "path": ["v1", "{{tenant_code}}", "teacher", "courses", "{{course_id}}", "lessons", "{{lesson_id}}", "publish"]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Delete Lesson",
+              "request": {
+                "method": "DELETE",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}/v1/{{tenant_code}}/teacher/courses/{{course_id}}/lessons/{{lesson_id}}",
+                  "host": ["{{base_url}}"],
+                  "path": ["v1", "{{tenant_code}}", "teacher", "courses", "{{course_id}}", "lessons", "{{lesson_id}}"]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Upload Lesson PDF",
+              "request": {
+                "method": "POST",
+                "header": [],
+                "body": {
+                  "mode": "formdata",
+                  "formdata": [
+                    {
+                      "key": "pdf",
+                      "type": "file",
+                      "src": "",
+                      "description": "PDF file for AI processing and chunk indexing"
+                    }
+                  ]
+                },
+                "url": {
+                  "raw": "{{base_url}}/v1/{{tenant_code}}/lessons/{{lesson_id}}/upload-pdf",
+                  "host": ["{{base_url}}"],
+                  "path": ["v1", "{{tenant_code}}", "lessons", "{{lesson_id}}", "upload-pdf"]
+                },
+                "description": "Uploads a PDF for the lesson. The AI module will chunk and index it for context-aware explanations."
+              },
+              "response": []
+            }
+          ]
+        },
+        {
+          "name": "Teacher Schedules",
+          "item": [
+            {
+              "name": "List Course Schedules",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}/v1/{{tenant_code}}/teacher/courses/{{course_id}}/schedules",
+                  "host": ["{{base_url}}"],
+                  "path": ["v1", "{{tenant_code}}", "teacher", "courses", "{{course_id}}", "schedules"]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Create Schedule",
+              "request": {
+                "method": "POST",
+                "header": [{ "key": "Content-Type", "value": "application/json" }],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n    \"title\": \"Live Session — Solving Quadratic Equations\",\n    \"description\": \"Interactive session where students practice solving quadratic equations using the quadratic formula\",\n    \"starts_at\": \"2026-09-20 14:00:00\",\n    \"ends_at\": \"2026-09-20 15:30:00\",\n    \"type\": \"online\"\n}",
+                  "options": { "raw": { "language": "json" } }
+                },
+                "url": {
+                  "raw": "{{base_url}}/v1/{{tenant_code}}/teacher/courses/{{course_id}}/schedules",
+                  "host": ["{{base_url}}"],
+                  "path": ["v1", "{{tenant_code}}", "teacher", "courses", "{{course_id}}", "schedules"]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Update Schedule",
+              "request": {
+                "method": "PUT",
+                "header": [{ "key": "Content-Type", "value": "application/json" }],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n    \"title\": \"Live Session — Solving Quadratic Equations (Rescheduled)\",\n    \"starts_at\": \"2026-09-21 14:00:00\",\n    \"ends_at\": \"2026-09-21 15:30:00\",\n    \"type\": \"online\"\n}",
+                  "options": { "raw": { "language": "json" } }
+                },
+                "url": {
+                  "raw": "{{base_url}}/v1/{{tenant_code}}/teacher/courses/{{course_id}}/schedules/{{schedule_id}}",
+                  "host": ["{{base_url}}"],
+                  "path": ["v1", "{{tenant_code}}", "teacher", "courses", "{{course_id}}", "schedules", "{{schedule_id}}"]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Update Schedule Status",
+              "request": {
+                "method": "PATCH",
+                "header": [{ "key": "Content-Type", "value": "application/json" }],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n    \"status\": \"live\"\n}",
+                  "options": { "raw": { "language": "json" } }
+                },
+                "url": {
+                  "raw": "{{base_url}}/v1/{{tenant_code}}/teacher/courses/{{course_id}}/schedules/{{schedule_id}}/status",
+                  "host": ["{{base_url}}"],
+                  "path": ["v1", "{{tenant_code}}", "teacher", "courses", "{{course_id}}", "schedules", "{{schedule_id}}", "status"]
+                },
+                "description": "Status values: scheduled, live, completed, cancelled"
+              },
+              "response": []
+            },
+            {
+              "name": "Delete Schedule",
+              "request": {
+                "method": "DELETE",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}/v1/{{tenant_code}}/teacher/courses/{{course_id}}/schedules/{{schedule_id}}",
+                  "host": ["{{base_url}}"],
+                  "path": ["v1", "{{tenant_code}}", "teacher", "courses", "{{course_id}}", "schedules", "{{schedule_id}}"]
+                }
+              },
+              "response": []
+            }
+          ]
+        },
+        {
+          "name": "Attendance",
+          "item": [
+            {
+              "name": "Get Session Attendance",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}/v1/{{tenant_code}}/teacher/schedules/{{schedule_id}}/attendance",
+                  "host": ["{{base_url}}"],
+                  "path": ["v1", "{{tenant_code}}", "teacher", "schedules", "{{schedule_id}}", "attendance"]
+                },
+                "description": "Returns all students enrolled in this session. Auto-creates absent records for missing students."
+              },
+              "response": []
+            },
+            {
+              "name": "Bulk Mark Attendance",
+              "request": {
+                "method": "POST",
+                "header": [{ "key": "Content-Type", "value": "application/json" }],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n    \"attendance\": [\n        { \"student_id\": 3, \"status\": \"present\", \"notes\": null },\n        { \"student_id\": 5, \"status\": \"absent\",  \"notes\": \"No prior notice\" },\n        { \"student_id\": 7, \"status\": \"late\",    \"notes\": \"Arrived 15 minutes late\" },\n        { \"student_id\": 9, \"status\": \"excused\",  \"notes\": \"Medical certificate submitted\" }\n    ]\n}",
+                  "options": { "raw": { "language": "json" } }
+                },
+                "url": {
+                  "raw": "{{base_url}}/v1/{{tenant_code}}/teacher/schedules/{{schedule_id}}/attendance",
+                  "host": ["{{base_url}}"],
+                  "path": ["v1", "{{tenant_code}}", "teacher", "schedules", "{{schedule_id}}", "attendance"]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Update Single Attendance Record",
+              "request": {
+                "method": "PATCH",
+                "header": [{ "key": "Content-Type", "value": "application/json" }],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n    \"status\": \"excused\",\n    \"notes\": \"Doctor's note received after initial marking\"\n}",
+                  "options": { "raw": { "language": "json" } }
+                },
+                "url": {
+                  "raw": "{{base_url}}/v1/{{tenant_code}}/teacher/schedules/{{schedule_id}}/attendance/{{attendance_id}}",
+                  "host": ["{{base_url}}"],
+                  "path": ["v1", "{{tenant_code}}", "teacher", "schedules", "{{schedule_id}}", "attendance", "{{attendance_id}}"]
+                }
+              },
+              "response": []
+            }
+          ]
+        },
+        {
+          "name": "Teacher Announcements",
+          "item": [
+            {
+              "name": "List Announcements",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}/v1/{{tenant_code}}/teacher/announcements",
+                  "host": ["{{base_url}}"],
+                  "path": ["v1", "{{tenant_code}}", "teacher", "announcements"]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Create Announcement",
+              "request": {
+                "method": "POST",
+                "header": [{ "key": "Content-Type", "value": "application/json" }],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n    \"title\": \"Assignment Deadline Extended\",\n    \"body\": \"Due to the upcoming public holiday, the deadline for Assignment 2 has been extended to September 25, 2026. Please submit via the student portal before midnight.\",\n    \"audience\": \"course\",\n    \"audience_id\": 1,\n    \"expires_at\": \"2026-09-26 00:00:00\"\n}",
+                  "options": { "raw": { "language": "json" } }
+                },
+                "url": {
+                  "raw": "{{base_url}}/v1/{{tenant_code}}/teacher/announcements",
+                  "host": ["{{base_url}}"],
+                  "path": ["v1", "{{tenant_code}}", "teacher", "announcements"]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Publish Announcement",
+              "request": {
+                "method": "PATCH",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}/v1/{{tenant_code}}/teacher/announcements/{{announcement_id}}/publish",
+                  "host": ["{{base_url}}"],
+                  "path": ["v1", "{{tenant_code}}", "teacher", "announcements", "{{announcement_id}}", "publish"]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Delete Announcement",
+              "request": {
+                "method": "DELETE",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}/v1/{{tenant_code}}/teacher/announcements/{{announcement_id}}",
+                  "host": ["{{base_url}}"],
+                  "path": ["v1", "{{tenant_code}}", "teacher", "announcements", "{{announcement_id}}"]
+                }
+              },
+              "response": []
+            }
+          ]
+        }
+      ]
+    },
+
+    {
+      "name": "🎓 Student",
+      "item": [
+        {
+          "name": "Student Dashboard",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/v1/{{tenant_code}}/student/dashboard",
+              "host": ["{{base_url}}"],
+              "path": ["v1", "{{tenant_code}}", "student", "dashboard"]
+            },
+            "description": "Returns all 7 dashboard sections in a single cached response (5-min TTL): enrolled_courses, upcoming_sessions, my_weak_topics, recent_quizzes, attendance_summary, pending_fees, unread_notifications."
+          },
+          "response": []
+        },
+        {
+          "name": "My Enrolled Courses",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/v1/{{tenant_code}}/student/courses",
+              "host": ["{{base_url}}"],
+              "path": ["v1", "{{tenant_code}}", "student", "courses"]
+            },
+            "description": "Returns only courses the authenticated student is enrolled in. Paginated (15/page)."
+          },
+          "response": []
+        },
+        {
+          "name": "Course Published Lessons",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/v1/{{tenant_code}}/student/courses/{{course_id}}/lessons",
+              "host": ["{{base_url}}"],
+              "path": ["v1", "{{tenant_code}}", "student", "courses", "{{course_id}}", "lessons"]
+            },
+            "description": "Returns only published lessons (is_published=true) ordered by `order` asc. Returns 403 if student is not enrolled."
+          },
+          "response": []
+        },
+        {
+          "name": "Upcoming Schedules",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/v1/{{tenant_code}}/student/schedules",
+              "host": ["{{base_url}}"],
+              "path": ["v1", "{{tenant_code}}", "student", "schedules"]
+            },
+            "description": "Returns all upcoming sessions (status=scheduled, starts_at > now) across enrolled courses. Paginated. Includes jitsi_url for online sessions."
+          },
+          "response": []
+        },
+        {
+          "name": "My Attendance Summary",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/v1/{{tenant_code}}/student/attendance",
+              "host": ["{{base_url}}"],
+              "path": ["v1", "{{tenant_code}}", "student", "attendance"]
+            },
+            "description": "Returns by_status breakdown (present/absent/late/excused), total_sessions, and attendance_rate (%)."
+          },
+          "response": []
+        },
+        {
+          "name": "My Announcements",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/v1/{{tenant_code}}/student/announcements",
+              "host": ["{{base_url}}"],
+              "path": ["v1", "{{tenant_code}}", "student", "announcements"]
+            },
+            "description": "Returns published, non-expired announcements filtered to audience=all, audience=grade_level (student's grade), or audience=course (enrolled courses)."
+          },
+          "response": []
+        },
+        {
+          "name": "My Fees",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/v1/{{tenant_code}}/student/fees",
+              "host": ["{{base_url}}"],
+              "path": ["v1", "{{tenant_code}}", "student", "fees"]
+            },
+            "description": "Returns own fee records ordered overdue → pending → waived → paid. Includes feeStructure and course relations."
+          },
+          "response": []
+        },
+        {
+          "name": "Notifications",
+          "item": [
+            {
+              "name": "List Notifications",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}/v1/{{tenant_code}}/notifications",
+                  "host": ["{{base_url}}"],
+                  "path": ["v1", "{{tenant_code}}", "notifications"]
+                },
+                "description": "Returns paginated notifications + live unread_count. Accessible to any authenticated role."
+              },
+              "response": []
+            },
+            {
+              "name": "Get Unread Count",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}/v1/{{tenant_code}}/notifications/unread-count",
+                  "host": ["{{base_url}}"],
+                  "path": ["v1", "{{tenant_code}}", "notifications", "unread-count"]
+                },
+                "description": "Lightweight endpoint for mobile badge polling. Returns { unread_count: N }."
+              },
+              "response": []
+            },
+            {
+              "name": "Mark Notification as Read",
+              "request": {
+                "method": "PATCH",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}/v1/{{tenant_code}}/notifications/{{notification_id}}/read",
+                  "host": ["{{base_url}}"],
+                  "path": ["v1", "{{tenant_code}}", "notifications", "{{notification_id}}", "read"]
+                },
+                "description": "Marks a single notification as read and returns the updated record with read_at set."
+              },
+              "response": []
+            },
+            {
+              "name": "Mark All Notifications as Read",
+              "request": {
+                "method": "PATCH",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}/v1/{{tenant_code}}/notifications/read-all",
+                  "host": ["{{base_url}}"],
+                  "path": ["v1", "{{tenant_code}}", "notifications", "read-all"]
+                },
+                "description": "Bulk operation — marks all unread notifications as read in a single call."
+              },
+              "response": []
+            }
+          ]
+        }
+      ]
+    },
+
+    {
+      "name": "🤖 AI Module",
+      "item": [
+        {
+          "name": "Explain Topic (AI Chat)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"message\": \"Can you explain how to solve quadratic equations using the quadratic formula? I'm struggling with the discriminant part.\",\n    \"lesson_id\": 1,\n    \"session_id\": null\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{base_url}}/v1/{{tenant_code}}/ai/explain",
+              "host": ["{{base_url}}"],
+              "path": ["v1", "{{tenant_code}}", "ai", "explain"]
+            },
+            "description": "Send a question with optional lesson_id for context-aware AI response. Pass session_id on follow-up messages to maintain conversation history (last 10 messages). Returns reply + session_id."
+          },
+          "response": []
+        },
+        {
+          "name": "Continue AI Chat Session",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"message\": \"What if the discriminant is negative? What does that mean?\",\n    \"lesson_id\": 1,\n    \"session_id\": 5\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{base_url}}/v1/{{tenant_code}}/ai/explain",
+              "host": ["{{base_url}}"],
+              "path": ["v1", "{{tenant_code}}", "ai", "explain"]
+            },
+            "description": "Follow-up message in an existing session. AI uses last 10 messages as context."
+          },
+          "response": []
+        },
+        {
+          "name": "Generate Quiz",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"topic\": \"Quadratic Equations\",\n    \"level\": 1\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{base_url}}/v1/{{tenant_code}}/ai/quiz/generate",
+              "host": ["{{base_url}}"],
+              "path": ["v1", "{{tenant_code}}", "ai", "quiz", "generate"]
+            },
+            "description": "Generate a progressive quiz at level 1, 2, or 3. Returns structured question set calibrated to the difficulty level."
+          },
+          "response": []
+        },
+        {
+          "name": "Submit Quiz Answers",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"topic\": \"Quadratic Equations\",\n    \"level\": 1,\n    \"answers\": [\n        { \"question_id\": 1, \"answer\": \"x = (-b ± √(b²-4ac)) / 2a\" },\n        { \"question_id\": 2, \"answer\": \"Two real roots\" },\n        { \"question_id\": 3, \"answer\": \"x = 3 or x = -5\" },\n        { \"question_id\": 4, \"answer\": \"b²-4ac\" },\n        { \"question_id\": 5, \"answer\": \"No real roots\" }\n    ]\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{base_url}}/v1/{{tenant_code}}/ai/quiz/submit",
+              "host": ["{{base_url}}"],
+              "path": ["v1", "{{tenant_code}}", "ai", "quiz", "submit"]
+            },
+            "description": "Auto-corrects answers, records QuizAttempt, updates WeakTopic profile. Returns score, per-question results with explanations, and next_level (null if failed or at level 3). Dispatches score_alert n8n webhook if score < 50%."
+          },
+          "response": []
+        },
+        {
+          "name": "Generate Exam (Teacher Only)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"course_id\": 1,\n    \"title\": \"Mid-term Exam — Quadratic Equations & Trigonometry\",\n    \"topics\": [\"Quadratic Equations\", \"Trigonometric Functions\", \"The Unit Circle\"],\n    \"question_count\": 20,\n    \"difficulty\": \"medium\",\n    \"duration_minutes\": 90\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{base_url}}/v1/{{tenant_code}}/ai/exam/generate",
+              "host": ["{{base_url}}"],
+              "path": ["v1", "{{tenant_code}}", "ai", "exam", "generate"]
+            },
+            "description": "Teacher-only. AI generates a structured exam from the given topics."
+          },
+          "response": []
+        },
+        {
+          "name": "Get Student Weak Topics",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/v1/{{tenant_code}}/ai/students/{{student_id}}/weak-topics",
+              "host": ["{{base_url}}"],
+              "path": ["v1", "{{tenant_code}}", "ai", "students", "{{student_id}}", "weak-topics"]
+            },
+            "description": "Returns all topics ordered by score ascending with attempt_count and last_attempt_date. Client applies the 60% threshold to display only weak topics. Returns 403 if student A requests student B's data."
+          },
+          "response": []
+        },
+        {
+          "name": "Get Student Chat History",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/v1/{{tenant_code}}/ai/students/{{student_id}}/chat-history",
+              "host": ["{{base_url}}"],
+              "path": ["v1", "{{tenant_code}}", "ai", "students", "{{student_id}}", "chat-history"]
+            },
+            "description": "Returns paginated AI chat sessions (20/page) with chronological message threads. Returns 403 if student A requests student B's data."
+          },
+          "response": []
+        },
+        {
+          "name": "AI Teacher Dashboard",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/v1/{{tenant_code}}/ai/teacher/dashboard",
+              "host": ["{{base_url}}"],
+              "path": ["v1", "{{tenant_code}}", "ai", "teacher", "dashboard"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "AI Parent Dashboard",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/v1/{{tenant_code}}/ai/parent/dashboard",
+              "host": ["{{base_url}}"],
+              "path": ["v1", "{{tenant_code}}", "ai", "parent", "dashboard"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+
+    {
+      "name": "👨‍👩‍👧 Parent",
+      "item": [
+        {
+          "name": "Parent Dashboard",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/v1/{{tenant_code}}/parent/dashboard",
+              "host": ["{{base_url}}"],
+              "path": ["v1", "{{tenant_code}}", "parent", "dashboard"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Children Fees",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/v1/{{tenant_code}}/parent/fees",
+              "host": ["{{base_url}}"],
+              "path": ["v1", "{{tenant_code}}", "parent", "fees"]
+            },
+            "description": "Returns fee records for all children linked to the authenticated parent."
+          },
+          "response": []
+        },
+        {
+          "name": "Parent Announcements",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/v1/{{tenant_code}}/parent/announcements",
+              "host": ["{{base_url}}"],
+              "path": ["v1", "{{tenant_code}}", "parent", "announcements"]
+            },
+            "description": "Returns published, non-expired announcements relevant to the parent's children (by grade level and enrolled courses)."
+          },
+          "response": []
+        }
+      ]
+    },
+
+    {
+      "name": "🔧 Webhooks & Internal",
+      "item": [
+        {
+          "name": "n8n Inbound Notify Webhook",
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"event\": \"session_reminder\",\n    \"tenant_id\": 1,\n    \"student_id\": 3,\n    \"title\": \"Session Starting in 30 Minutes\",\n    \"body\": \"Your Mathematics session starts at 14:00. Join link: https://meet.jitsi/acme-1-abc123\",\n    \"data\": {\n        \"schedule_id\": 1,\n        \"jitsi_url\": \"https://meet.jitsi/acme-1-abc123\"\n    }\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{base_url}}/v1/{{tenant_code}}/webhooks/n8n/notify",
+              "host": ["{{base_url}}"],
+              "path": ["v1", "{{tenant_code}}", "webhooks", "n8n", "notify"]
+            },
+            "description": "Called by n8n to push in-app notifications to students/parents. No auth required — secured at network level."
+          },
+          "response": []
+        },
+        {
+          "name": "Internal Upcoming Sessions",
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/v1/{{tenant_code}}/internal/upcoming-sessions",
+              "host": ["{{base_url}}"],
+              "path": ["v1", "{{tenant_code}}", "internal", "upcoming-sessions"]
+            },
+            "description": "Internal endpoint consumed by n8n for session reminder automation. No auth — secured at network level."
+          },
+          "response": []
+        },
+        {
+          "name": "Internal Weekly Report (Parent)",
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/v1/{{tenant_code}}/internal/weekly-report/{{parent_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["v1", "{{tenant_code}}", "internal", "weekly-report", "{{parent_id}}"]
+            },
+            "description": "Internal endpoint consumed by n8n to build the weekly parent digest email. No Sanctum auth — uses header-based security."
+          },
+          "response": []
+        }
+      ]
+    }
+
+  ]
+}

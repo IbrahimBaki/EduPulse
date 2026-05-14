@@ -43,8 +43,10 @@ class PlatformDomainSeeder extends Seeder
             ]
         );
 
-        // 3. Create Tenant-Specific Users (Managers)
-        User::firstOrCreate(
+        // 3. Seed Alpha Academy users with roles scoped to that tenant
+        setPermissionsTeamId($alphaAcademy->id);
+
+        $alphaManager = User::firstOrCreate(
             ['email' => 'manager@alpha.com'],
             [
                 'name' => 'Alpha Manager',
@@ -52,18 +54,9 @@ class PlatformDomainSeeder extends Seeder
                 'tenant_id' => $alphaAcademy->id,
             ]
         );
+        $alphaManager->syncRoles(['manager']);
 
-        User::firstOrCreate(
-            ['email' => 'manager@beta.com'],
-            [
-                'name' => 'Beta Manager',
-                'password' => Hash::make('password'),
-                'tenant_id' => $betaSchool->id,
-            ]
-        );
-
-        // 4. Create Students and Teachers for Alpha Academy
-        User::firstOrCreate(
+        $alphaTeacher = User::firstOrCreate(
             ['email' => 'teacher@alpha.com'],
             [
                 'name' => 'Mr. Ahmed (Teacher)',
@@ -71,8 +64,9 @@ class PlatformDomainSeeder extends Seeder
                 'tenant_id' => $alphaAcademy->id,
             ]
         );
+        $alphaTeacher->syncRoles(['teacher']);
 
-        User::firstOrCreate(
+        $alphaStudent = User::firstOrCreate(
             ['email' => 'student@alpha.com'],
             [
                 'name' => 'Omar Student',
@@ -80,8 +74,9 @@ class PlatformDomainSeeder extends Seeder
                 'tenant_id' => $alphaAcademy->id,
             ]
         );
+        $alphaStudent->syncRoles(['student']);
 
-        User::firstOrCreate(
+        $alphaParent = User::firstOrCreate(
             ['email' => 'parent@alpha.com'],
             [
                 'name' => 'Omar Parent',
@@ -89,6 +84,20 @@ class PlatformDomainSeeder extends Seeder
                 'tenant_id' => $alphaAcademy->id,
             ]
         );
+        $alphaParent->syncRoles(['parent']);
+
+        // 4. Seed Beta School users with roles scoped to that tenant
+        setPermissionsTeamId($betaSchool->id);
+
+        $betaManager = User::firstOrCreate(
+            ['email' => 'manager@beta.com'],
+            [
+                'name' => 'Beta Manager',
+                'password' => Hash::make('password'),
+                'tenant_id' => $betaSchool->id,
+            ]
+        );
+        $betaManager->syncRoles(['manager']);
 
         $this->command->info('✅ Platform Domain Seeder executed successfully!');
     }

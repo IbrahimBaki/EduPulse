@@ -25,7 +25,7 @@ class NotificationController extends Controller
     {
         $notification = auth()->user()->notifications()->findOrFail($id);
         $notification->markAsRead();
-        return $this->ReturnSuccess(null, 'Notification marked as read');
+        return $this->ReturnSuccess($notification->fresh(), 'Notification marked as read');
     }
 
     public function markAllRead()
