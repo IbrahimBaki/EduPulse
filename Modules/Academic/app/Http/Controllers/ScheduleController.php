@@ -26,6 +26,10 @@ class ScheduleController extends Controller
         $course = Course::findOrFail($courseId);
         $tenant = app('tenant');
 
+        if (auth()->user()->hasRole('teacher') && $course->teacher_id !== auth()->id()) {
+            return $this->ReturnFailed('Unauthorized', 403);
+        }
+
         $data = $request->validated() + [
             'tenant_id'  => $tenant->id,
             'course_id'  => $course->id,
@@ -54,6 +58,10 @@ class ScheduleController extends Controller
     {
         $schedule = Schedule::where('course_id', $courseId)->findOrFail($id);
 
+        if (auth()->user()->hasRole('teacher') && $schedule->course->teacher_id !== auth()->id()) {
+            return $this->ReturnFailed('Unauthorized', 403);
+        }
+
         if (in_array($schedule->status, ['live', 'completed'])) {
             return $this->ReturnFailed('Cannot update a live or completed schedule', 422);
         }
@@ -66,6 +74,10 @@ class ScheduleController extends Controller
     {
         $schedule = Schedule::where('course_id', $courseId)->findOrFail($id);
         $tenant = app('tenant');
+
+        if (auth()->user()->hasRole('teacher') && $schedule->course->teacher_id !== auth()->id()) {
+            return $this->ReturnFailed('Unauthorized', 403);
+        }
 
         $schedule->update(['status' => $request->status]);
 
@@ -88,6 +100,10 @@ class ScheduleController extends Controller
     public function destroy($courseId, $id)
     {
         $schedule = Schedule::where('course_id', $courseId)->findOrFail($id);
+
+        if (auth()->user()->hasRole('teacher') && $schedule->course->teacher_id !== auth()->id()) {
+            return $this->ReturnFailed('Unauthorized', 403);
+        }
 
         if ($schedule->status !== 'scheduled') {
             return $this->ReturnFailed('Only scheduled sessions can be deleted', 422);

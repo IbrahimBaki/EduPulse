@@ -18,6 +18,11 @@ class AttendanceController extends Controller
     public function show($scheduleId)
     {
         $schedule = Schedule::findOrFail($scheduleId);
+
+        if ($schedule->course->teacher_id !== auth()->id()) {
+            return $this->ReturnFailed('Unauthorized', 403);
+        }
+
         $tenant = app('tenant');
 
         $enrolled = $schedule->course->enrollments()->pluck('student_id');
@@ -37,6 +42,11 @@ class AttendanceController extends Controller
     public function bulkMark(BulkAttendanceRequest $request, $scheduleId)
     {
         $schedule = Schedule::findOrFail($scheduleId);
+
+        if ($schedule->course->teacher_id !== auth()->id()) {
+            return $this->ReturnFailed('Unauthorized', 403);
+        }
+
         $tenant = app('tenant');
         $markedBy = auth()->id();
 

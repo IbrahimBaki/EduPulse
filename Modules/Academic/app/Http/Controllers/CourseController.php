@@ -8,6 +8,8 @@ use Modules\Academic\Http\Requests\StoreCourseRequest;
 use Modules\Academic\Http\Requests\UpdateCourseRequest;
 use Modules\Academic\Http\Requests\UpdateCourseStatusRequest;
 use Modules\Academic\Models\Course;
+use Modules\AI\Models\QuizAttempt;
+use Modules\AI\Models\WeakTopic;
 
 class CourseController extends Controller
 {
@@ -108,7 +110,27 @@ class CourseController extends Controller
         }
 
         $students = $course->enrollments()->with('student.studentProfile')->get()->pluck('student');
-        return $this->ReturnSuccess($students, 'Students retrieved');
+
+        $studentIds = $students->pluck('id');
+
+        $weakTopics = WeakTopic::whereIn('student_id', $studentIds)
+            ->get()
+            ->groupBy('student_id');
+
+        $quizAttempts = QuizAttempt::whereIn('student_id', $studentIds)
+            ->latest()
+            ->get()
+            ->groupBy('student_id')
+            ->map(fn($g) => $g->take(5));
+
+        $data = $students->map(function ($student) use ($weakTopics, $quizAttempts) {
+            $sArray = $student->toArray();
+            $sArray['weak_topics'] = $weakTopics->get($student->id, collect());
+            $sArray['recent_quizzes'] = $quizAttempts->get($student->id, collect());
+            return $sArray;
+        });
+
+        return $this->ReturnSuccess($data, 'Students retrieved');
     }
 
     public function enrolledCourses()

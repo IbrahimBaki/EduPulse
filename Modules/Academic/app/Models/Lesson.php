@@ -22,6 +22,13 @@ class Lesson extends Model
         'pdf_chunks_count' => 'integer',
     ];
 
+    protected static function booted()
+    {
+        static::deleting(function ($lesson) {
+            $lesson->pdfChunks()->delete();
+        });
+    }
+
     public function course()
     {
         return $this->belongsTo(Course::class);
