@@ -1,0 +1,384 @@
+/* ─── Page shell ──────────────────────────────────────────────────────────── */
+
+.page {
+  padding: 40px 48px;
+  max-width: 860px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.pageHead {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.pageTitle {
+  font-size: 1.625rem;
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  color: var(--text-primary);
+  line-height: 1.2;
+}
+
+.pageCount {
+  font-size: 0.875rem;
+  color: var(--text-muted);
+  margin-block-start: 4px;
+}
+
+/* ─── Filters ─────────────────────────────────────────────────────────────── */
+
+.filters {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.filterBtn {
+  padding: 6px 14px;
+  border-radius: 999px;
+  border: 1px solid var(--neutral-border);
+  background: transparent;
+  color: var(--text-secondary);
+  font-size: 0.8125rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background var(--dur-fast), color var(--dur-fast), border-color var(--dur-fast);
+}
+
+.filterBtn:hover {
+  background: var(--surface-elevated);
+  color: var(--text-primary);
+}
+
+.filterBtnActive {
+  background: var(--color-blue-dim);
+  border-color: var(--color-blue);
+  color: var(--color-blue);
+}
+
+/* ─── Content ─────────────────────────────────────────────────────────────── */
+
+.content {
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+}
+
+.groupLabel {
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin-block-end: 12px;
+}
+
+.group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+/* ─── Session card ────────────────────────────────────────────────────────── */
+
+.sessionCard {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  background: var(--surface-panel);
+  border: 1px solid var(--neutral-border);
+  border-radius: var(--radius-lg);
+  padding: 16px 20px;
+  transition: border-color var(--dur-fast);
+}
+
+.sessionCard:hover {
+  border-color: var(--neutral-border-strong);
+}
+
+.sessionCompleted {
+  opacity: 0.65;
+}
+
+.sessionLive {
+  border-color: oklch(62% 0.26 255 / 0.35);
+  background: oklch(62% 0.26 255 / 0.04);
+}
+
+/* ─── Time block ──────────────────────────────────────────────────────────── */
+
+.sessionTime {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 6px;
+  min-width: 120px;
+  flex-shrink: 0;
+}
+
+.timeRange {
+  font-size: 0.9375rem;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  color: var(--text-primary);
+  white-space: nowrap;
+}
+
+.livePulse {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--color-blue);
+  animation: pulse 1.8s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.5; transform: scale(1.4); }
+}
+
+/* ─── Info block ──────────────────────────────────────────────────────────── */
+
+.sessionInfo {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+}
+
+.sessionTitle {
+  font-size: 0.9375rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.sessionCourse {
+  font-size: 0.8125rem;
+  color: var(--text-secondary);
+}
+
+.teacherRow {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-block-start: 4px;
+}
+
+.teacherAvatar {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: var(--color-blue-dim);
+  color: var(--color-blue);
+  font-size: 0.625rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.teacherName {
+  font-size: 0.8125rem;
+  color: var(--text-muted);
+}
+
+/* ─── Right block ─────────────────────────────────────────────────────────── */
+
+.sessionRight {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.badgeRow {
+  display: flex;
+  gap: 5px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.typeBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 9px;
+  border-radius: 999px;
+  font-size: 0.72rem;
+  font-weight: 600;
+}
+
+.typeOnline {
+  background: var(--color-blue-dim);
+  color: var(--color-blue);
+}
+
+.typeOffline {
+  background: oklch(65% 0.2 145 / 0.14);
+  color: oklch(65% 0.2 145);
+}
+
+.typeRecorded {
+  background: oklch(62% 0.18 295 / 0.14);
+  color: oklch(62% 0.18 295);
+}
+
+.attendanceBadge {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 9px;
+  border-radius: 999px;
+  font-size: 0.72rem;
+  font-weight: 600;
+}
+
+.attendPresent {
+  background: oklch(65% 0.2 145 / 0.14);
+  color: oklch(65% 0.2 145);
+}
+
+.attendAbsent {
+  background: var(--color-red-dim);
+  color: var(--color-red);
+}
+
+.attendUnknown {
+  background: var(--surface-elevated);
+  color: var(--text-muted);
+}
+
+/* ─── Join button ─────────────────────────────────────────────────────────── */
+
+.joinBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 7px 14px;
+  border-radius: var(--radius-md);
+  background: var(--color-blue-dim);
+  color: var(--color-blue);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  text-decoration: none;
+  border: 1px solid var(--color-blue);
+  transition: background var(--dur-fast), color var(--dur-fast);
+}
+
+.joinBtn:hover {
+  background: var(--color-blue);
+  color: oklch(97% 0.01 255);
+}
+
+.joinBtnLive {
+  background: var(--color-blue);
+  color: oklch(97% 0.01 255);
+  animation: glow 2.4s ease-in-out infinite;
+}
+
+.joinBtnLive:hover {
+  background: var(--color-blue-hover);
+}
+
+@keyframes glow {
+  0%, 100% { box-shadow: 0 0 0 0 oklch(62% 0.26 255 / 0.35); }
+  50% { box-shadow: 0 0 0 6px oklch(62% 0.26 255 / 0); }
+}
+
+/* ─── Skeleton ────────────────────────────────────────────────────────────── */
+
+.skeletonCard {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  background: var(--surface-panel);
+  border: 1px solid var(--neutral-border);
+  border-radius: var(--radius-lg);
+  padding: 16px 20px;
+}
+
+.skeleton {
+  display: block;
+  background: var(--surface-elevated);
+  border-radius: var(--radius-sm);
+  animation: shimmer 1.6s ease-in-out infinite;
+}
+
+@keyframes shimmer {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.4; }
+}
+
+/* ─── Empty / Error ───────────────────────────────────────────────────────── */
+
+.emptyState {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  padding: 64px 24px;
+  text-align: center;
+}
+
+.emptyTitle {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+
+.emptyText {
+  font-size: 0.875rem;
+  color: var(--text-muted);
+  max-width: 38ch;
+}
+
+.retryBtn {
+  margin-block-start: 4px;
+  padding: 8px 20px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--neutral-border);
+  background: transparent;
+  color: var(--text-secondary);
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background var(--dur-fast), color var(--dur-fast);
+}
+
+.retryBtn:hover {
+  background: var(--surface-elevated);
+  color: var(--text-primary);
+}
+
+/* ─── Responsive ──────────────────────────────────────────────────────────── */
+
+@media (max-width: 640px) {
+  .page {
+    padding: 24px 20px;
+  }
+
+  .sessionCard {
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+
+  .sessionTime {
+    min-width: auto;
+  }
+
+  .sessionRight {
+    align-items: flex-start;
+    width: 100%;
+    flex-direction: row;
+    flex-wrap: wrap;
+  }
+}

@@ -1,0 +1,263 @@
+/* ─── Page shell ──────────────────────────────────────────────────────────── */
+
+.page {
+  padding: 40px 48px;
+  max-width: 760px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.pageHead {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.pageTitle {
+  font-size: 1.625rem;
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  color: var(--text-primary);
+  line-height: 1.2;
+}
+
+.pageCount {
+  font-size: 0.875rem;
+  color: var(--text-muted);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-block-start: 4px;
+}
+
+.unreadCount {
+  background: var(--color-blue-dim);
+  color: var(--color-blue);
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+/* ─── Filters ─────────────────────────────────────────────────────────────── */
+
+.filters {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.filterBtn {
+  padding: 6px 14px;
+  border-radius: 999px;
+  border: 1px solid var(--neutral-border);
+  background: transparent;
+  color: var(--text-secondary);
+  font-size: 0.8125rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background var(--dur-fast), color var(--dur-fast), border-color var(--dur-fast);
+}
+
+.filterBtn:hover {
+  background: var(--surface-elevated);
+  color: var(--text-primary);
+}
+
+.filterBtnActive {
+  background: var(--color-blue-dim);
+  border-color: var(--color-blue);
+  color: var(--color-blue);
+}
+
+/* ─── List ────────────────────────────────────────────────────────────────── */
+
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+/* ─── Card ────────────────────────────────────────────────────────────────── */
+
+.card {
+  background: var(--surface-panel);
+  border: 1px solid var(--neutral-border);
+  border-radius: var(--radius-lg);
+  padding: 18px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  transition: border-color var(--dur-fast);
+}
+
+.card:hover {
+  border-color: var(--neutral-border-strong);
+}
+
+.cardUnread {
+  border-color: oklch(62% 0.26 255 / 0.25);
+  background: oklch(62% 0.26 255 / 0.04);
+}
+
+.cardTop {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+}
+
+.cardTitle {
+  font-size: 0.9375rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  line-height: 1.35;
+  flex: 1;
+}
+
+.unreadDot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--color-blue);
+  flex-shrink: 0;
+  margin-block-start: 5px;
+}
+
+.cardBody {
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+  line-height: 1.6;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.cardBodyExpanded {
+  display: block;
+  -webkit-line-clamp: unset;
+  overflow: visible;
+}
+
+.readMoreBtn {
+  background: none;
+  border: none;
+  padding: 0;
+  color: var(--color-blue);
+  font-size: 0.8125rem;
+  font-weight: 500;
+  cursor: pointer;
+  text-align: start;
+  align-self: flex-start;
+  transition: opacity var(--dur-fast);
+}
+
+.readMoreBtn:hover {
+  opacity: 0.8;
+}
+
+.cardMeta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-block-start: 4px;
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 9px;
+  border-radius: 999px;
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+}
+
+.badgeSchool {
+  background: oklch(65% 0.2 145 / 0.14);
+  color: oklch(65% 0.2 145);
+}
+
+.badgeCourse {
+  background: var(--color-blue-dim);
+  color: var(--color-blue);
+}
+
+.cardDate {
+  font-size: 0.8125rem;
+  color: var(--text-muted);
+  margin-inline-start: auto;
+}
+
+/* ─── Skeleton ────────────────────────────────────────────────────────────── */
+
+.skeletonCard {
+  background: var(--surface-panel);
+  border: 1px solid var(--neutral-border);
+  border-radius: var(--radius-lg);
+  padding: 18px 20px;
+}
+
+.skeleton {
+  display: inline-block;
+  background: var(--surface-elevated);
+  border-radius: var(--radius-sm);
+  animation: shimmer 1.6s ease-in-out infinite;
+}
+
+@keyframes shimmer {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.4; }
+}
+
+/* ─── Empty / Error ───────────────────────────────────────────────────────── */
+
+.emptyState {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  padding: 64px 24px;
+  text-align: center;
+}
+
+.emptyTitle {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+
+.emptyText {
+  font-size: 0.875rem;
+  color: var(--text-muted);
+  max-width: 38ch;
+}
+
+.retryBtn {
+  margin-block-start: 4px;
+  padding: 8px 20px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--neutral-border);
+  background: transparent;
+  color: var(--text-secondary);
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background var(--dur-fast), color var(--dur-fast);
+}
+
+.retryBtn:hover {
+  background: var(--surface-elevated);
+  color: var(--text-primary);
+}
+
+/* ─── Responsive ──────────────────────────────────────────────────────────── */
+
+@media (max-width: 640px) {
+  .page {
+    padding: 24px 20px;
+  }
+}

@@ -1,0 +1,297 @@
+/* ─── Page shell ──────────────────────────────────────────────────────────── */
+
+.page {
+  padding: 40px 48px;
+  max-width: 760px;
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+}
+
+.pageHead {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.pageTitle {
+  font-size: 1.625rem;
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  color: var(--text-primary);
+  line-height: 1.2;
+}
+
+.pageCount {
+  font-size: 0.875rem;
+  color: var(--text-muted);
+}
+
+/* ─── Summary bar ─────────────────────────────────────────────────────────── */
+
+.summaryBar {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  background: var(--surface-panel);
+  border: 1px solid var(--neutral-border);
+  border-radius: var(--radius-xl);
+  overflow: hidden;
+}
+
+.summaryItem {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 20px 16px;
+}
+
+.summaryAmount {
+  font-size: 1.375rem;
+  font-weight: 700;
+  letter-spacing: -0.025em;
+  line-height: 1;
+}
+
+.summaryLabel {
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.summaryDivider {
+  width: 1px;
+  height: 48px;
+  background: var(--neutral-border);
+  flex-shrink: 0;
+}
+
+/* ─── Filters ─────────────────────────────────────────────────────────────── */
+
+.filters {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.filterBtn {
+  padding: 6px 14px;
+  border-radius: 999px;
+  border: 1px solid var(--neutral-border);
+  background: transparent;
+  color: var(--text-secondary);
+  font-size: 0.8125rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background var(--dur-fast), color var(--dur-fast), border-color var(--dur-fast);
+}
+
+.filterBtn:hover {
+  background: var(--surface-elevated);
+  color: var(--text-primary);
+}
+
+.filterBtnActive {
+  background: var(--color-blue-dim);
+  border-color: var(--color-blue);
+  color: var(--color-blue);
+}
+
+/* ─── Fee list ────────────────────────────────────────────────────────────── */
+
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.feeCard {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  background: var(--surface-panel);
+  border: 1px solid var(--neutral-border);
+  border-radius: var(--radius-lg);
+  padding: 18px 20px;
+  transition: border-color var(--dur-fast);
+}
+
+.feeCard:hover {
+  border-color: var(--neutral-border-strong);
+}
+
+.feeCardOverdue {
+  background: oklch(58% 0.22 27 / 0.06);
+  border-color: oklch(58% 0.22 27 / 0.3);
+}
+
+.feeMain {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+}
+
+.feeDesc {
+  font-size: 0.9375rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.feeCourse {
+  font-size: 0.8125rem;
+  color: var(--text-secondary);
+}
+
+.feeDue {
+  font-size: 0.8125rem;
+  color: var(--text-muted);
+  margin-block-start: 2px;
+}
+
+.feeRight {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.feeAmount {
+  font-size: 1.125rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: var(--text-primary);
+  line-height: 1;
+}
+
+/* ─── Status badges ───────────────────────────────────────────────────────── */
+
+.statusBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 10px;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.statusPaid {
+  background: oklch(65% 0.2 145 / 0.15);
+  color: oklch(65% 0.2 145);
+}
+
+.statusPending {
+  background: var(--color-amber-dim);
+  color: var(--color-amber);
+}
+
+.statusOverdue {
+  background: var(--color-red-dim);
+  color: var(--color-red);
+}
+
+.statusWaived {
+  background: oklch(44% 0.015 255 / 0.2);
+  color: var(--text-muted);
+}
+
+/* ─── Skeleton ────────────────────────────────────────────────────────────── */
+
+.skeletonCard {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  background: var(--surface-panel);
+  border: 1px solid var(--neutral-border);
+  border-radius: var(--radius-lg);
+  padding: 18px 20px;
+}
+
+.skeleton {
+  display: block;
+  background: var(--surface-elevated);
+  border-radius: var(--radius-sm);
+  animation: shimmer 1.6s ease-in-out infinite;
+}
+
+@keyframes shimmer {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.45; }
+}
+
+/* ─── Empty / Error ───────────────────────────────────────────────────────── */
+
+.emptyState {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  padding: 64px 24px;
+  text-align: center;
+}
+
+.emptyTitle {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+
+.emptyText {
+  font-size: 0.875rem;
+  color: var(--text-muted);
+  max-width: 38ch;
+}
+
+.retryBtn {
+  margin-block-start: 4px;
+  padding: 8px 20px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--neutral-border);
+  background: transparent;
+  color: var(--text-secondary);
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background var(--dur-fast), color var(--dur-fast);
+}
+
+.retryBtn:hover {
+  background: var(--surface-elevated);
+  color: var(--text-primary);
+}
+
+/* ─── Responsive ──────────────────────────────────────────────────────────── */
+
+@media (max-width: 640px) {
+  .page {
+    padding: 24px 20px;
+  }
+
+  .summaryBar {
+    border-radius: var(--radius-lg);
+  }
+
+  .summaryAmount {
+    font-size: 1.125rem;
+  }
+
+  .feeCard {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  .feeRight {
+    align-items: flex-start;
+    flex-direction: row;
+    align-items: center;
+    gap: 10px;
+  }
+}
