@@ -1,0 +1,192 @@
+@import "tailwindcss";
+@import "../../../../vendor/filament/filament/resources/css/base.css";
+
+/* EduPulse "Precision Cockpit" Redesign */
+
+:root {
+    /* Base background: deep navy */
+    --fi-bg-base: oklch(18% 0.02 255);
+    /* Sidebar: slightly darker than base */
+    --fi-bg-sidebar: oklch(14% 0.025 255);
+    
+    /* Primary Accent: Electric blue */
+    --c-primary-50: oklch(95% 0.05 255);
+    --c-primary-100: oklch(90% 0.1 255);
+    --c-primary-200: oklch(85% 0.15 255);
+    --c-primary-300: oklch(80% 0.2 255);
+    --c-primary-400: oklch(75% 0.23 255);
+    --c-primary-500: oklch(62% 0.26 255);
+    --c-primary-600: oklch(55% 0.24 255);
+    --c-primary-700: oklch(48% 0.2 255);
+    --c-primary-800: oklch(40% 0.15 255);
+    --c-primary-900: oklch(35% 0.1 255);
+    --c-primary-950: oklch(25% 0.05 255);
+
+    /* Neutral Overrides: Tinted towards navy (Hue 255) */
+    --c-gray-50: oklch(98% 0.005 255);
+    --c-gray-100: oklch(95% 0.008 255);
+    --c-gray-200: oklch(90% 0.01 255);
+    --c-gray-300: oklch(80% 0.012 255);
+    --c-gray-400: oklch(70% 0.015 255);
+    --c-gray-500: oklch(60% 0.018 255);
+    --c-gray-600: oklch(50% 0.02 255);
+    --c-gray-700: oklch(40% 0.022 255);
+    --c-gray-800: oklch(30% 0.02 255);
+    --c-gray-900: oklch(22% 0.022 255);
+    --c-gray-950: oklch(18% 0.02 255);
+
+    /* Amber (Warning) Overrides */
+    --c-warning-500: oklch(78% 0.18 80);
+
+    /* Adjusting typography to the brand */
+    font-family: 'Plus Jakarta Sans', sans-serif;
+}
+
+/* 1. SIDEBAR & LOGO AREA */
+.fi-sidebar {
+    background-color: var(--fi-bg-sidebar) !important;
+    border-right: 1px solid oklch(24% 0.02 255) !important;
+}
+
+.fi-sidebar-header {
+    padding: 1.5rem !important;
+    border-bottom: none !important;
+    background: transparent !important;
+}
+
+/* 2. NAV ITEMS HOVER & ACTIVE */
+.fi-sidebar-item {
+    transition: all 150ms ease-out;
+}
+
+.fi-sidebar-item-button {
+    color: oklch(70% 0.015 255) !important;
+    transition: all 150ms ease-out !important;
+}
+
+.fi-sidebar-item-button:hover {
+    color: #fff !important;
+    background-color: oklch(25% 0.05 255) !important;
+}
+
+.fi-sidebar-item-icon {
+    color: oklch(70% 0.015 255) !important;
+    transition: all 150ms ease-out !important;
+}
+
+.fi-sidebar-item-button:hover .fi-sidebar-item-icon {
+    color: #fff !important;
+}
+
+/* Active Nav Item */
+.fi-sidebar-item.fi-active .fi-sidebar-item-button {
+    background-color: oklch(62% 0.26 255 / 0.15) !important;
+    color: #fff !important;
+    border-left: 3px solid oklch(62% 0.26 255) !important;
+    box-shadow: inset 0 0 10px rgba(99,102,241,0.1);
+}
+
+.fi-sidebar-item.fi-active .fi-sidebar-item-icon {
+    color: oklch(62% 0.26 255) !important;
+}
+
+/* Group Labels */
+.fi-sidebar-group-label {
+    color: oklch(60% 0.018 255) !important;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+/* 3. LAYOUT & CARDS */
+.fi-main {
+    background-color: var(--fi-bg-base) !important;
+}
+
+.fi-ta-content, .fi-wi-stats-overview-stat, .fi-section, .fi-modal-window {
+    background-color: oklch(22% 0.022 255) !important; /* surface elevation */
+    border: 1px solid oklch(30% 0.02 255) !important;
+    box-shadow: none !important;
+    border-radius: 0.75rem !important;
+}
+
+.fi-topbar {
+    background-color: oklch(22% 0.022 255) !important;
+    border-bottom: 1px solid oklch(30% 0.02 255) !important;
+    box-shadow: none !important;
+}
+
+/* 4. TABLES */
+.fi-ta-row {
+    transition: background-color 150ms ease-out !important;
+    border-bottom: 1px solid oklch(26% 0.02 255) !important;
+}
+
+.fi-ta-row:hover {
+    background-color: oklch(26% 0.025 255) !important; /* subtle background shift */
+}
+
+/* Very subtle alternating rows */
+.fi-ta-table tbody tr:nth-child(even) {
+    background-color: oklch(20% 0.02 255);
+}
+
+.fi-ta-header-cell {
+    background-color: oklch(18% 0.02 255) !important;
+    border-bottom: 1px solid oklch(30% 0.02 255) !important;
+}
+
+.fi-ta-header-cell-label {
+    text-transform: uppercase !important;
+    letter-spacing: 0.05em !important;
+    color: oklch(60% 0.018 255) !important;
+    font-size: 0.75rem !important;
+}
+
+/* 5. BUTTONS */
+.fi-btn {
+    transition: all 150ms ease-out !important;
+}
+
+.fi-btn-color-primary {
+    background-color: oklch(62% 0.26 255) !important;
+    color: #fff !important;
+}
+
+.fi-btn-color-primary:hover {
+    box-shadow: 0 0 15px oklch(62% 0.26 255 / 0.4) !important; /* slight glow */
+    filter: brightness(1.1);
+}
+
+.fi-btn-color-danger {
+    background-color: oklch(48% 0.18 27) !important; /* softer red tint */
+    color: #fff !important;
+}
+
+/* 6. FORMS */
+.fi-input, .fi-select, .fi-textarea {
+    background-color: oklch(18% 0.02 255) !important;
+    border: 1px solid oklch(30% 0.02 255) !important;
+    color: oklch(98% 0.005 255) !important;
+    transition: all 150ms ease-out !important;
+}
+
+.fi-input:focus, .fi-select:focus, .fi-textarea:focus, .fi-input:focus-within {
+    border-color: oklch(62% 0.26 255) !important;
+    box-shadow: 0 0 0 2px oklch(62% 0.26 255 / 0.3) !important; /* electric blue ring */
+    outline: none !important;
+}
+
+.fi-fo-field-wrp-label {
+    color: oklch(80% 0.012 255) !important; /* proper contrast */
+    font-weight: 500 !important;
+}
+
+.fi-fo-field-wrp-error-message {
+    color: oklch(78% 0.18 80) !important; /* Amber instead of red */
+}
+
+/* Global text color fix for dark mode assumption */
+body {
+    color: oklch(95% 0.008 255) !important;
+}

@@ -14,7 +14,15 @@ import ManagerStudents  from '../pages/manager/Students'
 import ManagerTeachers  from '../pages/manager/Teachers'
 import ManagerCourses   from '../pages/manager/Courses'
 import ManagerSettings  from '../pages/manager/Settings'
-import TeacherDashboard from '../pages/teacher/Dashboard'
+import ManagerSchedule  from '../pages/manager/Schedule'
+import ManagerFinance   from '../pages/manager/Finance'
+import ManagerAnnouncements from '../pages/manager/Announcements'
+import TeacherDashboard      from '../pages/teacher/Dashboard'
+import TeacherCourses         from '../pages/teacher/Courses'
+import TeacherCourseDetail    from '../pages/teacher/CourseDetail'
+import TeacherSchedule        from '../pages/teacher/Schedule'
+import TeacherStudents        from '../pages/teacher/Students'
+import TeacherAnnouncements   from '../pages/teacher/Announcements'
 import ParentDashboard  from '../pages/parent/Dashboard'
 
 function Placeholder({ title }: { title: string }) {
@@ -55,9 +63,9 @@ const router = createBrowserRouter([
       { path: 'students',            element: <ManagerStudents /> },
       { path: 'teachers',            element: <ManagerTeachers /> },
       { path: 'courses',             element: <ManagerCourses /> },
-      { path: 'schedule',            element: <Placeholder title="Schedule" /> },
-      { path: 'finance',             element: <Placeholder title="Finance" /> },
-      { path: 'announcements',       element: <Placeholder title="Announcements" /> },
+      { path: 'schedule',            element: <ManagerSchedule /> },
+      { path: 'finance',             element: <ManagerFinance /> },
+      { path: 'announcements',       element: <ManagerAnnouncements /> },
       { path: 'settings',            element: <ManagerSettings /> },
     ],
   },
@@ -67,12 +75,13 @@ const router = createBrowserRouter([
     path: '/teacher',
     element: <TeacherLayout />,
     children: [
-      { index: true,             element: <Navigate to="dashboard" replace /> },
-      { path: 'dashboard',       element: <TeacherDashboard /> },
-      { path: 'classes',         element: <Placeholder title="My Classes" /> },
-      { path: 'assignments',     element: <Placeholder title="Assignments" /> },
-      { path: 'grades',          element: <Placeholder title="Grades" /> },
-      { path: 'schedule',        element: <Placeholder title="Schedule" /> },
+      { index: true,              element: <Navigate to="dashboard" replace /> },
+      { path: 'dashboard',        element: <TeacherDashboard /> },
+      { path: 'courses',          element: <TeacherCourses /> },
+      { path: 'courses/:courseId', element: <TeacherCourseDetail /> },
+      { path: 'schedule',         element: <TeacherSchedule /> },
+      { path: 'students',         element: <TeacherStudents /> },
+      { path: 'announcements',    element: <TeacherAnnouncements /> },
     ],
   },
 

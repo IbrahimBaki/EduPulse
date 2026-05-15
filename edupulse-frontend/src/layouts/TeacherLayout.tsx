@@ -21,12 +21,12 @@ function BookOpenIcon() {
   return <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
 }
 
-function ClipboardIcon() {
-  return <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><rect x="8" y="2" width="8" height="4" rx="1" ry="1"/></svg>
+function UsersIcon() {
+  return <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
 }
 
-function BarChartIcon() {
-  return <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+function BellIcon() {
+  return <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
 }
 
 function CalendarIcon() {
@@ -40,11 +40,11 @@ function LogOutIcon() {
 type NavItem = { to: string; label: string; Icon: () => React.ReactElement }
 
 const NAV_ITEMS: NavItem[] = [
-  { to: '/teacher/dashboard',   label: 'Dashboard',   Icon: HomeIcon },
-  { to: '/teacher/classes',     label: 'My Classes',  Icon: BookOpenIcon },
-  { to: '/teacher/assignments', label: 'Assignments', Icon: ClipboardIcon },
-  { to: '/teacher/grades',      label: 'Grades',      Icon: BarChartIcon },
-  { to: '/teacher/schedule',    label: 'Schedule',    Icon: CalendarIcon },
+  { to: '/teacher/dashboard',      label: 'Dashboard',      Icon: HomeIcon },
+  { to: '/teacher/courses',        label: 'My Courses',     Icon: BookOpenIcon },
+  { to: '/teacher/schedule',       label: 'Schedule',       Icon: CalendarIcon },
+  { to: '/teacher/students',       label: 'Students',       Icon: UsersIcon },
+  { to: '/teacher/announcements',  label: 'Announcements',  Icon: BellIcon },
 ]
 
 export default function TeacherLayout() {

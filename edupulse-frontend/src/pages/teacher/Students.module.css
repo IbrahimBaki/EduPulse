@@ -1,0 +1,420 @@
+.page {
+  padding: 32px 40px 64px;
+  max-width: 1440px;
+}
+
+/* ─── Header ─────────────────────────────────────────────────────────────── */
+
+.pageHead {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 16px;
+  margin-block-end: 24px;
+  animation: fadeUp 0.4s var(--ease-out-expo) both;
+}
+
+.pageTitle {
+  font-size: 1.375rem;
+  font-weight: 700;
+  letter-spacing: -0.025em;
+  color: var(--text-primary);
+  margin: 0;
+  line-height: 1.2;
+}
+
+.pageSubtitle {
+  font-size: 0.8125rem;
+  color: var(--text-muted);
+  margin: 3px 0 0;
+}
+
+/* ─── Toolbar ─────────────────────────────────────────────────────────────── */
+
+.toolbar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-block-end: 24px;
+  animation: fadeUp 0.4s var(--ease-out-expo) 0.05s both;
+  flex-wrap: wrap;
+}
+
+.courseSelect {
+  height: 36px;
+  padding-inline: 10px 32px;
+  background: var(--surface-elevated);
+  border: 1px solid var(--neutral-border);
+  border-radius: var(--radius-md);
+  color: var(--text-secondary);
+  font-size: 0.8125rem;
+  font-family: var(--font-sans);
+  cursor: pointer;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='oklch(62%25 0.02 255)' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 8px center;
+  transition: border-color var(--dur-fast) var(--ease-out-quart);
+  min-width: 200px;
+}
+
+.courseSelect:focus { outline: none; border-color: var(--color-blue); }
+
+/* ─── Table ───────────────────────────────────────────────────────────────── */
+
+.tableWrap {
+  border: 1px solid var(--neutral-border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  animation: fadeUp 0.4s var(--ease-out-expo) 0.08s both;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.8125rem;
+}
+
+.table th {
+  padding: 10px 16px;
+  text-align: start;
+  font-size: 0.625rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: var(--text-muted);
+  background: var(--surface-panel);
+  border-bottom: 1px solid var(--neutral-border);
+  white-space: nowrap;
+}
+
+.table td {
+  padding: 12px 16px;
+  border-bottom: 1px solid oklch(32% 0.02 255 / 0.45);
+  vertical-align: middle;
+}
+
+.table tr:last-child td { border-bottom: none; }
+
+.table tbody tr {
+  cursor: pointer;
+  transition: background 120ms var(--ease-out-quart);
+}
+
+.table tbody tr:hover { background: oklch(20% 0.015 255 / 0.5); }
+.table tbody tr:focus-within { outline: 2px solid var(--color-blue); outline-offset: -2px; }
+
+/* ─── Student cell ────────────────────────────────────────────────────────── */
+
+.studentAvatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: var(--color-blue-dim);
+  color: var(--color-blue);
+  font-size: 0.6875rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}
+
+.studentCell {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.studentName { font-weight: 500; color: var(--text-primary); }
+.studentCode { font-size: 0.75rem; color: var(--text-muted); font-variant-numeric: tabular-nums; }
+
+/* ─── Inline progress ─────────────────────────────────────────────────────── */
+
+.inlineProgress {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.miniProgress {
+  width: 72px;
+  height: 4px;
+  background: var(--surface-panel);
+  border-radius: 999px;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.miniProgressBar {
+  height: 100%;
+  border-radius: 999px;
+  background: var(--color-blue);
+}
+
+.progressPct {
+  font-size: 0.75rem;
+  font-variant-numeric: tabular-nums;
+  color: var(--text-secondary);
+  min-width: 32px;
+}
+
+/* ─── Score coloring ──────────────────────────────────────────────────────── */
+
+.scoreGreen { color: oklch(68% 0.18 148); font-weight: 700; font-variant-numeric: tabular-nums; }
+.scoreAmber { color: var(--color-amber);   font-weight: 700; font-variant-numeric: tabular-nums; }
+.scoreRed   { color: var(--color-red);     font-weight: 700; font-variant-numeric: tabular-nums; }
+.scoreMuted { color: var(--text-muted);    font-variant-numeric: tabular-nums; }
+
+/* ─── At-risk badge ───────────────────────────────────────────────────────── */
+
+.atRiskBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.5625rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  padding: 2px 7px;
+  border-radius: 999px;
+  background: var(--color-amber-dim);
+  color: var(--color-amber);
+}
+
+/* ─── Weak topics pill ────────────────────────────────────────────────────── */
+
+.weakCount {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  font-size: 0.75rem;
+  font-variant-numeric: tabular-nums;
+  color: var(--color-amber);
+  font-weight: 600;
+}
+
+/* ─── Last activity ───────────────────────────────────────────────────────── */
+
+.lastActivity {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+/* ─── Slide-over: student detail ──────────────────────────────────────────── */
+
+.detailSection { margin-block-end: 24px; }
+
+.detailLabel {
+  font-size: 0.6875rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: var(--text-muted);
+  margin-block-end: 10px;
+}
+
+.infoGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.infoItem {}
+.infoKey   { font-size: 0.6875rem; color: var(--text-muted); margin-block-end: 2px; }
+.infoValue { font-size: 0.9375rem; font-weight: 600; color: var(--text-primary); }
+
+.pillRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.topicPill {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  background: var(--color-amber-dim);
+  color: var(--color-amber);
+  border: 1px solid oklch(75% 0.18 75 / 0.25);
+}
+
+.topicScore {
+  font-size: 0.6875rem;
+  font-weight: 700;
+  background: var(--color-amber);
+  color: oklch(16% 0.01 255);
+  border-radius: 999px;
+  padding: 1px 5px;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ─── Quiz attempts table ─────────────────────────────────────────────────── */
+
+.quizTable {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.8125rem;
+}
+
+.quizTable th {
+  padding: 6px 10px;
+  text-align: start;
+  font-size: 0.5625rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: var(--text-muted);
+  border-bottom: 1px solid var(--neutral-border);
+}
+
+.quizTable td {
+  padding: 8px 10px;
+  border-bottom: 1px solid oklch(32% 0.02 255 / 0.4);
+  vertical-align: middle;
+}
+
+.quizTable tr:last-child td { border-bottom: none; }
+
+/* ─── Attendance breakdown ────────────────────────────────────────────────── */
+
+.attendanceBreakdown {
+  display: flex;
+  gap: 12px;
+}
+
+.attStat {
+  flex: 1;
+  padding: 10px;
+  border-radius: var(--radius-sm);
+  background: var(--surface-elevated);
+  border: 1px solid var(--neutral-border);
+  text-align: center;
+}
+
+.attNum  { font-size: 1.25rem; font-weight: 700; font-variant-numeric: tabular-nums; }
+.attLabel{ font-size: 0.625rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-muted); }
+
+.attPresent { color: oklch(68% 0.18 148); }
+.attAbsent  { color: var(--color-red); }
+.attLate    { color: var(--color-amber); }
+.attExcused { color: var(--text-muted); }
+
+/* ─── AI exam button ──────────────────────────────────────────────────────── */
+
+.aiExamBtn {
+  width: 100%;
+  justify-content: center;
+  background: var(--color-blue);
+  color: oklch(99% 0.005 255);
+  border: none;
+  height: 40px;
+  border-radius: var(--radius-md);
+  font-size: 0.875rem;
+  font-weight: 600;
+  font-family: var(--font-sans);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  transition: filter var(--dur-fast) var(--ease-out-quart), transform 100ms var(--ease-out-quart);
+}
+
+.aiExamBtn:hover { filter: brightness(1.1); }
+.aiExamBtn:active { transform: scale(0.98); }
+.aiExamBtn:focus-visible { outline: 2px solid var(--color-blue); outline-offset: 2px; }
+.aiExamBtn:disabled { opacity: 0.45; pointer-events: none; }
+
+/* ─── Buttons ─────────────────────────────────────────────────────────────── */
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 34px;
+  padding-inline: 14px;
+  border-radius: var(--radius-md);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  cursor: pointer;
+  border: 1px solid transparent;
+  background: transparent;
+  color: var(--text-primary);
+  font-family: var(--font-sans);
+  min-height: 34px;
+  transition:
+    background var(--dur-fast) var(--ease-out-quart),
+    transform 100ms var(--ease-out-quart);
+}
+
+.btnOutline { background: var(--surface-elevated); border-color: var(--neutral-border); color: var(--text-secondary); }
+.btnOutline:hover { color: var(--text-primary); background: oklch(26% 0.026 255); }
+.btn:focus-visible { outline: 2px solid var(--color-blue); outline-offset: 2px; }
+.btn:disabled { opacity: 0.45; pointer-events: none; }
+
+/* ─── Empty / Error states ────────────────────────────────────────────────── */
+
+.emptyState {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding: 64px 24px;
+  color: var(--text-muted);
+  text-align: center;
+  background: var(--surface-elevated);
+  border: 1px solid var(--neutral-border);
+  border-radius: var(--radius-lg);
+}
+
+.emptyTitle { font-size: 0.9375rem; font-weight: 600; color: var(--text-secondary); margin: 0; }
+.emptyText  { font-size: 0.8125rem; color: var(--text-muted); margin: 0; max-width: 280px; line-height: 1.5; }
+
+/* ─── Skeleton ────────────────────────────────────────────────────────────── */
+
+.skeleton {
+  display: block;
+  border-radius: 4px;
+  background: linear-gradient(90deg, var(--surface-panel) 25%, var(--surface-elevated) 37%, var(--surface-panel) 63%);
+  background-size: 400% 100%;
+  animation: shimmer 1.5s ease-in-out infinite;
+}
+
+/* ─── Keyframes ───────────────────────────────────────────────────────────── */
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes shimmer {
+  0%   { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+/* ─── Reduced motion ──────────────────────────────────────────────────────── */
+
+@media (prefers-reduced-motion: reduce) {
+  .pageHead, .toolbar, .tableWrap { animation: none; }
+  .skeleton { animation: none; }
+}
+
+/* ─── Responsive ──────────────────────────────────────────────────────────── */
+
+@media (max-width: 860px) {
+  .table th:nth-child(5),
+  .table td:nth-child(5) { display: none; }
+}
+
+@media (max-width: 720px) {
+  .page { padding: 20px 16px 48px; }
+  .infoGrid { grid-template-columns: 1fr; }
+  .attendanceBreakdown { flex-wrap: wrap; }
+}

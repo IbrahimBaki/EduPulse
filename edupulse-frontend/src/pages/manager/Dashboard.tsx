@@ -654,16 +654,27 @@ function FinanceSummary({
   refetch: () => void
 }) {
   const rate = data ? parseRate(data.collection_rate) : 0
+  const navigate = useNavigate()
 
   return (
     <div className={styles.panel}>
       <div className={styles.panelHead}>
         <h2 className={styles.panelTitle}>Finance</h2>
-        {data && (data.overdue_students?.length ?? 0) > 0 && (
-          <span className={styles.overdueBadge}>
-            {data.overdue_students.length} overdue
-          </span>
-        )}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          {data && (data.overdue_students?.length ?? 0) > 0 && (
+            <span className={styles.overdueBadge}>
+              {data.overdue_students.length} overdue
+            </span>
+          )}
+          <button 
+            type="button" 
+            onClick={() => navigate('/manager/finance')}
+            className={styles.viewAllBtn}
+            style={{ fontSize: '0.6875rem', fontWeight: 600, color: 'var(--color-blue)', background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}
+          >
+            Manage
+          </button>
+        </div>
       </div>
 
       {loading ? (

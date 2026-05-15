@@ -12,6 +12,7 @@ use Filament\PanelProvider;
 use Filament\Support\Colors\Color;
 use Filament\Widgets;
 use Filament\View\PanelsRenderHook;
+use Filament\Navigation\NavigationGroup;
 use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
 use Illuminate\Cookie\Middleware\EncryptCookies;
 use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
@@ -39,17 +40,39 @@ class AdminPanelProvider extends PanelProvider
             ->brandLogoHeight('3.5rem')
             ->favicon(asset('images/epa-logo.png'))
             ->sidebarCollapsibleOnDesktop()
+            ->font('Plus Jakarta Sans')
             ->colors([
                 'primary' => Color::Indigo,
-                'info'    => Color::Cyan,
+                'info'    => Color::Sky,
                 'success' => Color::Emerald,
-                'warning' => Color::Orange,
+                'warning' => Color::Amber,
                 'danger'  => Color::Rose,
+                'gray'    => Color::Slate,
             ])
-            ->renderHook(
-                PanelsRenderHook::HEAD_END,
-                fn (): string => '<link rel="stylesheet" href="' . asset('css/epa-admin-theme.css') . '?v=' . time() . '">'
-            )
+            ->navigationGroups([
+                NavigationGroup::make()
+                     ->label('Academic')
+                     ->icon('heroicon-o-academic-cap'),
+                NavigationGroup::make()
+                     ->label('Assessments')
+                     ->icon('heroicon-o-clipboard-document-check'),
+                NavigationGroup::make()
+                     ->label('Finance')
+                     ->icon('heroicon-o-banknotes'),
+                NavigationGroup::make()
+                     ->label('Communication')
+                     ->icon('heroicon-o-chat-bubble-left-right'),
+                NavigationGroup::make()
+                     ->label('AI Tools')
+                     ->icon('heroicon-o-sparkles'),
+                NavigationGroup::make()
+                     ->label('Identity & Access')
+                     ->icon('heroicon-o-users'),
+                NavigationGroup::make()
+                     ->label('Platform')
+                     ->icon('heroicon-o-cog-8-tooth'),
+            ])
+            ->viteTheme('resources/css/filament/admin/theme.css')
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\\Filament\\Resources')
             ->discoverPages(in: app_path('Filament/Pages'), for: 'App\\Filament\\Pages')
             ->pages([
