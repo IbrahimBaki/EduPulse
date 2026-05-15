@@ -36,7 +36,10 @@ return [
     ],
 
     'jitsi' => [
-        'base_url' => env('JITSI_BASE_URL', 'https://meet.jit.si'),
+        'base_url'    => env('JITSI_BASE_URL', 'https://8x8.vc'),
+        'app_id'      => env('JITSI_APP_ID'),
+        'key_id'      => env('JITSI_KEY_ID'),
+        'private_key' => env('JITSI_PRIVATE_KEY'),
     ],
 
 ];

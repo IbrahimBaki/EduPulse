@@ -9,6 +9,7 @@ use Modules\Academic\Http\Requests\StoreScheduleRequest;
 use Modules\Academic\Http\Requests\UpdateScheduleStatusRequest;
 use Modules\Academic\Models\Course;
 use Modules\Academic\Models\Schedule;
+use Modules\Academic\Services\JitsiTokenService;
 
 class ScheduleController extends Controller
 {
@@ -129,5 +130,53 @@ class ScheduleController extends Controller
             ->paginate(15);
 
         return $this->ReturnSuccess($schedules, 'Upcoming schedules retrieved');
+    }
+
+    public function studentCourseSchedules($courseId)
+    {
+        $course = Course::whereHas('enrollments', fn($q) => $q->where('student_id', auth()->id()))
+            ->findOrFail($courseId);
+
+        $schedules = Schedule::where('course_id', $course->id)
+            ->orderBy('starts_at')
+            ->get();
+
+        return $this->ReturnSuccess($schedules, 'Course schedules retrieved');
+    }
+
+    public function teacherJoin($courseId, $id, JitsiTokenService $jitsi)
+    {
+        $schedule = Schedule::where('course_id', $courseId)->findOrFail($id);
+
+        if (auth()->user()->hasRole('teacher') && $schedule->teacher_id !== auth()->id()) {
+            return $this->ReturnFailed('Unauthorized', 403);
+        }
+
+        if ($schedule->type !== 'online' || !$schedule->jitsi_url) {
+            return $this->ReturnFailed('This session has no online meeting link', 422);
+        }
+
+        $url = $jitsi->getJoinUrl($schedule, auth()->user(), true);
+
+        return $this->ReturnSuccess(['url' => $url], 'Join URL generated');
+    }
+
+    public function studentJoin($courseId, $id, JitsiTokenService $jitsi)
+    {
+        $course = Course::whereHas('enrollments', fn($q) => $q->where('student_id', auth()->id()))
+            ->findOrFail($courseId);
+
+        $schedule = Schedule::where('course_id', $course->id)
+            ->where('status', 'live')
+            ->where('type', 'online')
+            ->findOrFail($id);
+
+        if (!$schedule->jitsi_url) {
+            return $this->ReturnFailed('This session has no online meeting link', 422);
+        }
+
+        $url = $jitsi->getJoinUrl($schedule, auth()->user(), false);
+
+        return $this->ReturnSuccess(['url' => $url], 'Join URL generated');
     }
 }

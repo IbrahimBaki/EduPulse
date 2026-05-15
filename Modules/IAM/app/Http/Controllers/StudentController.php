@@ -89,7 +89,7 @@ class StudentController extends Controller
     public function show($id)
     {
         $student = User::role('student')
-            ->with('studentProfile.gradeLevel', 'parents')
+            ->with('studentProfile.gradeLevel', 'parents', 'enrollments.course')
             ->findOrFail($id);
 
         return $this->ReturnSuccess($student, 'Student retrieved');

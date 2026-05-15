@@ -17,6 +17,8 @@ class PdfController extends Controller
 
         $path = $request->file('pdf')->store("pdfs/lessons/{$lesson->id}");
 
+        $lesson->update(['pdf_path' => $path, 'pdf_processed' => false]);
+
         ProcessPdfJob::dispatch($lesson, $path);
 
         return $this->ReturnSuccess(

@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useRef } from 'react'
 import { useParams, Link } from 'react-router-dom'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import api from '../../lib/axios'
@@ -171,6 +171,16 @@ function BookIcon() {
   )
 }
 
+function UploadIcon() {
+  return (
+    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <polyline points="16 16 12 12 8 16"/>
+      <line x1="12" y1="12" x2="12" y2="21"/>
+      <path d="M20.39 18.39A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.3"/>
+    </svg>
+  )
+}
+
 function UsersIcon() {
   return (
     <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
@@ -250,6 +260,10 @@ function LessonsTab({ courseId }: { courseId: string }) {
   const qc = useQueryClient()
   const [showForm, setShowForm] = useState(false)
   const [form, setForm] = useState({ title: '', description: '' })
+  const fileInputRef     = useRef<HTMLInputElement>(null)
+  const [pendingLessonId, setPendingLessonId] = useState<number | null>(null)
+  const [queuedIds, setQueuedIds]             = useState<Set<number>>(new Set())
+  const [uploadError, setUploadError]         = useState<string | null>(null)
 
   const { data: lessons = [], isLoading, isError, refetch } = useQuery<Lesson[]>({
     queryKey: ['teacher-lessons', courseId],
@@ -267,11 +281,46 @@ function LessonsTab({ courseId }: { courseId: string }) {
     },
   })
 
-const publishMutation = useMutation({
+  const publishMutation = useMutation({
     mutationFn: ({ lessonId, published }: { lessonId: number; published: boolean }) =>
       api.patch(`/teacher/courses/${courseId}/lessons/${lessonId}/publish`, { is_published: !published }),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['teacher-lessons', courseId] }),
   })
+
+  const uploadMutation = useMutation({
+    mutationFn: ({ lessonId, file }: { lessonId: number; file: File }) => {
+      const fd = new FormData()
+      fd.append('pdf', file)
+      // Pass Content-Type as undefined so axios doesn't override the multipart boundary
+      return api.post(`/lessons/${lessonId}/upload-pdf`, fd, {
+        headers: { 'Content-Type': undefined as unknown as string },
+      })
+    },
+    onSuccess: (_data, vars) => {
+      setQueuedIds(prev => new Set(prev).add(vars.lessonId))
+      setPendingLessonId(null)
+      setUploadError(null)
+      qc.invalidateQueries({ queryKey: ['teacher-lessons', courseId] })
+    },
+    onError: (err: unknown) => {
+      const msg = (err as { response?: { data?: { message?: string } } })?.response?.data?.message ?? 'Upload failed'
+      setUploadError(msg)
+      setPendingLessonId(null)
+    },
+  })
+
+  function handleUploadClick(lessonId: number) {
+    setUploadError(null)
+    setPendingLessonId(lessonId)
+    fileInputRef.current?.click()
+  }
+
+  function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0]
+    if (!file || pendingLessonId === null) return
+    uploadMutation.mutate({ lessonId: pendingLessonId, file })
+    e.target.value = ''
+  }
 
   const handleSubmit = useCallback((e: React.FormEvent) => {
     e.preventDefault()
@@ -358,11 +407,24 @@ if (isLoading) {
                   {lesson.pdf_processed && (
                     <span className={`${styles.badge} ${styles.badgePdf}`}>PDF</span>
                   )}
+                  {queuedIds.has(lesson.id) && !lesson.pdf_processed && (
+                    <span className={`${styles.badge} ${styles.badgeQueued}`}>Processing…</span>
+                  )}
                   {lesson.chunks_count != null && lesson.chunks_count > 0 && (
                     <span className={`${styles.badge} ${styles.badgeChunks}`}>{lesson.chunks_count} chunks</span>
                   )}
                 </div>
                 <div className={styles.lessonActions}>
+                  <button
+                    type="button"
+                    className={`${styles.uploadPdfBtn} ${lesson.pdf_processed ? styles.uploadPdfBtnDone : ''}`}
+                    onClick={() => handleUploadClick(lesson.id)}
+                    disabled={uploadMutation.isPending && pendingLessonId === lesson.id}
+                    aria-label={lesson.pdf_processed ? `Re-upload PDF for ${lesson.title}` : `Upload PDF for ${lesson.title}`}
+                    title={lesson.pdf_processed ? 'Re-upload PDF' : 'Upload PDF'}
+                  >
+                    <UploadIcon />
+                  </button>
                   <button
                     type="button"
                     className={`${styles.publishToggle} ${lesson.is_published ? styles.publishToggleOn : styles.publishToggleOff}`}
@@ -376,6 +438,9 @@ if (isLoading) {
               </li>
             ))}
           </ol>
+          {uploadError && (
+            <p className={styles.uploadPdfError} role="alert">{uploadError}</p>
+          )}
           {!showForm && (
             <div className={styles.btnRow}>
               <button type="button" className={`${styles.btn} ${styles.btnOutline}`} onClick={() => setShowForm(true)}>
@@ -385,6 +450,15 @@ if (isLoading) {
           )}
         </>
       )}
+      <input
+        type="file"
+        accept=".pdf,application/pdf"
+        className={styles.hiddenInput}
+        ref={fileInputRef}
+        onChange={handleFileChange}
+        aria-hidden="true"
+        tabIndex={-1}
+      />
     </>
   )
 }

@@ -34,6 +34,49 @@ class GeminiService
         return $response->json('candidates.0.content.parts.0.text', '');
     }
 
+    public function chatWithPdf(string $systemPrompt, array $messages, string $pdfPath): string
+    {
+        $pdfData = base64_encode(file_get_contents($pdfPath));
+
+        $contents = [];
+
+        // Inject PDF as first user turn so all subsequent turns can reference it
+        $contents[] = [
+            'role'  => 'user',
+            'parts' => [
+                [
+                    'inline_data' => [
+                        'mime_type' => 'application/pdf',
+                        'data'      => $pdfData,
+                    ],
+                ],
+                ['text' => 'هذا هو محتوى الدرس. استخدمه للإجابة على أسئلة الطالب.'],
+            ],
+        ];
+
+        // Model acknowledgement keeps the conversation structure valid
+        $contents[] = [
+            'role'  => 'model',
+            'parts' => [['text' => 'فهمت محتوى الدرس. أنا جاهز للإجابة على أسئلة الطالب.']],
+        ];
+
+        foreach ($messages as $m) {
+            $contents[] = [
+                'role'  => $m['role'] === 'assistant' ? 'model' : 'user',
+                'parts' => [['text' => $m['content']]],
+            ];
+        }
+
+        $response = Http::withQueryParameters(['key' => $this->key])
+            ->post($this->url, [
+                'system_instruction' => ['parts' => [['text' => $systemPrompt]]],
+                'contents'           => $contents,
+                'generationConfig'   => ['temperature' => 0.7, 'maxOutputTokens' => 2048],
+            ]);
+
+        return $response->json('candidates.0.content.parts.0.text', '');
+    }
+
     public function generateQuiz(string $systemPrompt, string $topic, int $level): array
     {
         $labels = ['', 'easy', 'medium', 'hard'];

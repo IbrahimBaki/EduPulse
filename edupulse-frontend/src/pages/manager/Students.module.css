@@ -1022,6 +1022,101 @@
   font-size: 0.9375rem;
 }
 
+/* ─── Enrollment ──────────────────────────────────────────────────────────── */
+
+.enrolledList {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.enrolledItem {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 8px 10px;
+  background: var(--surface-elevated);
+  border: 1px solid var(--neutral-border);
+  border-radius: var(--radius-sm);
+}
+
+.enrolledCourseName {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--text-primary);
+}
+
+.enrolledDate {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  flex-shrink: 0;
+}
+
+.enrollForm {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  align-items: flex-start;
+  margin-top: 8px;
+}
+
+.enrollSelect {
+  flex: 1;
+  min-width: 140px;
+  height: 32px;
+  padding-inline: 8px 28px;
+  background: var(--surface-panel);
+  border: 1px solid var(--neutral-border);
+  border-radius: var(--radius-sm);
+  color: var(--text-primary);
+  font-size: 0.8125rem;
+  font-family: var(--font-sans);
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='oklch(62%25 0.02 255)' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 8px center;
+  transition: border-color var(--dur-fast) var(--ease-out-quart);
+  cursor: pointer;
+}
+
+.enrollSelect:focus { outline: none; border-color: var(--color-blue); }
+.enrollSelect:disabled { opacity: 0.5; cursor: not-allowed; }
+
+.enrollSubmitBtn {
+  height: 32px;
+  padding-inline: 14px;
+  background: var(--color-blue);
+  color: oklch(99% 0.005 255);
+  border: none;
+  border-radius: var(--radius-sm);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  font-family: var(--font-sans);
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: opacity var(--dur-fast) var(--ease-out-quart),
+              background var(--dur-fast) var(--ease-out-quart);
+}
+
+.enrollSubmitBtn:hover:not(:disabled) { background: oklch(58% 0.26 255); }
+.enrollSubmitBtn:focus-visible { outline: 2px solid var(--color-blue); outline-offset: 2px; }
+.enrollSubmitBtn:disabled { opacity: 0.45; cursor: not-allowed; }
+
+.enrollError {
+  width: 100%;
+  padding: 6px 10px;
+  margin: 0;
+  background: oklch(62% 0.22 27 / 0.08);
+  border: 1px solid oklch(62% 0.22 27 / 0.25);
+  border-radius: var(--radius-sm);
+  font-size: 0.8rem;
+  color: oklch(60% 0.22 27);
+}
+
 /* ─── Responsive ──────────────────────────────────────────────────────────── */
 
 .hideOnMobile { /* hidden via media query below */ }

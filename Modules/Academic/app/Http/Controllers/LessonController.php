@@ -4,6 +4,7 @@ namespace Modules\Academic\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use App\Traits\ApiResponser;
+use Illuminate\Support\Facades\Storage;
 use Modules\AI\Jobs\SendN8nWebhookJob;
 use Modules\Academic\Http\Requests\StoreLessonRequest;
 use Modules\Academic\Models\Course;
@@ -93,5 +94,25 @@ class LessonController extends Controller
 
         $lessons = $course->lessons()->where('is_published', true)->orderBy('order')->get();
         return $this->ReturnSuccess($lessons, 'Published lessons retrieved');
+    }
+
+    public function servePdf(Lesson $lesson)
+    {
+        $isEnrolled = $lesson->course->enrollments()->where('student_id', auth()->id())->exists();
+        if (!$isEnrolled) {
+            abort(403, 'Not enrolled in this course');
+        }
+
+        if (!$lesson->pdf_path || !Storage::disk('local')->exists($lesson->pdf_path)) {
+            abort(404, 'PDF not found');
+        }
+
+        $absolutePath = Storage::disk('local')->path($lesson->pdf_path);
+        $filename     = $lesson->title . '.pdf';
+
+        return response()->file($absolutePath, [
+            'Content-Type'        => 'application/pdf',
+            'Content-Disposition' => 'inline; filename="' . addslashes($filename) . '"',
+        ]);
     }
 }

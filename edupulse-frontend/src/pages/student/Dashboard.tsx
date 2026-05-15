@@ -1,5 +1,6 @@
 import { useQuery } from '@tanstack/react-query'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
+import { useRef, useEffect, useState } from 'react'
 import { useAuthStore } from '../../stores/authStore'
 import api from '../../lib/axios'
 import styles from './Dashboard.module.css'
@@ -92,7 +93,11 @@ function minutesUntil(isoString: string): number {
 function formatSessionDay(isoString: string): string {
   if (isToday(isoString)) return 'Today'
   if (isTomorrow(isoString)) return 'Tomorrow'
-  return new Date(isoString).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })
+  return new Date(isoString).toLocaleDateString('en-US', {
+    weekday: 'short',
+    month: 'short',
+    day: 'numeric',
+  })
 }
 
 function formatSessionTime(isoString: string): string {
@@ -104,21 +109,93 @@ function formatSessionTime(isoString: string): string {
 }
 
 function formatRelativeDate(isoString: string): string {
-  const diffMs = Date.now() - new Date(isoString).getTime()
-  const days = Math.floor(diffMs / (1000 * 60 * 60 * 24))
+  const days = Math.floor(
+    (Date.now() - new Date(isoString).getTime()) / (1000 * 60 * 60 * 24)
+  )
   if (days === 0) return 'Today'
   if (days === 1) return 'Yesterday'
   return `${days}d ago`
 }
 
-// ─── Icons ───────────────────────────────────────────────────────────────────
+// ─── Data-driven motivation ───────────────────────────────────────────────────
+
+function getMotivation(data?: DashboardData): string {
+  if (!data) return ''
+  const hour    = new Date().getHours()
+  const quizzes = data.recent_quizzes ?? []
+  const passed  = quizzes.filter(q => q.passed).length
+  const rate    = data.attendance_summary?.rate ?? 0
+  const total   = data.attendance_summary?.total ?? 0
+  const weak    = (data.my_weak_topics ?? []).length
+
+  if (quizzes.length === 0) {
+    if (hour < 12) return 'No quizzes yet. Starting one today takes 5 minutes and begins your streak.'
+    if (hour < 17) return 'Your score board is empty. Take a quick quiz and change that.'
+    return 'A good evening for your first quiz. AI Tutor will walk you through it.'
+  }
+  if (passed === quizzes.length && quizzes.length >= 2) {
+    return `All ${quizzes.length} recent quizzes passed. You're building real knowledge.`
+  }
+  if (rate >= 90 && total > 0) {
+    return `${rate}% attendance this term. That consistency is what separates the best from the rest.`
+  }
+  if (weak >= 1) {
+    return `${weak} topic${weak > 1 ? 's' : ''} where you can still improve. AI Tutor can work through each one with you.`
+  }
+  if (hour < 12) return "Let's build on yesterday. Your sessions and quizzes are ready."
+  if (hour < 17) return 'Good progress. Every session this week moves you forward.'
+  return 'Good session today. Come back tomorrow to keep the streak going.'
+}
+
+// ─── Count-up hook ────────────────────────────────────────────────────────────
+
+function useCountUp(target: number, duration = 820): number {
+  const [display, setDisplay] = useState(0)
+  const rafRef = useRef<number>(0)
+  const hasRun = useRef(false)
+
+  useEffect(() => {
+    if (target === 0 || hasRun.current) return
+    const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    if (prefersReduced) {
+      setDisplay(target)
+      hasRun.current = true
+      return
+    }
+    hasRun.current = true
+    const t0 = performance.now()
+
+    function step(now: number) {
+      const p = Math.min((now - t0) / duration, 1)
+      const eased = p === 1 ? 1 : 1 - Math.pow(2, -10 * p)
+      setDisplay(Math.round(eased * target))
+      if (p < 1) rafRef.current = requestAnimationFrame(step)
+    }
+
+    rafRef.current = requestAnimationFrame(step)
+    return () => cancelAnimationFrame(rafRef.current)
+  }, [target, duration])
+
+  return target === 0 ? 0 : display
+}
+
+// ─── Icons ────────────────────────────────────────────────────────────────────
+
+function BookOpenIcon() {
+  return (
+    <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/>
+      <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/>
+    </svg>
+  )
+}
 
 function ExternalLinkIcon() {
   return (
     <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.25" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-      <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
-      <polyline points="15 3 21 3 21 9" />
-      <line x1="10" y1="14" x2="21" y2="3" />
+      <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/>
+      <polyline points="15 3 21 3 21 9"/>
+      <line x1="10" y1="14" x2="21" y2="3"/>
     </svg>
   )
 }
@@ -126,7 +203,7 @@ function ExternalLinkIcon() {
 function ChevronRightIcon() {
   return (
     <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.25" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-      <polyline points="9 18 15 12 9 6" />
+      <polyline points="9 18 15 12 9 6"/>
     </svg>
   )
 }
@@ -134,23 +211,221 @@ function ChevronRightIcon() {
 function AlertTriangleIcon() {
   return (
     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-      <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" />
-      <line x1="12" y1="9" x2="12" y2="13" />
-      <line x1="12" y1="17" x2="12.01" y2="17" />
+      <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+      <line x1="12" y1="9" x2="12" y2="13"/>
+      <line x1="12" y1="17" x2="12.01" y2="17"/>
     </svg>
   )
 }
 
-// ─── Skeleton ────────────────────────────────────────────────────────────────
-
-function Skeleton({ w = '100%', h = '14px', radius = '4px' }: { w?: string; h?: string; radius?: string }) {
-  return <div className={styles.skeleton} style={{ width: w, height: h, borderRadius: radius }} />
+function SparklesIcon() {
+  return (
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <path d="M12 3l1.5 4.5L18 9l-4.5 1.5L12 15l-1.5-4.5L6 9l4.5-1.5z"/>
+      <path d="M19 3l.75 2.25L22 6l-2.25.75L19 9l-.75-2.25L16 6l2.25-.75z"/>
+    </svg>
+  )
 }
 
-// ─── Next session banner ─────────────────────────────────────────────────────
+function CalendarIcon() {
+  return (
+    <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <rect x="3" y="4" width="18" height="18" rx="2"/>
+      <line x1="16" y1="2" x2="16" y2="6"/>
+      <line x1="8" y1="2" x2="8" y2="6"/>
+      <line x1="3" y1="10" x2="21" y2="10"/>
+    </svg>
+  )
+}
+
+function TrophyIcon() {
+  return (
+    <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <polyline points="8 21 12 17 16 21"/>
+      <path d="M6 3H18V8C18 11.3 15.3 14 12 14C8.7 14 6 11.3 6 8V3Z"/>
+      <path d="M6 7H3C3 7 3 12 6 12"/>
+      <path d="M18 7H21C21 7 21 12 18 12"/>
+    </svg>
+  )
+}
+
+function UserCheckIcon() {
+  return (
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/>
+      <circle cx="9" cy="7" r="4"/>
+      <polyline points="16 11 18 13 22 9"/>
+    </svg>
+  )
+}
+
+function FlameIcon() {
+  return (
+    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"/>
+    </svg>
+  )
+}
+
+function ArrowRightIcon() {
+  return (
+    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <line x1="5" y1="12" x2="19" y2="12"/>
+      <polyline points="12 5 19 12 12 19"/>
+    </svg>
+  )
+}
+
+// ─── Skeleton ─────────────────────────────────────────────────────────────────
+
+function Skeleton({
+  w = '100%',
+  h = '14px',
+  radius = '4px',
+}: {
+  w?: string
+  h?: string
+  radius?: string
+}) {
+  return (
+    <div
+      className={styles.skeleton}
+      style={{ width: w, height: h, borderRadius: radius }}
+    />
+  )
+}
+
+// ─── Stat Card ────────────────────────────────────────────────────────────────
+
+function StatCard({
+  icon,
+  value,
+  label,
+  colorVariant,
+  loading,
+}: {
+  icon: React.ReactNode
+  value: number
+  label: string
+  colorVariant: 'blue' | 'amber' | 'green'
+  loading: boolean
+}) {
+  const displayed = useCountUp(loading ? 0 : value)
+
+  const cardClass =
+    colorVariant === 'blue'
+      ? styles.statCardBlue
+      : colorVariant === 'amber'
+      ? styles.statCardAmber
+      : styles.statCardGreen
+
+  const iconClass =
+    colorVariant === 'blue'
+      ? styles.statCardIconBlue
+      : colorVariant === 'amber'
+      ? styles.statCardIconAmber
+      : styles.statCardIconGreen
+
+  return (
+    <div data-animate className={`${styles.statCard} ${cardClass}`}>
+      <div className={`${styles.statCardIcon} ${iconClass}`}>{icon}</div>
+      <div className={styles.statCardNum}>
+        {loading ? (
+          <span className={styles.statCardDash}>–</span>
+        ) : (
+          displayed
+        )}
+      </div>
+      <div className={styles.statCardLabel}>{label}</div>
+    </div>
+  )
+}
+
+// ─── AI Tutor banner ──────────────────────────────────────────────────────────
+
+function AiTutorBanner() {
+  const navigate = useNavigate()
+  const [topic, setTopic] = useState('')
+
+  function handleSubmit(e: React.FormEvent) {
+    e.preventDefault()
+    const t = topic.trim()
+    navigate(
+      t
+        ? `/student/ai-tutor?topic=${encodeURIComponent(t)}`
+        : '/student/ai-tutor'
+    )
+  }
+
+  return (
+    <div
+      data-animate
+      className={styles.aiTutorBanner}
+      role="region"
+      aria-label="AI Tutor quick start"
+    >
+      <div className={styles.aiTutorBannerIcon}>
+        <SparklesIcon />
+      </div>
+      <div className={styles.aiTutorBannerBody}>
+        <p className={styles.aiTutorBannerTitle}>Your AI Tutor is ready.</p>
+        <form className={styles.aiTutorBannerForm} onSubmit={handleSubmit}>
+          <input
+            type="text"
+            className={styles.aiTutorBannerInput}
+            placeholder="What do you want to learn today?"
+            value={topic}
+            onChange={e => setTopic(e.target.value)}
+            aria-label="Topic to learn with AI Tutor"
+          />
+          <button
+            type="submit"
+            className={styles.aiTutorBannerBtn}
+            aria-label="Start learning"
+          >
+            <ArrowRightIcon />
+          </button>
+        </form>
+      </div>
+    </div>
+  )
+}
+
+// ─── Hero section ─────────────────────────────────────────────────────────────
+
+function HeroSection({
+  userName,
+  schoolName,
+  data,
+  loading,
+}: {
+  userName: string
+  schoolName: string
+  data?: DashboardData
+  loading: boolean
+}) {
+  const greeting   = userName ? getGreeting(userName) : 'Welcome back'
+  const motivation = getMotivation(data)
+
+  return (
+    <header data-animate className={styles.hero}>
+      <div className={styles.heroGreeting}>
+        <span className={styles.waveEmoji} aria-hidden="true">👋</span>
+        <h1 className={styles.greeting}>{greeting}</h1>
+      </div>
+      {schoolName && <p className={styles.heroSub}>{schoolName}</p>}
+      <p className={styles.heroDate}>{formatTodayDate()}</p>
+      {!loading && motivation && (
+        <p className={styles.motivation}>{motivation}</p>
+      )}
+    </header>
+  )
+}
+
+// ─── Next session banner ──────────────────────────────────────────────────────
 
 function NextSessionBanner({ session }: { session: UpcomingSession }) {
-  const mins = minutesUntil(session.starts_at)
+  const mins  = minutesUntil(session.starts_at)
   const label = mins <= 1 ? 'Starting now' : `Starts in ${mins} min`
 
   return (
@@ -167,29 +442,65 @@ function NextSessionBanner({ session }: { session: UpcomingSession }) {
           rel="noopener noreferrer"
           className={styles.joinBtn}
         >
-          Join now
-          <ExternalLinkIcon />
+          Join now <ExternalLinkIcon />
         </a>
       )}
     </div>
   )
 }
 
-// ─── Upcoming sessions ───────────────────────────────────────────────────────
+// ─── Upcoming sessions ────────────────────────────────────────────────────────
 
-function UpcomingSessions({ sessions, loading }: { sessions?: UpcomingSession[]; loading: boolean }) {
+function UpcomingSessions({
+  sessions,
+  loading,
+}: {
+  sessions?: UpcomingSession[]
+  loading: boolean
+}) {
   return (
-    <section aria-labelledby="upcoming-label">
-      <h2 id="upcoming-label" className={styles.sectionLabel}>Upcoming sessions</h2>
+    <section data-animate aria-labelledby="upcoming-label">
+      <h2 id="upcoming-label" className={styles.sectionLabel}>
+        <CalendarIcon /> Upcoming sessions
+      </h2>
 
       {loading ? (
         <div className={styles.sessionsScroll}>
-          {[148, 148, 148].map((w, i) => (
-            <Skeleton key={i} w={`${w}px`} h="100px" radius="8px" />
+          {[0, 1, 2].map(i => (
+            <Skeleton key={i} w="148px" h="100px" radius="10px" />
           ))}
         </div>
       ) : !sessions?.length ? (
-        <p className={styles.emptyNote}>No sessions scheduled.</p>
+        <div className={styles.emptyState}>
+          <div className={styles.emptyIcon} aria-hidden="true">
+            <svg
+              width="28"
+              height="28"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="1.25"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <rect x="3" y="4" width="18" height="18" rx="2"/>
+              <line x1="16" y1="2" x2="16" y2="6"/>
+              <line x1="8" y1="2" x2="8" y2="6"/>
+              <line x1="3" y1="10" x2="21" y2="10"/>
+              <polyline points="9 16 11 18 15 14"/>
+            </svg>
+          </div>
+          <p className={styles.emptyTitle}>Your schedule is clear today</p>
+          <p className={styles.emptyHint}>Use the time to get ahead.</p>
+          <div className={styles.emptyActions}>
+            <Link to="/student/courses" className={styles.emptyBtn}>
+              Browse lessons <ChevronRightIcon />
+            </Link>
+            <Link to="/student/ai-tutor" className={styles.emptyBtnOutline}>
+              Practice with AI Tutor <ChevronRightIcon />
+            </Link>
+          </div>
+        </div>
       ) : (
         <div className={styles.sessionsScroll} role="list">
           {sessions.map(session => {
@@ -200,14 +511,24 @@ function UpcomingSessions({ sessions, loading }: { sessions?: UpcomingSession[];
                 role="listitem"
                 className={`${styles.sessionItem} ${today ? styles.sessionItemToday : ''}`}
               >
-                <span className={`${styles.sessionDay} ${today ? styles.sessionDayToday : ''}`}>
+                <span
+                  className={`${styles.sessionDay} ${today ? styles.sessionDayToday : ''}`}
+                >
                   {formatSessionDay(session.starts_at)}
                 </span>
                 <span className={styles.sessionTime}>
                   {formatSessionTime(session.starts_at)}
                 </span>
-                <span className={styles.sessionTitle} lang="ar">{session.title}</span>
-                <span className={`${styles.sessionTypeBadge} ${session.type === 'online' ? styles.sessionTypeOnline : styles.sessionTypeOffline}`}>
+                <span className={styles.sessionTitle} lang="ar">
+                  {session.title}
+                </span>
+                <span
+                  className={`${styles.sessionTypeBadge} ${
+                    session.type === 'online'
+                      ? styles.sessionTypeOnline
+                      : styles.sessionTypeOffline
+                  }`}
+                >
                   {session.type}
                 </span>
               </div>
@@ -219,16 +540,29 @@ function UpcomingSessions({ sessions, loading }: { sessions?: UpcomingSession[];
   )
 }
 
-// ─── Recent quiz results ─────────────────────────────────────────────────────
+// ─── Recent quiz results ──────────────────────────────────────────────────────
 
-function RecentQuizzes({ quizzes, loading }: { quizzes?: RecentQuiz[]; loading: boolean }) {
+function RecentQuizzes({
+  quizzes,
+  loading,
+}: {
+  quizzes?: RecentQuiz[]
+  loading: boolean
+}) {
+  const navigate = useNavigate()
+
   return (
-    <section aria-labelledby="quizzes-label">
-      <h2 id="quizzes-label" className={styles.sectionLabel}>Recent results</h2>
+    <section className={styles.card} aria-labelledby="quizzes-label">
+      <header className={styles.cardHeader}>
+        <span className={`${styles.cardHeaderIcon} ${styles.cardHeaderIconBlue}`}>
+          <TrophyIcon />
+        </span>
+        <h2 id="quizzes-label" className={styles.cardTitle}>Recent results</h2>
+      </header>
 
       {loading ? (
         <div className={styles.quizList}>
-          {[1, 2, 3, 4, 5].map(i => (
+          {[0, 1, 2, 3, 4].map(i => (
             <div key={i} className={styles.quizRowSkeleton}>
               <Skeleton w="55%" h="13px" />
               <Skeleton w="32px" h="13px" />
@@ -237,16 +571,48 @@ function RecentQuizzes({ quizzes, loading }: { quizzes?: RecentQuiz[]; loading: 
           ))}
         </div>
       ) : !quizzes?.length ? (
-        <p className={styles.emptyNote}>No quiz attempts yet.</p>
+        <div className={styles.cardEmpty}>
+          <div className={styles.cardEmptyIcon} aria-hidden="true">
+            <TrophyIcon />
+          </div>
+          <p className={styles.cardEmptyTitle}>Your score board is empty</p>
+          <p className={styles.cardEmptyHint}>
+            Your first quiz starts a learning streak. It takes 5 minutes.
+          </p>
+          <button
+            type="button"
+            className={styles.emptyBtn}
+            onClick={() => navigate('/student/ai-tutor')}
+          >
+            Start with AI Tutor <ArrowRightIcon />
+          </button>
+        </div>
       ) : (
         <ul className={styles.quizList} aria-label="Recent quiz results">
           {quizzes.map((q, i) => (
-            <li key={i} className={styles.quizRow}>
-              <span className={styles.quizTopic} lang="ar">{q.topic}</span>
-              <span className={`${styles.quizScore} ${q.passed ? styles.quizScorePassed : styles.quizScoreFailed}`}>
+            <li
+              key={i}
+              className={`${styles.quizRow} ${q.passed ? styles.quizRowPassed : ''}`}
+              style={{ '--row-i': `${i * 48}ms` } as React.CSSProperties}
+            >
+              <span className={styles.quizTopic} lang="ar">
+                {q.topic}
+              </span>
+              <span
+                className={`${styles.quizScore} ${
+                  q.passed ? styles.quizScorePassed : styles.quizScoreFailed
+                }`}
+              >
+                {q.score === 100 && (
+                  <span className={styles.quizStar} aria-label="Perfect score">
+                    ★
+                  </span>
+                )}
                 {q.score}%
               </span>
-              <span className={styles.quizDate}>{formatRelativeDate(q.created_at)}</span>
+              <span className={styles.quizDate}>
+                {formatRelativeDate(q.created_at)}
+              </span>
             </li>
           ))}
         </ul>
@@ -257,10 +623,30 @@ function RecentQuizzes({ quizzes, loading }: { quizzes?: RecentQuiz[]; loading: 
 
 // ─── Attendance summary ───────────────────────────────────────────────────────
 
-function AttendanceSummary({ summary, loading }: { summary?: AttendanceSummary; loading: boolean }) {
+function AttendanceSummarySection({
+  summary,
+  loading,
+}: {
+  summary?: AttendanceSummary
+  loading: boolean
+}) {
+  const isExcellent =
+    (summary?.rate ?? 0) >= 90 && (summary?.total ?? 0) > 0
+
   return (
-    <section aria-labelledby="attendance-label">
-      <h2 id="attendance-label" className={styles.sectionLabel}>Attendance</h2>
+    <section className={styles.card} aria-labelledby="attendance-label">
+      <header className={styles.cardHeader}>
+        <span
+          className={`${styles.cardHeaderIcon} ${
+            isExcellent ? styles.cardHeaderIconGreen : styles.cardHeaderIconAmber
+          }`}
+        >
+          <UserCheckIcon />
+        </span>
+        <h2 id="attendance-label" className={styles.cardTitle}>
+          Attendance
+        </h2>
+      </header>
 
       {loading ? (
         <>
@@ -271,15 +657,26 @@ function AttendanceSummary({ summary, loading }: { summary?: AttendanceSummary; 
           <div style={{ display: 'flex', gap: '12px' }}>
             <Skeleton w="48px" h="28px" />
             <Skeleton w="48px" h="28px" />
-            <Skeleton w="48px" h="28px" />
           </div>
         </>
       ) : !summary || summary.total === 0 ? (
-        <p className={styles.emptyNote}>No session records yet.</p>
+        <div className={styles.cardEmpty}>
+          <div className={styles.cardEmptyIcon} aria-hidden="true">
+            <UserCheckIcon />
+          </div>
+          <p className={styles.cardEmptyTitle}>No records yet</p>
+          <p className={styles.cardEmptyHint}>
+            Attend your first session to start tracking your progress here.
+          </p>
+        </div>
       ) : (
         <>
           <p className={styles.attendanceFraction}>
-            {summary.present} <span className={styles.attendanceFractionOf}>of {summary.total}</span> sessions attended
+            {summary.present}{' '}
+            <span className={styles.attendanceFractionOf}>
+              of {summary.total}
+            </span>{' '}
+            attended
           </p>
           <div
             className={styles.attendanceBar}
@@ -290,7 +687,9 @@ function AttendanceSummary({ summary, loading }: { summary?: AttendanceSummary; 
             aria-label={`${summary.rate}% attendance`}
           >
             <div
-              className={styles.attendanceBarFill}
+              className={`${styles.attendanceBarFill} ${
+                isExcellent ? styles.attendanceBarExcellent : ''
+              }`}
               style={{ width: `${summary.rate}%` }}
             />
           </div>
@@ -301,33 +700,77 @@ function AttendanceSummary({ summary, loading }: { summary?: AttendanceSummary; 
             </div>
             <div className={styles.attendanceDivider} />
             <div className={styles.attendanceStat}>
-              <span className={styles.attendanceStatNum}>{summary.total - summary.present}</span>
+              <span className={styles.attendanceStatNum}>
+                {summary.total - summary.present}
+              </span>
               <span className={styles.attendanceStatLabel}>Absent</span>
             </div>
           </div>
+          {isExcellent && (
+            <div
+              className={styles.attendanceCelebration}
+              aria-label="Excellent attendance"
+            >
+              <FlameIcon />
+              <span>Excellent attendance — keep it up</span>
+            </div>
+          )}
         </>
       )}
     </section>
   )
 }
 
-// ─── Weak topics ─────────────────────────────────────────────────────────────
+// ─── Level-up topics ─────────────────────────────────────────────────────────
 
-function WeakTopics({ topics }: { topics?: WeakTopic[] }) {
+function LevelUpTopics({ topics }: { topics?: WeakTopic[] }) {
+  const navigate   = useNavigate()
+  const sectionRef = useRef<HTMLElement>(null)
+
+  useEffect(() => {
+    if (!sectionRef.current) return
+    const prefersReduced = window.matchMedia(
+      '(prefers-reduced-motion: reduce)'
+    ).matches
+    if (prefersReduced) return
+    sectionRef.current.animate(
+      [
+        { opacity: '0', transform: 'translateY(14px)' },
+        { opacity: '1', transform: 'none' },
+      ],
+      { duration: 320, easing: 'cubic-bezier(0.16, 1, 0.3, 1)', fill: 'both' }
+    )
+  }, [])
+
   if (!topics?.length) return null
+
   return (
-    <section aria-labelledby="topics-label">
-      <h2 id="topics-label" className={styles.sectionLabel}>Topics to review</h2>
+    <section ref={sectionRef} aria-labelledby="topics-label">
+      <h2 id="topics-label" className={styles.sectionLabel}>
+        <SparklesIcon /> Level up on these
+      </h2>
       <div className={styles.topicPills} role="list">
         {topics.map((t, i) => (
-          <span
+          <button
             key={i}
             role="listitem"
-            className={`${styles.topicPill} ${t.score < 60 ? styles.topicPillWeak : ''}`}
+            type="button"
+            className={`${styles.topicPill} ${
+              t.score < 60 ? styles.topicPillWeak : styles.topicPillMedium
+            }`}
+            onClick={() =>
+              navigate(
+                `/student/ai-tutor?topic=${encodeURIComponent(t.topic)}`
+              )
+            }
+            aria-label={`Practice ${t.topic} — ${t.score}% score`}
           >
             <span lang="ar">{t.topic}</span>
             <span className={styles.topicScore}>{t.score}%</span>
-          </span>
+            <span className={styles.topicArrow} aria-hidden="true">
+              <ChevronRightIcon />
+            </span>
+          </button>
         ))}
       </div>
     </section>
@@ -337,7 +780,13 @@ function WeakTopics({ topics }: { topics?: WeakTopic[] }) {
 // ─── Dashboard page ───────────────────────────────────────────────────────────
 
 export default function DashboardPage() {
-  const user = useAuthStore(s => s.user)
+  const user       = useAuthStore(s => s.user)
+  const tenantCode = useAuthStore(s => s.tenantCode)
+  const pageRef    = useRef<HTMLDivElement>(null)
+
+  const schoolName = tenantCode
+    ? tenantCode.replace(/-/g, ' ').replace(/\b\w/g, c => c.toUpperCase())
+    : ''
 
   const { data, isLoading, isError, refetch } = useQuery<DashboardData>({
     queryKey: ['student-dashboard'],
@@ -347,60 +796,125 @@ export default function DashboardPage() {
   const nextSession = data?.upcoming_sessions?.[0]
   const showBanner  = nextSession ? isWithin30Min(nextSession.starts_at) : false
 
+  // WAAPI directed entrance sequence
+  useEffect(() => {
+    if (!pageRef.current) return
+    const prefersReduced = window.matchMedia(
+      '(prefers-reduced-motion: reduce)'
+    ).matches
+    if (prefersReduced) return
+
+    const nodes = Array.from(
+      pageRef.current.querySelectorAll<Element>('[data-animate]')
+    )
+    nodes.forEach((el, i) => {
+      el.animate(
+        [
+          { opacity: '0', transform: 'translateY(16px)' },
+          { opacity: '1', transform: 'translateY(0px)' },
+        ],
+        {
+          duration: 380,
+          delay: i * 55,
+          easing: 'cubic-bezier(0.16, 1, 0.3, 1)',
+          fill: 'both',
+        }
+      )
+    })
+  }, [])
+
   return (
-    <div className={styles.page}>
+    <div className={styles.page} ref={pageRef}>
 
-      {/* Greeting */}
-      <header className={styles.pageHead}>
-        <h1 className={styles.greeting}>
-          {user?.name ? getGreeting(user.name) : 'Welcome back'}
-        </h1>
-        <p className={styles.greetingDate}>{formatTodayDate()}</p>
-      </header>
+      <HeroSection
+        userName={user?.name ?? ''}
+        schoolName={schoolName}
+        data={data}
+        loading={isLoading}
+      />
 
-      {/* Next session alert */}
+      <div className={styles.statCardsGrid} aria-label="Quick overview">
+        <StatCard
+          icon={<BookOpenIcon />}
+          value={data?.enrolled_courses ?? 0}
+          label="courses enrolled"
+          colorVariant="blue"
+          loading={isLoading}
+        />
+        <StatCard
+          icon={<CalendarIcon />}
+          value={data?.attendance_summary?.total ?? 0}
+          label="sessions attended"
+          colorVariant="amber"
+          loading={isLoading}
+        />
+        <StatCard
+          icon={<TrophyIcon />}
+          value={data?.recent_quizzes?.length ?? 0}
+          label="quizzes taken"
+          colorVariant="green"
+          loading={isLoading}
+        />
+      </div>
+
+      <AiTutorBanner />
+
       {showBanner && nextSession && (
         <NextSessionBanner session={nextSession} />
       )}
 
-      {/* Error state */}
       {isError && (
         <div className={styles.errorBanner} role="alert">
           <AlertTriangleIcon />
           <span>Could not load your dashboard.</span>
-          <button type="button" onClick={() => refetch()} className={styles.retryBtn}>
+          <button
+            type="button"
+            onClick={() => refetch()}
+            className={styles.retryBtn}
+          >
             Retry
           </button>
         </div>
       )}
 
-      {/* Upcoming sessions */}
-      <UpcomingSessions sessions={data?.upcoming_sessions} loading={isLoading} />
+      <UpcomingSessions
+        sessions={data?.upcoming_sessions}
+        loading={isLoading}
+      />
 
-      {/* Quiz + Attendance */}
-      <div className={styles.twoCol}>
-        <RecentQuizzes quizzes={data?.recent_quizzes} loading={isLoading} />
-        <AttendanceSummary summary={data?.attendance_summary} loading={isLoading} />
+      <div data-animate className={styles.twoCol}>
+        <RecentQuizzes
+          quizzes={data?.recent_quizzes}
+          loading={isLoading}
+        />
+        <AttendanceSummarySection
+          summary={data?.attendance_summary}
+          loading={isLoading}
+        />
       </div>
 
-      {/* Weak topics */}
-      {!isLoading && <WeakTopics topics={data?.my_weak_topics} />}
+      {!isLoading && <LevelUpTopics topics={data?.my_weak_topics} />}
 
-      {/* Summary bar */}
-      {!isLoading && data && (
-        <footer className={styles.summaryBar}>
-          <Link to="/student/courses" className={styles.summaryLink}>
-            {data.enrolled_courses} {data.enrolled_courses === 1 ? 'course' : 'courses'} enrolled
-            <ChevronRightIcon />
+      <footer data-animate className={styles.summaryBar}>
+        <Link to="/student/courses" className={styles.coursePill}>
+          <span className={styles.coursePillNum}>
+            {data?.enrolled_courses ?? 0}
+          </span>
+          {(data?.enrolled_courses ?? 0) === 1 ? 'course' : 'courses'} enrolled
+          <ChevronRightIcon />
+        </Link>
+
+        {(data?.pending_fees ?? 0) > 0 && (
+          <Link to="/student/fees" className={styles.feesBadge}>
+            <AlertTriangleIcon />
+            {data!.pending_fees.toLocaleString()} pending
           </Link>
-          {data.pending_fees > 0 && (
-            <Link to="/student/fees" className={styles.feesBadge}>
-              <AlertTriangleIcon />
-              {data.pending_fees.toLocaleString()} pending
-            </Link>
-          )}
-        </footer>
-      )}
+        )}
+
+        <Link to="/student/ai-tutor" className={styles.aiTutorCta}>
+          <SparklesIcon /> Go to AI Tutor <ArrowRightIcon />
+        </Link>
+      </footer>
 
     </div>
   )

@@ -374,6 +374,16 @@ export default function TeacherSchedule() {
   const [showAdd, setShowAdd] = useState(false)
   const [attendanceSession, setAttendanceSession] = useState<Session | null>(null)
 
+  const joinAsHost = useCallback(async (session: Session) => {
+    try {
+      const res = await api.get(`/teacher/courses/${session.course_id}/schedules/${session.id}/join`)
+      const url = res.data.data?.url ?? res.data.url
+      if (url) window.open(url, '_blank', 'noopener,noreferrer')
+    } catch {
+      if (session.jitsi_url) window.open(session.jitsi_url, '_blank', 'noopener,noreferrer')
+    }
+  }, [])
+
   const weekDates = getWeekDates(anchor)
 
   const { data: courses = [] } = useQuery<Course[]>({
@@ -391,21 +401,23 @@ export default function TeacherSchedule() {
 
   const statusMutation = useMutation({
     mutationFn: ({ session, status }: { session: Session; status: string }) =>
-      api.put(`/teacher/courses/${session.course_id}/schedules/${session.id}`, {
-        title: session.title,
-        type: session.type,
-        starts_at: session.starts_at,
-        ends_at: session.ends_at,
-        status,
-      }),
-    onSuccess: () => qc.invalidateQueries({ queryKey: ['teacher-schedules', courseFilter] }),
+      api.patch(`/teacher/courses/${session.course_id}/schedules/${session.id}/status`, { status }),
+    onSuccess: (_data, vars) => {
+      qc.invalidateQueries({ queryKey: ['teacher-schedules', courseFilter] })
+      if (vars.status === 'live') {
+        joinAsHost(vars.session)
+      }
+      if (vars.status === 'completed') {
+        setAttendanceSession(vars.session)
+      }
+    },
   })
 
   const filtered = sessions
 
   const sessionsForDay = (day: Date) =>
     filtered.filter(s => sameDay(new Date(s.starts_at), day))
-      .sort((a, b) => a.start_time.localeCompare(b.start_time))
+      .sort((a, b) => a.starts_at.localeCompare(b.starts_at))
 
   const goWeek = (dir: -1 | 1) => {
     const d = new Date(anchor)
@@ -523,6 +535,7 @@ export default function TeacherSchedule() {
                         className={`${styles.sessionChip} ${chipClass(s.status)}`}
                         onClick={() => {
                           if (s.status === 'completed') setAttendanceSession(s)
+                          else if (s.status === 'live') joinAsHost(s)
                         }}
                         aria-label={`${s.title} at ${formatTime(s.starts_at)}, status: ${s.status}`}
                       >
@@ -565,7 +578,7 @@ export default function TeacherSchedule() {
         ) : (
           <div className={styles.listView}>
             {[...filtered]
-              .sort((a, b) => a.start_time.localeCompare(b.start_time))
+              .sort((a, b) => a.starts_at.localeCompare(b.starts_at))
               .map(s => {
                 const { day, month } = formatDateShort(new Date(s.starts_at))
                 const isLive = s.status === 'live'
@@ -602,9 +615,13 @@ export default function TeacherSchedule() {
                       {s.status === 'live' && (
                         <>
                           {s.jitsi_url && (
-                            <a href={s.jitsi_url} target="_blank" rel="noopener noreferrer" className={`${styles.btn} ${styles.btnOutline} ${styles.btnSm}`}>
+                            <button
+                              type="button"
+                              className={`${styles.btn} ${styles.btnGreen} ${styles.btnSm}`}
+                              onClick={() => joinAsHost(s)}
+                            >
                               Join
-                            </a>
+                            </button>
                           )}
                           <button
                             type="button"

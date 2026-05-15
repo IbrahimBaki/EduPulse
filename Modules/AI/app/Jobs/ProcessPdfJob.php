@@ -27,9 +27,12 @@ class ProcessPdfJob implements ShouldQueue
     {
         $absolutePath = Storage::disk('local')->path($this->storedPath);
 
-        $service->processAndStore($absolutePath, $this->lesson);
+        $chunkCount = $service->processAndStore($absolutePath, $this->lesson);
 
-        Storage::disk('local')->delete($this->storedPath);
+        $this->lesson->update([
+            'pdf_processed'    => true,
+            'pdf_chunks_count' => $chunkCount,
+        ]);
 
         SendN8nWebhookJob::dispatch('content_uploaded', [
             'lesson_id'    => $this->lesson->id,

@@ -57,6 +57,16 @@ function FileTextIcon() {
   )
 }
 
+function SparklesIcon() {
+  return (
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <path d="M12 3l1.5 4.5L18 9l-4.5 1.5L12 15l-1.5-4.5L6 9l4.5-1.5z"/>
+      <path d="M19 3l.75 2.25L22 6l-2.25.75L19 9l-.75-2.25L16 6l2.25-.75z"/>
+      <path d="M5 18l.5 1.5L7 20l-1.5.5L5 22l-.5-1.5L3 20l1.5-.5z"/>
+    </svg>
+  )
+}
+
 function CreditCardIcon() {
   return (
     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
@@ -92,6 +102,7 @@ type NavItem = { to: string; label: string; Icon: () => React.ReactElement; noti
 const NAV_ITEMS: NavItem[] = [
   { to: '/student/dashboard',     label: 'Dashboard',     Icon: HomeIcon },
   { to: '/student/courses',       label: 'Courses',       Icon: BookOpenIcon },
+  { to: '/student/ai-tutor',      label: 'AI Tutor',      Icon: SparklesIcon },
   { to: '/student/schedule',      label: 'Schedule',      Icon: CalendarIcon },
   { to: '/student/announcements', label: 'Announcements', Icon: FileTextIcon, notif: true },
   { to: '/student/fees',          label: 'Fees',          Icon: CreditCardIcon },

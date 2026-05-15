@@ -67,6 +67,7 @@ Route::prefix('v1/{tenant_code}')->middleware(['tenant', 'auth:sanctum'])->group
         Route::put('courses/{courseId}/schedules/{id}', [ScheduleController::class, 'update']);
         Route::patch('courses/{courseId}/schedules/{id}/status', [ScheduleController::class, 'updateStatus']);
         Route::delete('courses/{courseId}/schedules/{id}', [ScheduleController::class, 'destroy']);
+        Route::get('courses/{courseId}/schedules/{id}/join', [ScheduleController::class, 'teacherJoin']);
 
         // Attendance (teacher)
         Route::get('schedules/{scheduleId}/attendance', [AttendanceController::class, 'show']);
@@ -76,11 +77,16 @@ Route::prefix('v1/{tenant_code}')->middleware(['tenant', 'auth:sanctum'])->group
 
     // Student routes
     Route::middleware('role:student')->prefix('student')->group(function () {
-        Route::get('courses', [CourseController::class, 'enrolledCourses']);
-        Route::get('courses/{courseId}/lessons', [LessonController::class, 'publishedLessons']);
-        Route::get('schedules', [ScheduleController::class, 'upcomingSchedules']);
-        Route::get('attendance', [AttendanceController::class, 'mySummary']);
-        Route::get('dashboard', [StudentDashboardController::class, 'dashboard']);
+        Route::get('courses',                              [CourseController::class,  'enrolledCourses']);
+        Route::get('courses/{courseId}',                  [CourseController::class,  'enrolledCourseDetail']);
+        Route::get('courses/{courseId}/lessons',          [LessonController::class,  'publishedLessons']);
+        Route::get('courses/{courseId}/schedules',        [ScheduleController::class, 'studentCourseSchedules']);
+        Route::get('courses/{courseId}/schedules/{id}/join', [ScheduleController::class, 'studentJoin']);
+        Route::get('courses/{courseId}/progress',         [CourseController::class,  'courseProgress']);
+        Route::get('lessons/{lesson}/pdf',                [LessonController::class,  'servePdf']);
+        Route::get('schedules',                           [ScheduleController::class, 'upcomingSchedules']);
+        Route::get('attendance',                          [AttendanceController::class, 'mySummary']);
+        Route::get('dashboard',                           [StudentDashboardController::class, 'dashboard']);
     });
 
     // Parent routes

@@ -141,4 +141,57 @@ class CourseController extends Controller
 
         return $this->ReturnSuccess($courses, 'Enrolled courses retrieved');
     }
+
+    public function enrolledCourseDetail($courseId)
+    {
+        $course = Course::whereHas('enrollments', fn($q) => $q->where('student_id', auth()->id()))
+            ->with('subject', 'gradeLevel', 'teacher')
+            ->findOrFail($courseId);
+
+        return $this->ReturnSuccess($course, 'Course retrieved');
+    }
+
+    public function courseProgress($courseId)
+    {
+        $student = auth()->user();
+
+        $course = Course::whereHas('enrollments', fn($q) => $q->where('student_id', $student->id))
+            ->findOrFail($courseId);
+
+        // Attendance: schedules for this course that the student has attendance records for
+        $scheduleIds = $course->schedules()->pluck('id');
+        $totalSchedules  = $scheduleIds->count();
+        $presentCount    = \Modules\Academic\Models\Attendance::whereIn('schedule_id', $scheduleIds)
+            ->where('student_id', $student->id)
+            ->where('status', 'present')
+            ->count();
+        $attendanceRate = $totalSchedules > 0 ? round(($presentCount / $totalSchedules) * 100, 1) : 0;
+
+        // Quiz scores: attempts for lessons belonging to this course
+        $lessonIds = $course->lessons()->pluck('id');
+        $quizScores = \Modules\AI\Models\QuizAttempt::where('student_id', $student->id)
+            ->whereIn('lesson_id', $lessonIds)
+            ->latest()
+            ->limit(20)
+            ->get(['topic', 'score', 'passed', 'created_at'])
+            ->map(fn($q) => ['topic' => $q->topic, 'score' => $q->score, 'date' => $q->created_at->toDateString()]);
+
+        // Weak / strong topics (global for the student, not course-scoped)
+        $weakTopics = \Modules\AI\Models\WeakTopic::where('student_id', $student->id)
+            ->where('score', '<', 60)
+            ->orderBy('score')
+            ->get(['topic', 'score']);
+
+        $strongTopics = \Modules\AI\Models\WeakTopic::where('student_id', $student->id)
+            ->where('score', '>=', 80)
+            ->orderByDesc('score')
+            ->get(['topic', 'score']);
+
+        return $this->ReturnSuccess([
+            'attendance_rate' => $attendanceRate,
+            'quiz_scores'     => $quizScores,
+            'weak_topics'     => $weakTopics,
+            'strong_topics'   => $strongTopics,
+        ], 'Progress retrieved');
+    }
 }

@@ -91,6 +91,11 @@ class User extends Authenticatable implements FilamentUser
         return $this->hasMany(\Modules\AI\Models\QuizAttempt::class, 'student_id');
     }
 
+    public function enrollments()
+    {
+        return $this->hasMany(\Modules\Academic\Models\Enrollment::class, 'student_id');
+    }
+
     /**
      * Determine if the user can access the Filament admin panel.
      */

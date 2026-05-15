@@ -29,8 +29,22 @@ interface Student {
   student_profile: StudentProfile | null
 }
 
+interface CourseEnrollment {
+  id: number
+  course_id: number
+  enrolled_at: string
+  course: { id: number; name: string; status: string } | null
+}
+
+interface CourseListItem {
+  id: number
+  name: string
+  status: string
+}
+
 interface StudentDetail extends Student {
   parents: Array<{ id: number; name: string; email: string; phone: string | null }>
+  enrollments?: CourseEnrollment[]
 }
 
 interface Paginated<T> {
@@ -76,6 +90,13 @@ async function fetchGradeLevels() {
 async function fetchStudentDetail(id: number) {
   const { data } = await api.get(`/manager/students/${id}`)
   return data.data as StudentDetail
+}
+
+async function fetchManagerCourses() {
+  const { data } = await api.get('/manager/courses', { params: { per_page: 100 } })
+  const raw = data.data
+  const list = Array.isArray(raw) ? raw : Array.isArray(raw?.data) ? raw.data : []
+  return list as CourseListItem[]
 }
 
 async function toggleStudentStatus(id: number) {
@@ -357,6 +378,74 @@ function AddStudentForm({ gradeLevels, onSuccess, onCancel }: {
   )
 }
 
+// ─── EnrollCourseInline ───────────────────────────────────────────────────────
+
+function EnrollCourseInline({ studentId, enrolledIds }: { studentId: number; enrolledIds: Set<number> }) {
+  const qc = useQueryClient()
+  const [selectedId, setSelectedId] = useState<number | ''>('')
+  const [enrollError, setEnrollError] = useState<string | null>(null)
+
+  const coursesQ = useQuery({
+    queryKey: ['manager-courses-list'],
+    queryFn: fetchManagerCourses,
+    staleTime: 5 * 60 * 1000,
+  })
+
+  const enrollMut = useMutation({
+    mutationFn: (courseId: number) =>
+      api.post(`/manager/students/${studentId}/enroll`, { course_id: courseId }),
+    onSuccess: () => {
+      setSelectedId('')
+      setEnrollError(null)
+      qc.invalidateQueries({ queryKey: ['manager-student-detail', studentId] })
+    },
+    onError: (err: unknown) => {
+      const msg = (err as { response?: { data?: { message?: string } } })?.response?.data?.message ?? 'Enrollment failed'
+      setEnrollError(msg)
+    },
+  })
+
+  const available = (coursesQ.data ?? []).filter(c => c.status === 'active' && !enrolledIds.has(c.id))
+
+  function handleSubmit(e: React.FormEvent) {
+    e.preventDefault()
+    if (!selectedId) return
+    setEnrollError(null)
+    enrollMut.mutate(selectedId as number)
+  }
+
+  if (coursesQ.isLoading) return <p className={styles.dPlaceholder}>Loading courses…</p>
+
+  if (available.length === 0) {
+    return <p className={styles.dPlaceholder}>No additional active courses available.</p>
+  }
+
+  return (
+    <form className={styles.enrollForm} onSubmit={handleSubmit}>
+      <select
+        className={styles.enrollSelect}
+        value={selectedId}
+        onChange={e => setSelectedId(e.target.value ? Number(e.target.value) : '')}
+        aria-label="Select course to enroll student"
+        disabled={enrollMut.isPending}
+      >
+        <option value="">Select a course…</option>
+        {available.map(c => (
+          <option key={c.id} value={c.id}>{c.name}</option>
+        ))}
+      </select>
+      <button
+        type="submit"
+        className={styles.enrollSubmitBtn}
+        disabled={!selectedId || enrollMut.isPending}
+      >
+        {enrollMut.isPending ? 'Enrolling…' : 'Enroll'}
+      </button>
+      {enrollError && <p className={styles.enrollError} role="alert">{enrollError}</p>}
+    </form>
+  )
+}
+
 // ─── StudentDetailPanel ───────────────────────────────────────────────────────
 
 function DRow({ label, children }: { label: string; children: ReactNode }) {
@@ -461,10 +550,27 @@ function StudentDetailPanel({ id }: { id: number }) {
       )}
 
       <section className={styles.dSection}>
-        <h3 className={styles.dSectionTitle}>Academic performance</h3>
-        <p className={styles.dPlaceholder}>
-          Quiz scores, weak topics, and enrolled courses will be available in a future update.
-        </p>
+        <h3 className={styles.dSectionTitle}>Enrolled Courses</h3>
+        {data.enrollments && data.enrollments.length > 0 ? (
+          <ul className={styles.enrolledList}>
+            {data.enrollments.map(e => (
+              <li key={e.id} className={styles.enrolledItem}>
+                <span className={styles.enrolledCourseName}>{e.course?.name ?? '—'}</span>
+                {e.enrolled_at && (
+                  <span className={styles.enrolledDate}>
+                    {new Date(e.enrolled_at).toLocaleDateString()}
+                  </span>
+                )}
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <p className={styles.dPlaceholder}>No courses enrolled yet.</p>
+        )}
+        <EnrollCourseInline
+          studentId={data.id}
+          enrolledIds={new Set((data.enrollments ?? []).map(e => e.course_id))}
+        />
       </section>
     </div>
   )

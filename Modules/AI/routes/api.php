@@ -19,7 +19,9 @@ Route::prefix('v1/{tenant_code}')->middleware(['tenant', 'auth:sanctum'])->group
         Route::post('/quiz/submit',   [QuizController::class, 'submit']);
         Route::post('/exam/generate', [ExamController::class, 'generate'])->middleware('role:teacher');
 
-        Route::get('/students/{student}/weak-topics',  [WeakTopicController::class, 'index']);
+        Route::get('/chat-history',                    [ChatHistoryController::class, 'myHistory']);
+        Route::get('/weak-topics',                     [WeakTopicController::class,  'myTopics']);
+        Route::get('/students/{student}/weak-topics',  [WeakTopicController::class,  'index']);
         Route::get('/students/{student}/chat-history', [ChatHistoryController::class, 'index']);
         Route::get('/teacher/dashboard', [DashboardController::class, 'teacher'])->middleware('role:teacher');
         Route::get('/parent/dashboard',  [DashboardController::class, 'parent'])->middleware('role:parent');

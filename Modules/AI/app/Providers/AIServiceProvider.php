@@ -43,7 +43,9 @@ class AIServiceProvider extends ServiceProvider
      */
     protected function registerCommands(): void
     {
-        // $this->commands([]);
+        $this->commands([
+            \Modules\AI\Console\ReprocessPdfsCommand::class,
+        ]);
     }
 
     /**
