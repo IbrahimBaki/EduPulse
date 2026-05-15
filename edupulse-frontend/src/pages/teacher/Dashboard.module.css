@@ -64,7 +64,7 @@
 
 .statCard:hover {
   transform: translateY(-2px);
-  box-shadow: 0 8px 24px oklch(6% 0.015 255 / 0.22), 0 0 0 1px oklch(62% 0.26 255 / 0.15);
+  box-shadow: var(--shadow-md), 0 0 0 1px oklch(62% 0.26 255 / 0.15);
   border-color: oklch(62% 0.26 255 / 0.3);
 }
 
@@ -131,7 +131,7 @@
 
 .panel:hover {
   transform: translateY(-2px);
-  box-shadow: 0 8px 24px oklch(6% 0.015 255 / 0.18);
+  box-shadow: var(--shadow-md);
 }
 
 .panelHead {
@@ -201,7 +201,7 @@
 }
 
 .timelineDotLive {
-  background: oklch(68% 0.18 148);
+  background: var(--color-green);
   animation: pulseGreen 1.5s ease-out infinite;
 }
 
@@ -260,8 +260,8 @@
   text-transform: uppercase;
   padding: 2px 7px;
   border-radius: 999px;
-  background: oklch(68% 0.18 148 / 0.14);
-  color: oklch(68% 0.18 148);
+  background: var(--color-green-dim);
+  color: var(--color-green);
 }
 
 .soonChip {
@@ -476,7 +476,7 @@
   align-items: center;
   gap: 8px;
   font-size: 0.8125rem;
-  color: oklch(68% 0.18 148);
+  color: var(--color-green);
   padding: 8px 0;
 }
 
@@ -500,7 +500,7 @@
   align-items: center;
   gap: 8px;
   padding: 7px 0;
-  border-bottom: 1px solid oklch(32% 0.02 255 / 0.6);
+  border-bottom: 1px solid var(--neutral-border);
   animation: fadeSlideUp 0.28s var(--ease-out-quart) both;
 }
 
@@ -565,7 +565,7 @@
 }
 
 .quizScorePass {
-  color: oklch(68% 0.18 148);
+  color: var(--color-green);
 }
 
 .quizScoreFail {
@@ -632,7 +632,7 @@
   align-items: center;
   gap: 8px;
   padding: 7px 0;
-  border-bottom: 1px solid oklch(32% 0.02 255 / 0.6);
+  border-bottom: 1px solid var(--neutral-border);
 }
 
 .quizSkeletonRow:last-child {

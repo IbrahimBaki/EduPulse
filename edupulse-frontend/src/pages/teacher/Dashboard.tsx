@@ -10,6 +10,7 @@ import {
   ResponsiveContainer,
   Tooltip,
 } from 'recharts'
+import { useTranslation } from 'react-i18next'
 import { useAuthStore } from '../../stores/authStore'
 import api from '../../lib/axios'
 import styles from './Dashboard.module.css'
@@ -67,9 +68,9 @@ function nameInitials(name: string): string {
   return name.trim().split(/\s+/).filter(Boolean).slice(0, 2).map(w => w[0]).join('').toUpperCase()
 }
 
-function getGreeting(name: string): string {
+function getGreeting(name: string, t: (key: string) => string): string {
   const hour = new Date().getHours()
-  const salutation = hour < 12 ? 'Good morning' : hour < 17 ? 'Good afternoon' : 'Good evening'
+  const salutation = hour < 12 ? t('teacher.dashboard.goodMorning') : hour < 17 ? t('teacher.dashboard.goodAfternoon') : t('teacher.dashboard.goodEvening')
   return `${salutation}, ${name.trim().split(/\s+/)[0]}`
 }
 
@@ -244,6 +245,7 @@ function TodaySessions({ sessions, loading, error, refetch }: {
   error: boolean
   refetch: () => void
 }) {
+  const { t } = useTranslation()
   return (
     <div className={styles.panel}>
       <div className={styles.panelHead}>
@@ -273,7 +275,7 @@ function TodaySessions({ sessions, loading, error, refetch }: {
           <button type="button" onClick={refetch} className={styles.retryBtnSmall}>Retry</button>
         </div>
       ) : !sessions?.length ? (
-        <EmptyState icon={<CalendarEmptyIcon />} message="No sessions today — enjoy your day" />
+        <EmptyState icon={<CalendarEmptyIcon />} message={t('teacher.dashboard.noSessionsToday')} />
       ) : (
         <ul className={styles.timelineList} aria-label="Today's sessions">
           {sessions.map((session, i) => {
@@ -300,10 +302,10 @@ function TodaySessions({ sessions, loading, error, refetch }: {
                       {formatTimeRange(session.starts_at, session.ends_at)}
                     </span>
                     {status === 'live' && (
-                      <span className={styles.liveChip} aria-label="Live now">Live</span>
+                      <span className={styles.liveChip} aria-label={t('session.live')}>{t('session.live')}</span>
                     )}
                     {status === 'soon' && (
-                      <span className={styles.soonChip} aria-label="Starting within 30 minutes">Starting soon</span>
+                      <span className={styles.soonChip} aria-label={t('session.startingSoon')}>{t('session.startingSoon')}</span>
                     )}
                   </div>
 
@@ -312,7 +314,7 @@ function TodaySessions({ sessions, loading, error, refetch }: {
                   <div className={styles.sessionBadges}>
                     <span className={styles.gradeBadge}>{session.grade_level}</span>
                     <span className={styles.typeBadge}>
-                      {session.type === 'online' ? 'Online' : 'In-Person'}
+                      {session.type === 'online' ? t('common.online') : t('common.inPerson')}
                     </span>
                   </div>
 
@@ -325,7 +327,7 @@ function TodaySessions({ sessions, loading, error, refetch }: {
                       aria-label={`Join ${session.course_name} on Jitsi`}
                     >
                       <VideoIcon />
-                      Join Now
+                      {t('session.joinNow')}
                     </a>
                   )}
                 </div>
@@ -346,6 +348,7 @@ function AtRiskStudents({ students, loading, error, refetch }: {
   error: boolean
   refetch: () => void
 }) {
+  const { t } = useTranslation()
   return (
     <div className={styles.panel}>
       <div className={styles.panelHead}>
@@ -378,7 +381,7 @@ function AtRiskStudents({ students, loading, error, refetch }: {
       ) : !students?.length ? (
         <div className={styles.allGoodRow} role="status">
           <span style={{ color: 'oklch(68% 0.18 148)', display: 'flex' }}><CheckIcon /></span>
-          <span>All students performing well</span>
+          <span>{t('teacher.dashboard.allPerformingWell')}</span>
         </div>
       ) : (
         <ul className={styles.atRiskList} aria-label="At-risk students">
@@ -423,6 +426,7 @@ function RecentQuizActivity({ activity, loading, error, refetch }: {
   error: boolean
   refetch: () => void
 }) {
+  const { t } = useTranslation()
   return (
     <div className={styles.panel}>
       <div className={styles.panelHead}>
@@ -454,7 +458,7 @@ function RecentQuizActivity({ activity, loading, error, refetch }: {
           <button type="button" onClick={refetch} className={styles.retryBtnSmall}>Retry</button>
         </div>
       ) : !activity?.length ? (
-        <EmptyState icon={<QuizEmptyIcon />} message="No quiz attempts yet" />
+        <EmptyState icon={<QuizEmptyIcon />} message={t('teacher.dashboard.noQuizAttempts')} />
       ) : (
         <ul className={styles.quizList} aria-label="Recent quiz activity">
           {activity.slice(0, 8).map(a => (
@@ -500,13 +504,14 @@ function TopicPerformance({ topics, loading, error, refetch }: {
   error: boolean
   refetch: () => void
 }) {
+  const { t } = useTranslation()
   const chartH = topics?.length ? Math.max(200, topics.length * 42) : 200
 
   return (
     <div className={styles.panel}>
       <div className={styles.panelHead}>
         <h2 className={styles.panelTitle}>Topic performance</h2>
-        <span className={styles.panelCount}>Avg score</span>
+        <span className={styles.panelCount}>{t('teacher.dashboard.avgScore')}</span>
       </div>
 
       {loading ? (
@@ -526,7 +531,7 @@ function TopicPerformance({ topics, loading, error, refetch }: {
           <button type="button" onClick={refetch} className={styles.retryBtnSmall}>Retry</button>
         </div>
       ) : !topics?.length ? (
-        <EmptyState icon={<BarEmptyIcon />} message="No topic data available yet" />
+        <EmptyState icon={<BarEmptyIcon />} message={t('teacher.dashboard.noTopicData')} />
       ) : (
         <div className={styles.chartWrap} style={{ height: chartH }}>
           <ResponsiveContainer width="100%" height="100%">
@@ -590,6 +595,7 @@ function TopicPerformance({ topics, loading, error, refetch }: {
 // ─── Main dashboard ───────────────────────────────────────────────────────────
 
 export default function TeacherDashboard() {
+  const { t } = useTranslation()
   const user = useAuthStore(s => s.user)
 
   const {
@@ -611,7 +617,7 @@ export default function TeacherDashboard() {
 
       <header className={styles.pageHead}>
         <h1 className={styles.greeting}>
-          {user?.name ? getGreeting(user.name) : 'Teacher Dashboard'}
+          {user?.name ? getGreeting(user.name, t) : 'Teacher Dashboard'}
         </h1>
         <p className={styles.greetingDate}>{formatDate()}</p>
       </header>
@@ -626,22 +632,22 @@ export default function TeacherDashboard() {
 
       <div className={styles.statsRow}>
         <StatCard
-          label="My courses"
+          label={t('teacher.dashboard.myCourses')}
           value={dash?.stats?.my_courses ?? 0}
           loading={loading}
         />
         <StatCard
-          label="Total students"
+          label={t('teacher.dashboard.totalStudents')}
           value={dash?.stats?.total_students ?? 0}
           loading={loading}
         />
         <StatCard
-          label="Sessions today"
+          label={t('teacher.dashboard.sessionsToday')}
           value={dash?.stats?.sessions_today ?? 0}
           loading={loading}
         />
         <StatCard
-          label="At-risk students"
+          label={t('teacher.dashboard.atRisk')}
           value={dash?.stats?.at_risk_count ?? 0}
           sub="score below 60%"
           loading={loading}

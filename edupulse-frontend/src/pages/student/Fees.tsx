@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
+import { useTranslation } from 'react-i18next'
 import api from '../../lib/axios'
 import styles from './Fees.module.css'
 
@@ -84,6 +85,7 @@ function SkeletonCard() {
 // ─── Fee card ─────────────────────────────────────────────────────────────────
 
 function FeeCard({ fee }: { fee: Fee }) {
+  const { t } = useTranslation()
   const actuallyOverdue = isOverdue(fee)
   const statusClass = fee.status === 'paid'
     ? styles.statusPaid
@@ -93,17 +95,17 @@ function FeeCard({ fee }: { fee: Fee }) {
     ? styles.statusOverdue
     : styles.statusPending
 
-  const label = fee.status === 'paid' ? 'Paid'
-    : fee.status === 'waived' ? 'Waived'
-    : actuallyOverdue || fee.status === 'overdue' ? 'Overdue'
-    : 'Pending'
+  const label = fee.status === 'paid' ? t('student.fees.paid')
+    : fee.status === 'waived' ? t('student.fees.waived')
+    : actuallyOverdue || fee.status === 'overdue' ? t('student.fees.overdue')
+    : t('student.fees.pending')
 
   return (
     <article className={`${styles.feeCard} ${(actuallyOverdue || fee.status === 'overdue') ? styles.feeCardOverdue : ''}`}>
       <div className={styles.feeMain}>
         <p className={styles.feeDesc}>{fee.description}</p>
         {fee.course && <p className={styles.feeCourse}>{fee.course.name}</p>}
-        <p className={styles.feeDue}>Due {formatDate(fee.due_date)}</p>
+        <p className={styles.feeDue}>{t('student.fees.due')} {formatDate(fee.due_date)}</p>
       </div>
       <div className={styles.feeRight}>
         <span className={styles.feeAmount}>{formatCurrency(fee.amount)}</span>
@@ -119,6 +121,7 @@ function FeeCard({ fee }: { fee: Fee }) {
 // ─── Summary bar ──────────────────────────────────────────────────────────────
 
 function SummaryBar({ fees }: { fees: Fee[] }) {
+  const { t } = useTranslation()
   const pending = fees.filter(f => f.status === 'pending' && !isOverdue(f)).reduce((s, f) => s + f.amount, 0)
   const overdue = fees.filter(f => f.status === 'overdue' || isOverdue(f)).reduce((s, f) => s + f.amount, 0)
   const paid    = fees.filter(f => f.status === 'paid').reduce((s, f) => s + f.amount, 0)
@@ -127,17 +130,17 @@ function SummaryBar({ fees }: { fees: Fee[] }) {
     <div className={styles.summaryBar}>
       <div className={styles.summaryItem}>
         <span className={styles.summaryAmount} style={{ color: 'var(--color-amber)' }}>{formatCurrency(pending)}</span>
-        <span className={styles.summaryLabel}>Pending</span>
+        <span className={styles.summaryLabel}>{t('student.fees.pending')}</span>
       </div>
       <div className={styles.summaryDivider} />
       <div className={styles.summaryItem}>
         <span className={styles.summaryAmount} style={{ color: 'var(--color-red)' }}>{formatCurrency(overdue)}</span>
-        <span className={styles.summaryLabel}>Overdue</span>
+        <span className={styles.summaryLabel}>{t('student.fees.overdue')}</span>
       </div>
       <div className={styles.summaryDivider} />
       <div className={styles.summaryItem}>
         <span className={styles.summaryAmount} style={{ color: 'oklch(65% 0.2 145)' }}>{formatCurrency(paid)}</span>
-        <span className={styles.summaryLabel}>Paid</span>
+        <span className={styles.summaryLabel}>{t('student.fees.paid')}</span>
       </div>
     </div>
   )
@@ -146,6 +149,7 @@ function SummaryBar({ fees }: { fees: Fee[] }) {
 // ─── Main page ────────────────────────────────────────────────────────────────
 
 export default function StudentFees() {
+  const { t } = useTranslation()
   const [filter, setFilter] = useState<FilterStatus>('all')
 
   const { data: fees = [], isLoading, isError, refetch } = useQuery<Fee[]>({
@@ -161,24 +165,24 @@ export default function StudentFees() {
   })
 
   const FILTERS: { key: FilterStatus; label: string }[] = [
-    { key: 'all', label: 'All' },
-    { key: 'pending', label: 'Pending' },
-    { key: 'overdue', label: 'Overdue' },
-    { key: 'paid', label: 'Paid' },
+    { key: 'all', label: t('common.all') },
+    { key: 'pending', label: t('student.fees.pending') },
+    { key: 'overdue', label: t('student.fees.overdue') },
+    { key: 'paid', label: t('student.fees.paid') },
   ]
 
   return (
     <div className={styles.page}>
       <header className={styles.pageHead}>
-        <h1 className={styles.pageTitle}>Fees</h1>
+        <h1 className={styles.pageTitle}>{t('student.fees.title')}</h1>
         <p className={styles.pageCount}>
-          {isLoading ? 'Loading...' : `${fees.length} fee${fees.length !== 1 ? 's' : ''}`}
+          {isLoading ? t('common.loading') : `${fees.length} fee${fees.length !== 1 ? 's' : ''}`}
         </p>
       </header>
 
       {!isLoading && !isError && fees.length > 0 && <SummaryBar fees={fees} />}
 
-      <div className={styles.filters} role="group" aria-label="Filter fees">
+      <div className={styles.filters} role="group" aria-label={t('student.fees.filterFees')}>
         {FILTERS.map(({ key, label }) => (
           <button
             key={key}
@@ -198,15 +202,15 @@ export default function StudentFees() {
       ) : isError ? (
         <div className={styles.emptyState}>
           <div style={{ color: 'var(--color-amber)' }}><AlertCircleIcon /></div>
-          <p className={styles.emptyTitle}>Failed to load fees</p>
-          <button type="button" className={styles.retryBtn} onClick={() => refetch()}>Retry</button>
+          <p className={styles.emptyTitle}>{t('common.errorLoadFailed')}</p>
+          <button type="button" className={styles.retryBtn} onClick={() => refetch()}>{t('common.retry')}</button>
         </div>
       ) : filtered.length === 0 ? (
         <div className={styles.emptyState}>
           <div style={{ color: 'var(--text-muted)' }}><ReceiptIcon /></div>
-          <p className={styles.emptyTitle}>{filter !== 'all' ? 'No fees in this category' : 'No fees assigned yet'}</p>
+          <p className={styles.emptyTitle}>{filter !== 'all' ? t('student.fees.noFeesCategory') : t('student.fees.noFees')}</p>
           <p className={styles.emptyText}>
-            {filter !== 'all' ? 'Try viewing all fees.' : 'Your fee information will appear here once assigned.'}
+            {filter !== 'all' ? t('student.fees.noFeesCategoryHint') : t('student.fees.noFeesHint')}
           </p>
         </div>
       ) : (

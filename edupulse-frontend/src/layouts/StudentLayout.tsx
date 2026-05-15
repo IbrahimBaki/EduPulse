@@ -1,8 +1,10 @@
 import React from 'react'
 import { NavLink, Outlet, useNavigate } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
+import { useTranslation } from 'react-i18next'
 import { useAuthStore } from '../stores/authStore'
 import RoleGuard from '../components/RoleGuard'
+import TopControls from '../components/TopControls'
 import api from '../lib/axios'
 import styles from './AppLayout.module.css'
 
@@ -97,20 +99,21 @@ function LogOutIcon() {
 
 // ─── Nav config ──────────────────────────────────────────────────────────────
 
-type NavItem = { to: string; label: string; Icon: () => React.ReactElement; notif?: boolean }
+type NavItem = { to: string; tKey: string; Icon: () => React.ReactElement; notif?: boolean }
 
 const NAV_ITEMS: NavItem[] = [
-  { to: '/student/dashboard',     label: 'Dashboard',     Icon: HomeIcon },
-  { to: '/student/courses',       label: 'Courses',       Icon: BookOpenIcon },
-  { to: '/student/ai-tutor',      label: 'AI Tutor',      Icon: SparklesIcon },
-  { to: '/student/schedule',      label: 'Schedule',      Icon: CalendarIcon },
-  { to: '/student/announcements', label: 'Announcements', Icon: FileTextIcon, notif: true },
-  { to: '/student/fees',          label: 'Fees',          Icon: CreditCardIcon },
+  { to: '/student/dashboard',     tKey: 'nav.dashboard',     Icon: HomeIcon },
+  { to: '/student/courses',       tKey: 'nav.courses',       Icon: BookOpenIcon },
+  { to: '/student/ai-tutor',      tKey: 'nav.aiTutor',       Icon: SparklesIcon },
+  { to: '/student/schedule',      tKey: 'nav.schedule',      Icon: CalendarIcon },
+  { to: '/student/announcements', tKey: 'nav.announcements', Icon: FileTextIcon, notif: true },
+  { to: '/student/fees',          tKey: 'nav.fees',          Icon: CreditCardIcon },
 ]
 
 // ─── Component ───────────────────────────────────────────────────────────────
 
 export default function StudentLayout() {
+  const { t } = useTranslation()
   const user       = useAuthStore(s => s.user)
   const tenantCode = useAuthStore(s => s.tenantCode)
   const clearAuth  = useAuthStore(s => s.clearAuth)
@@ -153,7 +156,7 @@ export default function StudentLayout() {
           {schoolName && <div className={styles.schoolLabel}>{schoolName}</div>}
 
           <nav className={styles.nav} aria-label="Student navigation">
-            {NAV_ITEMS.map(({ to, label, Icon, notif }) => (
+            {NAV_ITEMS.map(({ to, tKey, Icon, notif }) => (
               <NavLink
                 key={to}
                 to={to}
@@ -162,7 +165,7 @@ export default function StudentLayout() {
                 }
               >
                 <Icon />
-                <span>{label}</span>
+                <span>{t(tKey)}</span>
                 {notif && unreadCount > 0 && (
                   <span className={styles.navBadge} aria-label={`${unreadCount} unread`}>
                     {unreadCount > 99 ? '99+' : unreadCount}
@@ -172,13 +175,15 @@ export default function StudentLayout() {
             ))}
           </nav>
 
+          <TopControls />
+
           <div className={styles.userFooter}>
             <div className={styles.avatar} aria-hidden="true">{initials}</div>
             <div className={styles.userInfo}>
               <span className={styles.userName}>{user?.name}</span>
-              <span className={styles.userRole}>Student</span>
+              <span className={styles.userRole}>{t('roles.student')}</span>
             </div>
-            <button type="button" onClick={handleLogout} className={styles.logoutBtn} aria-label="Sign out">
+            <button type="button" onClick={handleLogout} className={styles.logoutBtn} aria-label={t('auth.signOut')}>
               <LogOutIcon />
             </button>
           </div>
@@ -211,7 +216,7 @@ export default function StudentLayout() {
 
         {/* ── Bottom nav (mobile) ── */}
         <nav className={styles.bottomNav} aria-label="Student navigation">
-          {NAV_ITEMS.map(({ to, label, Icon, notif }) => (
+          {NAV_ITEMS.map(({ to, tKey, Icon, notif }) => (
             <NavLink
               key={to}
               to={to}
@@ -223,7 +228,7 @@ export default function StudentLayout() {
                 <Icon />
                 {notif && unreadCount > 0 && <span className={styles.tabDot} aria-hidden="true" />}
               </span>
-              <span className={styles.bottomLabel}>{label}</span>
+              <span className={styles.bottomLabel}>{t(tKey)}</span>
             </NavLink>
           ))}
         </nav>

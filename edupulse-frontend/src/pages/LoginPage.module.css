@@ -544,7 +544,7 @@
   font-weight: 600;
   color: var(--text-secondary);
   width: 28px;
-  text-align: right;
+  text-align: end;
   flex-shrink: 0;
   font-family: var(--font-mono);
 }

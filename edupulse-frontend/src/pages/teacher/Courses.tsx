@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
+import { useTranslation } from 'react-i18next'
 import api from '../../lib/axios'
 import styles from './Courses.module.css'
 
@@ -182,6 +183,7 @@ function CourseCard({ course }: { course: Course }) {
 // ─── Main page ────────────────────────────────────────────────────────────────
 
 export default function TeacherCourses() {
+  const { t } = useTranslation()
   const [search, setSearch] = useState('')
   const [status, setStatus] = useState<'' | 'draft' | 'active' | 'archived'>('')
 
@@ -204,9 +206,9 @@ export default function TeacherCourses() {
     <div className={styles.page}>
       <header className={styles.pageHead}>
         <div>
-          <h1 className={styles.pageTitle}>My Courses</h1>
+          <h1 className={styles.pageTitle}>{t('teacher.dashboard.myCourses')}</h1>
           <p className={styles.pageCount}>
-            {isLoading ? 'Loading...' : `${filtered.length} course${filtered.length !== 1 ? 's' : ''}`}
+            {isLoading ? t('common.loading') : `${filtered.length} course${filtered.length !== 1 ? 's' : ''}`}
           </p>
         </div>
       </header>
@@ -217,10 +219,10 @@ export default function TeacherCourses() {
           <input
             type="search"
             className={styles.searchInput}
-            placeholder="Search by name or subject..."
+            placeholder={t('teacher.courses.searchPlaceholder')}
             value={search}
             onChange={e => setSearch(e.target.value)}
-            aria-label="Search courses"
+            aria-label={t('teacher.courses.searchPlaceholder')}
           />
         </div>
         <select
@@ -229,9 +231,9 @@ export default function TeacherCourses() {
           onChange={e => setStatus(e.target.value as typeof status)}
           aria-label="Filter by status"
         >
-          <option value="">All statuses</option>
-          <option value="active">Active</option>
-          <option value="draft">Draft</option>
+          <option value="">{t('common.all')}</option>
+          <option value="active">{t('common.active')}</option>
+          <option value="draft">{t('common.draft')}</option>
           <option value="archived">Archived</option>
         </select>
       </div>
@@ -242,13 +244,13 @@ export default function TeacherCourses() {
         ) : isError ? (
           <div className={styles.emptyState}>
             <div style={{ color: 'var(--color-amber)' }}><AlertIcon /></div>
-            <p className={styles.emptyTitle}>Failed to load courses</p>
+            <p className={styles.emptyTitle}>{t('common.errorLoadFailed')}</p>
             <button type="button" className={`${styles.btn} ${styles.btnOutline}`} onClick={() => refetch()}>Retry</button>
           </div>
         ) : filtered.length === 0 ? (
           <div className={styles.emptyState}>
             <div style={{ color: 'oklch(44% 0.018 255)' }}><BookIcon /></div>
-            <p className={styles.emptyTitle}>{search || status ? 'No matching courses' : 'No courses assigned'}</p>
+            <p className={styles.emptyTitle}>{search || status ? t('teacher.courses.noCoursesSearch') : t('teacher.courses.noCourses')}</p>
             <p className={styles.emptyText}>
               {search || status ? 'Try adjusting your search or filter.' : 'Courses assigned to you will appear here.'}
             </p>

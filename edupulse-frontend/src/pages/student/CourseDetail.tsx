@@ -1,6 +1,7 @@
 import { useState, useRef } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
+import { useTranslation } from 'react-i18next'
 import {
   LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer
 } from 'recharts'
@@ -187,6 +188,7 @@ function SkeletonRow() {
 // ─── PDF Viewer modal ─────────────────────────────────────────────────────────
 
 function PdfViewer({ lessonId, title, onClose }: { lessonId: number; title: string; onClose: () => void }) {
+  const { t } = useTranslation()
   const [blobUrl, setBlobUrl] = useState<string | null>(null)
   const [error, setError]     = useState(false)
   const urlRef = useRef<string | null>(null)
@@ -208,15 +210,15 @@ function PdfViewer({ lessonId, title, onClose }: { lessonId: number; title: stri
       <div className={styles.pdfModal} onClick={e => e.stopPropagation()}>
         <div className={styles.pdfHeader}>
           <span className={styles.pdfTitle}>{title}</span>
-          <button type="button" className={styles.pdfCloseBtn} onClick={onClose} aria-label="Close"><CloseIcon /></button>
+          <button type="button" className={styles.pdfCloseBtn} onClick={onClose} aria-label={t('common.close')}><CloseIcon /></button>
         </div>
         <div className={styles.pdfBody}>
           {error ? (
-            <p className={styles.pdfError}>Could not load PDF. The file may not be available yet.</p>
+            <p className={styles.pdfError}>{t('student.courses.pdfError')}</p>
           ) : !blobUrl ? (
             <div className={styles.pdfLoading}>
               <span className={styles.pdfSpinner} />
-              <p>Loading PDF…</p>
+              <p>{t('student.courses.loadingPdf')}</p>
             </div>
           ) : (
             <iframe
@@ -235,6 +237,7 @@ function PdfViewer({ lessonId, title, onClose }: { lessonId: number; title: stri
 // ─── Lessons tab ──────────────────────────────────────────────────────────────
 
 function LessonsTab({ courseId }: { courseId: string }) {
+  const { t } = useTranslation()
   const navigate = useNavigate()
   const [pdfLesson, setPdfLesson] = useState<{ id: number; title: string } | null>(null)
 
@@ -249,14 +252,14 @@ function LessonsTab({ courseId }: { courseId: string }) {
   if (isLoading) return <div className={styles.tabContent}>{Array.from({ length: 5 }, (_, i) => <SkeletonRow key={i} />)}</div>
   if (isError) return (
     <div className={styles.emptyState}>
-      <p className={styles.emptyTitle}>Failed to load lessons</p>
-      <button type="button" className={styles.retryBtn} onClick={() => refetch()}>Retry</button>
+      <p className={styles.emptyTitle}>{t('common.errorLoadFailed')}</p>
+      <button type="button" className={styles.retryBtn} onClick={() => refetch()}>{t('common.retry')}</button>
     </div>
   )
   if (sorted.length === 0) return (
     <div className={styles.emptyState}>
-      <p className={styles.emptyTitle}>No lessons yet</p>
-      <p className={styles.emptyText}>Lessons will appear here once your teacher publishes them.</p>
+      <p className={styles.emptyTitle}>{t('student.courses.tabs.noLessons')}</p>
+      <p className={styles.emptyText}>{t('student.courses.tabs.noLessonsHint')}</p>
     </div>
   )
 
@@ -286,18 +289,18 @@ function LessonsTab({ courseId }: { courseId: string }) {
                     type="button"
                     className={styles.pdfBtn}
                     onClick={() => setPdfLesson({ id: lesson.id, title: lesson.title })}
-                    aria-label={`View PDF for ${lesson.title}`}
+                    aria-label={`${t('student.courses.tabs.viewPdf')} ${lesson.title}`}
                   >
-                    <FileIcon /> View PDF
+                    <FileIcon /> {t('student.courses.tabs.viewPdf')}
                   </button>
                 )}
                 <button
                   type="button"
                   className={styles.aiBtn}
                   onClick={() => navigate(`/student/ai-tutor?lesson_id=${lesson.id}&lesson=${encodeURIComponent(lesson.title)}`)}
-                  aria-label={`Ask AI about ${lesson.title}`}
+                  aria-label={`${t('student.courses.tabs.askAi')} ${lesson.title}`}
                 >
-                  <SparklesIcon /> Ask AI
+                  <SparklesIcon /> {t('student.courses.tabs.askAi')}
                 </button>
               </div>
             )}
@@ -311,6 +314,7 @@ function LessonsTab({ courseId }: { courseId: string }) {
 // ─── Schedule tab ─────────────────────────────────────────────────────────────
 
 function ScheduleTab({ courseId }: { courseId: string }) {
+  const { t } = useTranslation()
   const { data: sessions = [], isLoading, isError, refetch } = useQuery<Session[]>({
     queryKey: ['student-course-schedules', courseId],
     queryFn: () => api.get(`/student/courses/${courseId}/schedules`).then(r => normalizeArray<Session>(r.data.data ?? r.data)),
@@ -330,14 +334,14 @@ function ScheduleTab({ courseId }: { courseId: string }) {
   if (isLoading) return <div className={styles.tabContent}>{Array.from({ length: 4 }, (_, i) => <SkeletonRow key={i} />)}</div>
   if (isError) return (
     <div className={styles.emptyState}>
-      <p className={styles.emptyTitle}>Failed to load schedule</p>
-      <button type="button" className={styles.retryBtn} onClick={() => refetch()}>Retry</button>
+      <p className={styles.emptyTitle}>{t('common.errorLoadFailed')}</p>
+      <button type="button" className={styles.retryBtn} onClick={() => refetch()}>{t('common.retry')}</button>
     </div>
   )
   if (sessions.length === 0) return (
     <div className={styles.emptyState}>
-      <p className={styles.emptyTitle}>No sessions scheduled</p>
-      <p className={styles.emptyText}>Your upcoming sessions for this course will appear here.</p>
+      <p className={styles.emptyTitle}>{t('student.courses.tabs.noSessions')}</p>
+      <p className={styles.emptyText}>{t('student.courses.tabs.noSessionsHint')}</p>
     </div>
   )
 
@@ -355,10 +359,10 @@ function ScheduleTab({ courseId }: { courseId: string }) {
             </div>
             <div className={styles.scheduleRight}>
               <span className={`${styles.typeBadge} ${s.type === 'online' ? styles.typeOnline : styles.typeOffline}`}>
-                {s.type === 'online' ? 'Online' : s.type === 'recorded' ? 'Recorded' : 'In-person'}
+                {s.type === 'online' ? t('common.online') : s.type === 'recorded' ? t('student.courses.tabs.recorded') : t('common.inPerson')}
               </span>
               {soon && !live && (
-                <span style={{ fontSize: '0.75rem', color: 'var(--color-amber)', fontWeight: 600 }}>Starting soon</span>
+                <span style={{ fontSize: '0.75rem', color: 'var(--color-amber)', fontWeight: 600 }}>{t('session.startingSoon')}</span>
               )}
               {canJoin && (
                 <button
@@ -366,7 +370,7 @@ function ScheduleTab({ courseId }: { courseId: string }) {
                   className={`${styles.joinBtn} ${styles.joinBtnLive}`}
                   onClick={() => joinSession(s)}
                 >
-                  <ExternalLinkIcon /> Join Now
+                  <ExternalLinkIcon /> {t('session.joinNow')}
                 </button>
               )}
             </div>
@@ -380,6 +384,7 @@ function ScheduleTab({ courseId }: { courseId: string }) {
 // ─── Progress tab ─────────────────────────────────────────────────────────────
 
 function ProgressTab({ courseId }: { courseId: string }) {
+  const { t } = useTranslation()
   const { data: progress, isLoading, isError, refetch } = useQuery<Progress>({
     queryKey: ['student-course-progress', courseId],
     queryFn: () => api.get(`/student/courses/${courseId}/progress`).then(r => r.data.data ?? r.data),
@@ -394,8 +399,8 @@ function ProgressTab({ courseId }: { courseId: string }) {
   )
   if (isError) return (
     <div className={styles.emptyState}>
-      <p className={styles.emptyTitle}>Failed to load progress</p>
-      <button type="button" className={styles.retryBtn} onClick={() => refetch()}>Retry</button>
+      <p className={styles.emptyTitle}>{t('common.errorLoadFailed')}</p>
+      <button type="button" className={styles.retryBtn} onClick={() => refetch()}>{t('common.retry')}</button>
     </div>
   )
 
@@ -412,12 +417,12 @@ function ProgressTab({ courseId }: { courseId: string }) {
   return (
     <div className={styles.progressContent}>
       <div className={styles.attendanceSection}>
-        <CircularProgress value={Math.round(attendance)} label="Attendance" />
+        <CircularProgress value={Math.round(attendance)} label={t('student.dashboard.attendance')} />
       </div>
 
       {chartData.length > 0 && (
         <div className={styles.chartSection}>
-          <h3 className={styles.sectionLabel}>Quiz Scores Over Time</h3>
+          <h3 className={styles.sectionLabel}>{t('student.courses.tabs.quizScoresOverTime')}</h3>
           <ResponsiveContainer width="100%" height={200}>
             <LineChart data={chartData} margin={{ top: 4, right: 16, left: -16, bottom: 0 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="oklch(32% 0.02 255)" />
@@ -435,11 +440,11 @@ function ProgressTab({ courseId }: { courseId: string }) {
 
       {weak.length > 0 && (
         <div className={styles.topicsSection}>
-          <h3 className={styles.sectionLabel}>Weak Topics</h3>
+          <h3 className={styles.sectionLabel}>{t('student.courses.tabs.weakTopics')}</h3>
           <div className={styles.pillRow}>
-            {weak.map(t => (
-              <span key={t.topic} className={styles.pillWeak}>
-                {t.topic} <span className={styles.pillScore}>{t.score}%</span>
+            {weak.map(topic => (
+              <span key={topic.topic} className={styles.pillWeak}>
+                {topic.topic} <span className={styles.pillScore}>{topic.score}%</span>
               </span>
             ))}
           </div>
@@ -448,11 +453,11 @@ function ProgressTab({ courseId }: { courseId: string }) {
 
       {strong.length > 0 && (
         <div className={styles.topicsSection}>
-          <h3 className={styles.sectionLabel}>Strong Topics</h3>
+          <h3 className={styles.sectionLabel}>{t('student.courses.tabs.strongTopics')}</h3>
           <div className={styles.pillRow}>
-            {strong.map(t => (
-              <span key={t.topic} className={styles.pillStrong}>
-                {t.topic} <span className={styles.pillScore}>{t.score}%</span>
+            {strong.map(topic => (
+              <span key={topic.topic} className={styles.pillStrong}>
+                {topic.topic} <span className={styles.pillScore}>{topic.score}%</span>
               </span>
             ))}
           </div>
@@ -461,8 +466,8 @@ function ProgressTab({ courseId }: { courseId: string }) {
 
       {chartData.length === 0 && weak.length === 0 && strong.length === 0 && (
         <div className={styles.emptyState}>
-          <p className={styles.emptyTitle}>No progress data yet</p>
-          <p className={styles.emptyText}>Complete quizzes to track your progress here.</p>
+          <p className={styles.emptyTitle}>{t('student.courses.tabs.noProgressData')}</p>
+          <p className={styles.emptyText}>{t('student.courses.tabs.noProgressDataHint')}</p>
         </div>
       )}
     </div>
@@ -472,6 +477,7 @@ function ProgressTab({ courseId }: { courseId: string }) {
 // ─── Main page ────────────────────────────────────────────────────────────────
 
 export default function StudentCourseDetail() {
+  const { t } = useTranslation()
   const { courseId } = useParams<{ courseId: string }>()
   const navigate = useNavigate()
   const qc = useQueryClient()
@@ -487,20 +493,20 @@ export default function StudentCourseDetail() {
   })
 
   const TABS: { key: Tab; label: string }[] = [
-    { key: 'lessons',  label: 'Lessons' },
-    { key: 'schedule', label: 'Schedule' },
-    { key: 'progress', label: 'My Progress' },
+    { key: 'lessons',  label: t('student.courses.tabs.lessons') },
+    { key: 'schedule', label: t('student.courses.tabs.schedule') },
+    { key: 'progress', label: t('student.courses.tabs.myProgress') },
   ]
 
   return (
     <div className={styles.page}>
       <button type="button" className={styles.backBtn} onClick={() => navigate('/student/courses')}>
-        <ChevronLeftIcon /> All Courses
+        <ChevronLeftIcon /> {t('student.courses.allCourses')}
       </button>
 
       <header className={styles.courseHeader}>
         <div className={styles.headerInfo}>
-          <h1 className={styles.courseTitle}>{course?.name ?? 'Course'}</h1>
+          <h1 className={styles.courseTitle}>{course?.name ?? t('student.courses.course')}</h1>
           <div className={styles.headerMeta}>
             {course?.subject && <span className={styles.metaBadge}>{str(course.subject)}</span>}
             {course?.grade_level && <span className={styles.metaBadge}>{str(course.grade_level)}</span>}

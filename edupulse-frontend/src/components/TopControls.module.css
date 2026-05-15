@@ -1,0 +1,41 @@
+.controls {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 8px 8px 4px;
+  flex-shrink: 0;
+}
+
+.btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: var(--radius-sm);
+  border: none;
+  cursor: pointer;
+  background: none;
+  color: var(--text-muted);
+  transition:
+    background var(--dur-fast) var(--ease-out-quart),
+    color var(--dur-fast) var(--ease-out-quart);
+}
+
+.btn:hover {
+  background: var(--surface-elevated);
+  color: var(--text-primary);
+}
+
+.btn:focus-visible {
+  outline: 2px solid var(--color-blue);
+  outline-offset: 2px;
+}
+
+.langLabel {
+  font-size: 0.6875rem;
+  font-weight: 700;
+  line-height: 1;
+  font-family: var(--font-sans);
+  letter-spacing: 0.02em;
+}

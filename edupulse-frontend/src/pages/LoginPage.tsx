@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect, type FormEvent } from 'react'
 import { useNavigate } from 'react-router-dom'
 import axios from 'axios'
+import { useTranslation } from 'react-i18next'
 import { useAuthStore, type AuthUser } from '../stores/authStore'
 import { getPrimaryRole } from '../components/RoleGuard'
 import styles from './LoginPage.module.css'
@@ -106,6 +107,7 @@ function CheckCircleIcon() {
 }
 
 function DashboardMockup() {
+  const { t } = useTranslation()
   return (
     <div className={styles.mockup}>
       {/* Header */}
@@ -116,28 +118,28 @@ function DashboardMockup() {
         </div>
         <div className={styles.mockupLive}>
           <span className={styles.liveDot} />
-          <span>Live</span>
+          <span>{t('brand.live')}</span>
         </div>
       </div>
 
       {/* Metric rows */}
       <div className={styles.mockupMetrics}>
         <div className={styles.metricRow}>
-          <span className={styles.metricLabel}>Attendance</span>
+          <span className={styles.metricLabel}>{t('brand.attendance')}</span>
           <div className={styles.metricBar}>
             <div className={`${styles.metricFill} ${styles.metricFill1}`} />
           </div>
           <span className={styles.metricVal}>94%</span>
         </div>
         <div className={styles.metricRow}>
-          <span className={styles.metricLabel}>Assignments</span>
+          <span className={styles.metricLabel}>{t('brand.assignments')}</span>
           <div className={styles.metricBar}>
             <div className={`${styles.metricFill} ${styles.metricFill2}`} />
           </div>
           <span className={styles.metricVal}>78%</span>
         </div>
         <div className={styles.metricRow}>
-          <span className={styles.metricLabel}>Submissions</span>
+          <span className={styles.metricLabel}>{t('brand.submissions')}</span>
           <div className={styles.metricBar}>
             <div className={`${styles.metricFill} ${styles.metricFill3}`} />
           </div>
@@ -149,11 +151,11 @@ function DashboardMockup() {
       <div className={styles.mockupFooter}>
         <div className={styles.mockupStat}>
           <UsersIcon />
-          <span><strong>142</strong> online now</span>
+          <span><strong>142</strong> {t('brand.onlineNow')}</span>
         </div>
         <div className={styles.mockupBadge}>
           <CheckCircleIcon />
-          <span>All systems normal</span>
+          <span>{t('brand.allSystemsNormal')}</span>
         </div>
       </div>
     </div>
@@ -166,6 +168,7 @@ type Step = 1 | 2
 type FieldErrors = { email?: string; password?: string }
 
 export default function LoginPage() {
+  const { t } = useTranslation()
   const [step, setStep] = useState<Step>(1)
   const [tenantCode, setTenantCode] = useState('')
   const [schoolName, setSchoolName] = useState('')
@@ -193,11 +196,11 @@ export default function LoginPage() {
     e.preventDefault()
     const code = tenantCode.trim().toLowerCase()
     if (!code) {
-      setCodeError('Enter your school code to continue')
+      setCodeError(t('auth.errors.enterSchoolCode'))
       return
     }
     if (!isValidSlug(code)) {
-      setCodeError('School codes use lowercase letters, numbers, and hyphens only')
+      setCodeError(t('auth.errors.invalidSchoolCode'))
       return
     }
     setCodeError(null)
@@ -212,8 +215,8 @@ export default function LoginPage() {
     e.preventDefault()
 
     const errors: FieldErrors = {}
-    if (!email.trim()) errors.email = 'Email is required'
-    if (!password) errors.password = 'Password is required'
+    if (!email.trim()) errors.email = t('auth.errors.emailRequired')
+    if (!password) errors.password = t('auth.errors.passwordRequired')
     if (Object.keys(errors).length > 0) {
       setFieldErrors(errors)
       return
@@ -252,19 +255,19 @@ export default function LoginPage() {
         if (status === 404 || message.toLowerCase().includes('domain')) {
           // Tenant not found — send user back to step 1
           setStep(1)
-          setCodeError('School not found — check the code and try again')
+          setCodeError(t('auth.errors.schoolNotFound'))
         } else if (status === 422 && validationErrors) {
           setFieldErrors({
             email: validationErrors.email?.[0],
             password: validationErrors.password?.[0],
           })
         } else if (status === 401) {
-          setLoginError('Incorrect email or password.')
+          setLoginError(t('auth.errors.incorrectCredentials'))
         } else {
-          setLoginError('Something went wrong. Please try again in a moment.')
+          setLoginError(t('auth.errors.somethingWrong'))
         }
       } else {
-        setLoginError('Unable to connect. Check your internet connection.')
+        setLoginError(t('auth.errors.unableToConnect'))
       }
     } finally {
       setIsSubmitting(false)
@@ -300,12 +303,12 @@ export default function LoginPage() {
             {step === 1 ? (
               <form onSubmit={handleCodeSubmit} noValidate>
                 <div className={styles.stepHead}>
-                  <h1 className={styles.headline}>Sign in to your school</h1>
-                  <p className={styles.subline}>Enter your school code to get started.</p>
+                  <h1 className={styles.headline}>{t('auth.schoolTitle')}</h1>
+                  <p className={styles.subline}>{t('auth.schoolSubtitle')}</p>
                 </div>
 
                 <div className={styles.field}>
-                  <label htmlFor="school-code" className={styles.label}>School code</label>
+                  <label htmlFor="school-code" className={styles.label}>{t('auth.schoolCode')}</label>
                   <input
                     ref={codeRef}
                     id="school-code"
@@ -318,7 +321,7 @@ export default function LoginPage() {
                       setTenantCode(e.target.value)
                       if (codeError) setCodeError(null)
                     }}
-                    placeholder="e.g. al-noor-academy"
+                    placeholder={t('auth.schoolCodePlaceholder')}
                     className={`${styles.input} ${codeError ? styles.inputError : ''}`}
                     aria-describedby={codeError ? 'code-error' : undefined}
                     aria-invalid={codeError ? true : undefined}
@@ -332,7 +335,7 @@ export default function LoginPage() {
                 </div>
 
                 <button type="submit" className={styles.btnPrimary}>
-                  Continue
+                  {t('auth.continue')}
                 </button>
               </form>
             ) : (
@@ -342,13 +345,13 @@ export default function LoginPage() {
                     type="button"
                     onClick={handleBack}
                     className={styles.backBtn}
-                    aria-label="Back to school code entry"
+                    aria-label={t('auth.backToSchoolCode')}
                   >
                     <ArrowLeftIcon />
                     <span className={styles.schoolPill}>{tenantCode}</span>
                   </button>
-                  <h1 className={styles.headline}>Welcome back</h1>
-                  <p className={styles.subline}>Sign in to continue to {schoolName}.</p>
+                  <h1 className={styles.headline}>{t('auth.welcomeBack')}</h1>
+                  <p className={styles.subline}>{t('auth.welcomeContinue', { school: schoolName })}</p>
                 </div>
 
                 {loginError && (
@@ -359,7 +362,7 @@ export default function LoginPage() {
                 )}
 
                 <div className={styles.field}>
-                  <label htmlFor="email" className={styles.label}>Email address</label>
+                  <label htmlFor="email" className={styles.label}>{t('auth.email')}</label>
                   <input
                     ref={emailRef}
                     id="email"
@@ -370,7 +373,7 @@ export default function LoginPage() {
                       setEmail(e.target.value)
                       if (fieldErrors.email) setFieldErrors(prev => ({ ...prev, email: undefined }))
                     }}
-                    placeholder="you@school.edu"
+                    placeholder={t('auth.emailPlaceholder')}
                     className={`${styles.input} ${fieldErrors.email ? styles.inputError : ''}`}
                     aria-describedby={fieldErrors.email ? 'email-error' : undefined}
                     aria-invalid={fieldErrors.email ? true : undefined}
@@ -385,9 +388,9 @@ export default function LoginPage() {
 
                 <div className={styles.field}>
                   <div className={styles.labelRow}>
-                    <label htmlFor="password" className={styles.label}>Password</label>
+                    <label htmlFor="password" className={styles.label}>{t('auth.password')}</label>
                     <button type="button" className={styles.forgotLink} tabIndex={0}>
-                      Forgot password?
+                      {t('auth.forgotPassword')}
                     </button>
                   </div>
                   <div className={styles.passwordWrap}>
@@ -409,7 +412,7 @@ export default function LoginPage() {
                       type="button"
                       className={styles.eyeBtn}
                       onClick={() => setPasswordVisible(v => !v)}
-                      aria-label={passwordVisible ? 'Hide password' : 'Show password'}
+                      aria-label={passwordVisible ? t('auth.hidePassword') : t('auth.showPassword')}
                       aria-pressed={passwordVisible}
                     >
                       {passwordVisible ? <EyeOffIcon /> : <EyeIcon />}
@@ -430,7 +433,7 @@ export default function LoginPage() {
                   aria-busy={isSubmitting}
                 >
                   {isSubmitting && <span className={styles.spinner} aria-hidden="true" />}
-                  {isSubmitting ? 'Signing in…' : 'Sign in'}
+                  {isSubmitting ? t('auth.signingIn') : t('auth.signIn')}
                 </button>
               </form>
             )}
@@ -439,7 +442,7 @@ export default function LoginPage() {
           {/* Footer */}
           <footer className={styles.formFooter}>
             <ShieldIcon />
-            <span>Secured with 256-bit encryption</span>
+            <span>{t('auth.secured')}</span>
           </footer>
 
         </div>
@@ -451,16 +454,16 @@ export default function LoginPage() {
           {step === 1 ? (
             <div key="brand-1" className={styles.brandContent}>
               <h2 className={styles.brandHeadline}>
-                The precision cockpit<br />for school operations.
+                {t('brand.headline')}
               </h2>
               <p className={styles.brandSub}>
-                Every metric, every role, every decision — one place.
+                {t('brand.sub')}
               </p>
               <DashboardMockup />
             </div>
           ) : (
             <div key="brand-2" className={styles.brandContent}>
-              <p className={styles.schoolWelcome}>Welcome back to</p>
+              <p className={styles.schoolWelcome}>{t('brand.welcomeBackTo')}</p>
               <h2 className={styles.schoolName}>{schoolName}</h2>
               <span className={styles.schoolCode}>{tenantCode}</span>
               <div className={styles.statRow}>
@@ -468,14 +471,14 @@ export default function LoginPage() {
                   <UsersIcon />
                   <div>
                     <div className={styles.statNum}>—</div>
-                    <div className={styles.statLabel}>Students</div>
+                    <div className={styles.statLabel}>{t('common.students')}</div>
                   </div>
                 </div>
                 <div className={styles.statChip}>
                   <BookIcon />
                   <div>
                     <div className={styles.statNum}>—</div>
-                    <div className={styles.statLabel}>Courses</div>
+                    <div className={styles.statLabel}>{t('common.courses')}</div>
                   </div>
                 </div>
               </div>

@@ -1,7 +1,9 @@
 import React from 'react'
 import { NavLink, Outlet, useNavigate } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { useAuthStore } from '../stores/authStore'
 import RoleGuard from '../components/RoleGuard'
+import TopControls from '../components/TopControls'
 import styles from './AppLayout.module.css'
 
 function LogoMark() {
@@ -49,20 +51,21 @@ function LogOutIcon() {
   return <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
 }
 
-type NavItem = { to: string; label: string; Icon: () => React.ReactElement }
+type NavItem = { to: string; tKey: string; Icon: () => React.ReactElement }
 
 const NAV_ITEMS: NavItem[] = [
-  { to: '/manager/dashboard',     label: 'Dashboard',     Icon: HomeIcon },
-  { to: '/manager/students',      label: 'Students',      Icon: UsersIcon },
-  { to: '/manager/teachers',      label: 'Teachers',      Icon: TeachersIcon },
-  { to: '/manager/courses',       label: 'Courses',       Icon: BookOpenIcon },
-  { to: '/manager/schedule',      label: 'Schedule',      Icon: CalendarIcon },
-  { to: '/manager/finance',       label: 'Finance',       Icon: FinanceIcon },
-  { to: '/manager/announcements', label: 'Announcements', Icon: MegaphoneIcon },
-  { to: '/manager/settings',      label: 'Settings',      Icon: SettingsIcon },
+  { to: '/manager/dashboard',     tKey: 'nav.dashboard',     Icon: HomeIcon },
+  { to: '/manager/students',      tKey: 'nav.students',      Icon: UsersIcon },
+  { to: '/manager/teachers',      tKey: 'nav.teachers',      Icon: TeachersIcon },
+  { to: '/manager/courses',       tKey: 'nav.courses',       Icon: BookOpenIcon },
+  { to: '/manager/schedule',      tKey: 'nav.schedule',      Icon: CalendarIcon },
+  { to: '/manager/finance',       tKey: 'nav.finance',       Icon: FinanceIcon },
+  { to: '/manager/announcements', tKey: 'nav.announcements', Icon: MegaphoneIcon },
+  { to: '/manager/settings',      tKey: 'nav.settings',      Icon: SettingsIcon },
 ]
 
 export default function ManagerLayout() {
+  const { t } = useTranslation()
   const user       = useAuthStore(s => s.user)
   const tenantCode = useAuthStore(s => s.tenantCode)
   const clearAuth  = useAuthStore(s => s.clearAuth)
@@ -86,19 +89,20 @@ export default function ManagerLayout() {
           </div>
           {schoolName && <div className={styles.schoolLabel}>{schoolName}</div>}
           <nav className={styles.nav} aria-label="Manager navigation">
-            {NAV_ITEMS.map(({ to, label, Icon }) => (
+            {NAV_ITEMS.map(({ to, tKey, Icon }) => (
               <NavLink key={to} to={to} className={({ isActive }) => `${styles.navItem} ${isActive ? styles.navActive : ''}`}>
-                <Icon /><span>{label}</span>
+                <Icon /><span>{t(tKey)}</span>
               </NavLink>
             ))}
           </nav>
+          <TopControls />
           <div className={styles.userFooter}>
             <div className={styles.avatar} aria-hidden="true">{initials}</div>
             <div className={styles.userInfo}>
               <span className={styles.userName}>{user?.name}</span>
-              <span className={styles.userRole}>Manager</span>
+              <span className={styles.userRole}>{t('roles.manager')}</span>
             </div>
-            <button type="button" onClick={() => { clearAuth(); navigate('/login', { replace: true }) }} className={styles.logoutBtn} aria-label="Sign out">
+            <button type="button" onClick={() => { clearAuth(); navigate('/login', { replace: true }) }} className={styles.logoutBtn} aria-label={t('auth.signOut')}>
               <LogOutIcon />
             </button>
           </div>

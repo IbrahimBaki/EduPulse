@@ -1,5 +1,6 @@
 import { useState, useMemo } from 'react'
 import { useQuery } from '@tanstack/react-query'
+import { useTranslation } from 'react-i18next'
 import api from '../../lib/axios'
 import styles from './Schedule.module.css'
 
@@ -28,16 +29,6 @@ function normalizeArray<T>(data: unknown): T[] {
   const d = (data as { data?: unknown })?.data
   if (Array.isArray(d)) return d as T[]
   return []
-}
-
-function str(val: unknown): string {
-  if (val == null) return ''
-  if (typeof val === 'string') return val
-  if (typeof val === 'object') {
-    const o = val as Record<string, unknown>
-    return String(o.name ?? o.level ?? '')
-  }
-  return String(val)
 }
 
 function startOf(d: Date): Date {
@@ -70,13 +61,6 @@ function canJoin(s: Session): boolean {
 function formatTimeRange(starts_at: string, ends_at: string): string {
   const fmt = (iso: string) => new Date(iso).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true })
   return `${fmt(starts_at)} – ${fmt(ends_at)}`
-}
-
-function formatGroupDate(key: GroupKey, sessions: Session[]): string {
-  if (key === 'today') return 'Today'
-  if (key === 'tomorrow') return 'Tomorrow'
-  if (key === 'this_week') return 'This Week'
-  return 'Later'
 }
 
 function teacherInitials(name?: string): string {
@@ -137,8 +121,8 @@ function SkeletonCard() {
 // ─── Session card ─────────────────────────────────────────────────────────────
 
 function SessionCard({ s }: { s: Session }) {
+  const { t } = useTranslation()
   const live   = isLive(s)
-  const soon   = isSoon(s)
   const join   = canJoin(s)
   const completed = s.status === 'completed'
 
@@ -164,11 +148,11 @@ function SessionCard({ s }: { s: Session }) {
         <div className={styles.badgeRow}>
           <span className={`${styles.typeBadge} ${s.type === 'online' ? styles.typeOnline : s.type === 'recorded' ? styles.typeRecorded : styles.typeOffline}`}>
             {s.type === 'online' && <VideoIcon />}
-            {s.type === 'online' ? 'Online' : s.type === 'recorded' ? 'Recorded' : 'In-person'}
+            {s.type === 'online' ? t('common.online') : s.type === 'recorded' ? t('student.schedule.recorded') : t('common.inPerson')}
           </span>
           {completed && (
             <span className={`${styles.attendanceBadge} ${s.my_attendance === 'present' ? styles.attendPresent : s.my_attendance === 'absent' ? styles.attendAbsent : styles.attendUnknown}`}>
-              {s.my_attendance === 'present' ? 'Present' : s.my_attendance === 'absent' ? 'Absent' : 'Completed'}
+              {s.my_attendance === 'present' ? t('student.schedule.present') : s.my_attendance === 'absent' ? t('student.schedule.absent') : t('student.schedule.completed')}
             </span>
           )}
         </div>
@@ -179,10 +163,10 @@ function SessionCard({ s }: { s: Session }) {
             target="_blank"
             rel="noopener noreferrer"
             className={`${styles.joinBtn} ${live ? styles.joinBtnLive : ''}`}
-            aria-label={`Join ${s.title}`}
+            aria-label={`${t('session.joinNow')} ${s.title}`}
           >
             <ExternalLinkIcon />
-            {live ? 'Join Now' : 'Join Soon'}
+            {live ? t('session.joinNow') : t('student.schedule.joinSoon')}
           </a>
         )}
       </div>
@@ -193,6 +177,7 @@ function SessionCard({ s }: { s: Session }) {
 // ─── Main page ────────────────────────────────────────────────────────────────
 
 export default function StudentSchedule() {
+  const { t } = useTranslation()
   const [typeFilter, setTypeFilter] = useState<TypeFilter>('all')
 
   const { data: sessions = [], isLoading, isError, refetch } = useQuery<Session[]>({
@@ -217,14 +202,14 @@ export default function StudentSchedule() {
 
   const ORDER: GroupKey[] = ['today', 'tomorrow', 'this_week', 'later']
   const GROUP_LABELS: Record<GroupKey, string> = {
-    today: 'Today', tomorrow: 'Tomorrow', this_week: 'This Week', later: 'Later'
+    today: t('student.schedule.today'), tomorrow: t('student.schedule.tomorrow'), this_week: t('student.schedule.thisWeek'), later: t('student.schedule.later')
   }
 
   const FILTERS: { key: TypeFilter; label: string }[] = [
-    { key: 'all',     label: 'All' },
-    { key: 'today',   label: 'Today' },
-    { key: 'online',  label: 'Online' },
-    { key: 'offline', label: 'In-Person' },
+    { key: 'all',     label: t('common.all') },
+    { key: 'today',   label: t('student.schedule.today') },
+    { key: 'online',  label: t('common.online') },
+    { key: 'offline', label: t('common.inPerson') },
   ]
 
   const hasAny = ORDER.some(k => grouped[k].length > 0)
@@ -233,14 +218,14 @@ export default function StudentSchedule() {
     <div className={styles.page}>
       <header className={styles.pageHead}>
         <div>
-          <h1 className={styles.pageTitle}>Schedule</h1>
+          <h1 className={styles.pageTitle}>{t('student.schedule.title')}</h1>
           <p className={styles.pageCount}>
-            {isLoading ? 'Loading...' : `${sessions.length} session${sessions.length !== 1 ? 's' : ''}`}
+            {isLoading ? t('common.loading') : `${sessions.length} session${sessions.length !== 1 ? 's' : ''}`}
           </p>
         </div>
       </header>
 
-      <div className={styles.filters} role="group" aria-label="Filter sessions">
+      <div className={styles.filters} role="group" aria-label={t('student.schedule.filterSessions')}>
         {FILTERS.map(({ key, label }) => (
           <button
             key={key}
@@ -260,14 +245,14 @@ export default function StudentSchedule() {
       ) : isError ? (
         <div className={styles.emptyState}>
           <div style={{ color: 'var(--color-amber)' }}><AlertIcon /></div>
-          <p className={styles.emptyTitle}>Failed to load schedule</p>
-          <button type="button" className={styles.retryBtn} onClick={() => refetch()}>Retry</button>
+          <p className={styles.emptyTitle}>{t('common.errorLoadFailed')}</p>
+          <button type="button" className={styles.retryBtn} onClick={() => refetch()}>{t('common.retry')}</button>
         </div>
       ) : !hasAny ? (
         <div className={styles.emptyState}>
           <div style={{ color: 'var(--text-muted)' }}><CalendarEmptyIcon /></div>
-          <p className={styles.emptyTitle}>No upcoming sessions</p>
-          <p className={styles.emptyText}>Check back later for your schedule.</p>
+          <p className={styles.emptyTitle}>{t('student.schedule.noUpcomingSessions')}</p>
+          <p className={styles.emptyText}>{t('student.schedule.noUpcomingSessionsHint')}</p>
         </div>
       ) : (
         <div className={styles.content}>

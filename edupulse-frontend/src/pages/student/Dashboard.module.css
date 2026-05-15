@@ -733,7 +733,7 @@
   letter-spacing: -0.01em;
 }
 
-.quizScorePassed { color: oklch(68% 0.15 145); }
+.quizScorePassed { color: var(--color-green); }
 .quizScoreFailed { color: var(--color-red); }
 
 .quizDate {
@@ -782,7 +782,7 @@
 }
 
 .attendanceBarExcellent {
-  background: oklch(68% 0.15 145);
+  background: var(--color-green);
 }
 
 .attendanceBreakdown {
@@ -826,12 +826,12 @@
   gap: 7px;
   margin-block-start: 14px;
   padding: 8px 12px;
-  background: oklch(68% 0.15 145 / 0.08);
+  background: var(--color-green-dim);
   border: 1px solid oklch(68% 0.15 145 / 0.22);
   border-radius: var(--radius-md);
   font-size: 0.8125rem;
   font-weight: 500;
-  color: oklch(68% 0.15 145);
+  color: var(--color-green);
   line-height: 1;
 }
 
@@ -944,7 +944,7 @@
 }
 
 .coursePill:hover {
-  background: oklch(28% 0.02 255);
+  background: var(--surface-elevated);
   color: var(--text-primary);
   border-color: var(--neutral-border-strong);
 }

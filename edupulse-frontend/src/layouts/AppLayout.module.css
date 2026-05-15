@@ -11,11 +11,7 @@
 .sidebar {
   width: 204px;
   flex-shrink: 0;
-  background: linear-gradient(
-    180deg,
-    var(--surface-panel) 0%,
-    oklch(14% 0.024 255) 100%
-  );
+  background: var(--surface-panel);
   border-inline-end: 1px solid var(--neutral-border);
   display: flex;
   flex-direction: column;

@@ -1,6 +1,7 @@
 import { useState, useEffect, type ReactNode } from 'react'
 import { createPortal } from 'react-dom'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import { useTranslation } from 'react-i18next'
 import api from '../../lib/axios'
 import styles from './Finance.module.css'
 
@@ -123,7 +124,7 @@ function MetricCard({ label, value, currency = 'EGP', trend }: { label: string; 
       </div>
       {trend !== undefined && (
         <div className={`${styles.statTrend} ${trend >= 0 ? styles.trendUp : styles.trendDown}`}>
-          {trend >= 0 ? '▲' : '▼'} {Math.abs(trend)}% vs last month
+          {trend >= 0 ? '▲' : '▼'} {Math.abs(trend)}%
         </div>
       )}
     </div>
@@ -131,7 +132,13 @@ function MetricCard({ label, value, currency = 'EGP', trend }: { label: string; 
 }
 
 function StatusBadge({ status }: { status: StudentFee['status'] }) {
-  const labels: Record<string, string> = { paid: 'Paid', pending: 'Pending', overdue: 'Overdue', waived: 'Waived' }
+  const { t } = useTranslation()
+  const labels: Record<string, string> = {
+    paid: t('manager.finance.paid'),
+    pending: t('manager.finance.pending'),
+    overdue: t('manager.finance.overdue'),
+    waived: t('manager.finance.waived')
+  }
   const classes: Record<string, string> = { paid: styles.badgePaid, pending: styles.badgePending, overdue: styles.badgeOverdue, waived: styles.badgeWaived }
   return <span className={`${styles.badge} ${classes[status]}`}>{labels[status]}</span>
 }
@@ -154,6 +161,7 @@ function SlideOver({ open, onClose, title, children }: { open: boolean; onClose:
 }
 
 function PaymentModal({ open, onClose, onConfirm, isPending }: { open: boolean; onClose: () => void; onConfirm: (method: string, ref: string) => void; isPending: boolean }) {
+  const { t } = useTranslation()
   const [method, setMethod] = useState('cash')
   const [ref, setRef] = useState('')
   if (!open) return null
@@ -161,24 +169,24 @@ function PaymentModal({ open, onClose, onConfirm, isPending }: { open: boolean; 
     <div className={styles.modalRoot}>
       <div className={styles.backdrop} onClick={onClose} />
       <div className={styles.modalPanel}>
-        <h3 style={{ fontSize: '1.125rem', fontWeight: 700, marginBlockEnd: '20px' }}>Confirm Payment</h3>
+        <h3 style={{ fontSize: '1.125rem', fontWeight: 700, marginBlockEnd: '20px' }}>{t('manager.finance.confirmPayment')}</h3>
         <div className={styles.formGroup}>
-          <label className={styles.label}>Payment Method</label>
+          <label className={styles.label}>{t('manager.finance.paymentMethod')}</label>
           <select className={styles.select} value={method} onChange={(e) => setMethod(e.target.value)}>
-            <option value="cash">Cash</option>
-            <option value="bank_transfer">Bank Transfer</option>
-            <option value="cheque">Cheque</option>
-            <option value="other">Other</option>
+            <option value="cash">{t('manager.finance.cash')}</option>
+            <option value="bank_transfer">{t('manager.finance.bankTransfer')}</option>
+            <option value="cheque">{t('manager.finance.cheque')}</option>
+            <option value="other">{t('manager.finance.other')}</option>
           </select>
         </div>
         <div className={styles.formGroup}>
-          <label className={styles.label}>Transaction Reference</label>
-          <input className={styles.input} value={ref} onChange={(e) => setRef(e.target.value)} placeholder="Ref # or notes" />
+          <label className={styles.label}>{t('manager.finance.transactionRef')}</label>
+          <input className={styles.input} value={ref} onChange={(e) => setRef(e.target.value)} placeholder={t('manager.finance.refPlaceholder')} />
         </div>
         <div style={{ display: 'flex', gap: '12px', justifyContent: 'flex-end', marginTop: '24px' }}>
-          <button className={styles.btn} onClick={onClose}>Cancel</button>
+          <button className={styles.btn} onClick={onClose}>{t('common.cancel')}</button>
           <button className={`${styles.btn} ${styles.btnPrimary}`} onClick={() => onConfirm(method, ref)} disabled={isPending}>
-            {isPending ? 'Processing...' : 'Mark as Paid'}
+            {isPending ? t('manager.finance.processing') : t('manager.finance.markAsPaid')}
           </button>
         </div>
       </div>
@@ -190,6 +198,7 @@ function PaymentModal({ open, onClose, onConfirm, isPending }: { open: boolean; 
 // ─── Main Page ────────────────────────────────────────────────────────────────
 
 export default function FinancePage() {
+  const { t } = useTranslation()
   const queryClient = useQueryClient()
   const [page, setPage] = useState(1)
   const [statusFilter, setStatusFilter] = useState('')
@@ -246,7 +255,7 @@ export default function FinancePage() {
   return (
     <div className={styles.page}>
       <header className={styles.pageHead}>
-        <h1 className={styles.pageTitle}>Financial Management</h1>
+        <h1 className={styles.pageTitle}>{t('manager.finance.title')}</h1>
       </header>
 
       {/* SECTION 1: Summary */}
@@ -255,10 +264,10 @@ export default function FinancePage() {
           Array.from({ length: 4 }).map((_, i) => <div key={i} className={`${styles.statCard} ${styles.skeleton}`} style={{ height: '120px' }} />)
         ) : (
           <>
-            <MetricCard label="Total Expected" value={summary?.expected ?? 0} trend={summary?.expected_trend} />
-            <MetricCard label="Total Collected" value={summary?.collected ?? 0} trend={summary?.collected_trend} />
-            <MetricCard label="Total Pending" value={summary?.pending ?? 0} />
-            <MetricCard label="Total Overdue" value={summary?.overdue ?? 0} />
+            <MetricCard label={t('manager.finance.totalExpected')} value={summary?.expected ?? 0} trend={summary?.expected_trend} />
+            <MetricCard label={t('manager.finance.totalCollected')} value={summary?.collected ?? 0} trend={summary?.collected_trend} />
+            <MetricCard label={t('manager.finance.totalPending')} value={summary?.pending ?? 0} />
+            <MetricCard label={t('manager.finance.totalOverdue')} value={summary?.overdue ?? 0} />
           </>
         )}
       </section>
@@ -271,20 +280,20 @@ export default function FinancePage() {
             <div className={styles.searchWrap}>
               <input 
                 className={styles.searchInput} 
-                placeholder="Search student name..." 
+                placeholder={t('manager.finance.searchStudentName')}
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
               />
             </div>
             <select className={styles.filterSelect} value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)}>
-              <option value="">All Statuses</option>
-              <option value="paid">Paid</option>
-              <option value="pending">Pending</option>
-              <option value="overdue">Overdue</option>
-              <option value="waived">Waived</option>
+              <option value="">{t('manager.finance.allStatuses')}</option>
+              <option value="paid">{t('manager.finance.paid')}</option>
+              <option value="pending">{t('manager.finance.pending')}</option>
+              <option value="overdue">{t('manager.finance.overdue')}</option>
+              <option value="waived">{t('manager.finance.waived')}</option>
             </select>
             <button className={`${styles.btn} ${styles.btnPrimary}`} onClick={() => setGenerateModalOpen(true)}>
-              Generate Fees
+              {t('manager.finance.generateFees')}
             </button>
           </div>
 
@@ -292,11 +301,11 @@ export default function FinancePage() {
             <table className={styles.table}>
               <thead>
                 <tr>
-                  <th className={styles.th}>Student</th>
-                  <th className={styles.th}>Description</th>
-                  <th className={styles.th}>Amount</th>
-                  <th className={styles.th}>Due Date</th>
-                  <th className={styles.th}>Status</th>
+                  <th className={styles.th}>{t('manager.finance.student')}</th>
+                  <th className={styles.th}>{t('manager.finance.description')}</th>
+                  <th className={styles.th}>{t('manager.finance.amount')}</th>
+                  <th className={styles.th}>{t('manager.finance.dueDate')}</th>
+                  <th className={styles.th}>{t('manager.finance.status')}</th>
                 </tr>
               </thead>
               <tbody>
@@ -310,9 +319,9 @@ export default function FinancePage() {
                   <tr>
                     <td colSpan={5}>
                       <div className={styles.emptyState}>
-                        <h3 className={styles.emptyTitle}>No fees assigned yet</h3>
-                        <p className={styles.emptyText}>Fees will appear here once they are generated for students.</p>
-                        <button className={`${styles.btn} ${styles.btnPrimary}`} style={{ marginTop: '12px' }} onClick={() => setGenerateModalOpen(true)}>Generate Fees</button>
+                        <h3 className={styles.emptyTitle}>{t('manager.finance.noFeesYet')}</h3>
+                        <p className={styles.emptyText}>{t('manager.finance.noFeesYetHint')}</p>
+                        <button className={`${styles.btn} ${styles.btnPrimary}`} style={{ marginTop: '12px' }} onClick={() => setGenerateModalOpen(true)}>{t('manager.finance.generateFees')}</button>
                       </div>
                     </td>
                   </tr>
@@ -337,9 +346,9 @@ export default function FinancePage() {
           {/* Pagination */}
           {feesData && feesData.last_page > 1 && (
             <div style={{ padding: '16px 20px', borderTop: '1px solid var(--neutral-border)', display: 'flex', gap: '8px', justifyContent: 'flex-end' }}>
-              <button className={styles.btn} disabled={page === 1} onClick={() => setPage(p => p - 1)}>Prev</button>
-              <span style={{ fontSize: '0.875rem', alignSelf: 'center' }}>Page {page} of {feesData.last_page}</span>
-              <button className={styles.btn} disabled={page === feesData.last_page} onClick={() => setPage(p => p + 1)}>Next</button>
+              <button className={styles.btn} disabled={page === 1} onClick={() => setPage(p => p - 1)}>{t('manager.finance.prev')}</button>
+              <span style={{ fontSize: '0.875rem', alignSelf: 'center' }}>{t('manager.finance.page')} {page} {t('manager.finance.of')} {feesData.last_page}</span>
+              <button className={styles.btn} disabled={page === feesData.last_page} onClick={() => setPage(p => p + 1)}>{t('manager.finance.next')}</button>
             </div>
           )}
         </section>
@@ -347,15 +356,15 @@ export default function FinancePage() {
         {/* RIGHT: Transactions */}
         <aside className={styles.transactionsCard}>
           <div className={styles.cardHead}>
-            <h3 className={styles.cardTitle}>Recent Transactions</h3>
-            <a href="#" className={styles.viewAll}>View all</a>
+            <h3 className={styles.cardTitle}>{t('manager.finance.recentTransactions')}</h3>
+            <a href="#" className={styles.viewAll}>{t('manager.finance.viewAll')}</a>
           </div>
           <div className={styles.transactionsList}>
             {transactionsLoading ? (
               Array.from({ length: 5 }).map((_, i) => <div key={i} className={styles.txItem}><div className={styles.skeleton} style={{ height: '40px', width: '100%' }} /></div>)
             ) : transactions?.length === 0 ? (
               <div className={styles.emptyState}>
-                <p className={styles.emptyText}>No payments recorded yet</p>
+                <p className={styles.emptyText}>{t('manager.finance.noPayments')}</p>
               </div>
             ) : (
               transactions?.map(tx => (
@@ -376,7 +385,7 @@ export default function FinancePage() {
       <section className={styles.collectionSection}>
         <div className={styles.progressBarWrap}>
           <div className={styles.progressLabelWrap}>
-            <span className={styles.collectionLabel}>Overall Collection Rate</span>
+            <span className={styles.collectionLabel}>{t('manager.finance.collectionRate')}</span>
             <span className={styles.collectionPct}>{collectionRate}%</span>
           </div>
           <div className={styles.progressBar}>
@@ -385,9 +394,9 @@ export default function FinancePage() {
             <div className={`${styles.progressSegment} ${styles.segOverdue}`} style={{ width: `${(summary?.overdue ?? 0) / (summary?.expected || 1) * 100}%` }} />
           </div>
           <div className={styles.breakdown}>
-            <div className={styles.breakdownItem}><span className={`${styles.dot} ${styles.segCollected}`} /> Collected</div>
-            <div className={styles.breakdownItem}><span className={`${styles.dot} ${styles.segPending}`} /> Pending</div>
-            <div className={styles.breakdownItem}><span className={`${styles.dot} ${styles.segOverdue}`} /> Overdue</div>
+            <div className={styles.breakdownItem}><span className={`${styles.dot} ${styles.segCollected}`} /> {t('manager.finance.collected')}</div>
+            <div className={styles.breakdownItem}><span className={`${styles.dot} ${styles.segPending}`} /> {t('manager.finance.pending')}</div>
+            <div className={styles.breakdownItem}><span className={`${styles.dot} ${styles.segOverdue}`} /> {t('manager.finance.overdue')}</div>
           </div>
         </div>
       </section>
@@ -396,13 +405,13 @@ export default function FinancePage() {
       <SlideOver 
         open={isGenerateModalOpen} 
         onClose={() => setGenerateModalOpen(false)} 
-        title="Generate Fees"
+        title={t('manager.finance.generateFees')}
       >
         <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
           <div className={styles.formGroup} style={{ marginBottom: 0 }}>
-            <label className={styles.label}>Fee Structure</label>
+            <label className={styles.label}>{t('manager.finance.feeStructure')}</label>
             <select className={styles.select} value={genFeeStructureId} onChange={(e) => setGenFeeStructureId(e.target.value)}>
-              <option value="">Select Fee Structure...</option>
+              <option value="">{t('manager.finance.selectFeeStructure')}</option>
               {feeStructures?.map((fs: any) => (
                 <option key={fs.id} value={fs.id}>{fs.name} ({formatCurrency(fs.amount)} {fs.currency})</option>
               ))}
@@ -410,25 +419,25 @@ export default function FinancePage() {
           </div>
 
           <div className={styles.formGroup} style={{ marginBottom: 0 }}>
-            <label className={styles.label}>Target Group</label>
+            <label className={styles.label}>{t('manager.finance.targetGroup')}</label>
             <select className={styles.select} value={genTarget} onChange={(e) => {
               setGenTarget(e.target.value);
-              setGenTargetId(''); // Reset target ID when changing target type
+              setGenTargetId('');
             }}>
-              <option value="grade_level">Grade Level</option>
-              <option value="course">Course</option>
-              <option value="all">All Students</option>
+              <option value="grade_level">{t('manager.finance.gradeLevel')}</option>
+              <option value="course">{t('manager.finance.course')}</option>
+              <option value="all">{t('manager.finance.allStudents')}</option>
             </select>
           </div>
 
           {genTarget !== 'all' && (
             <div className={styles.formGroup} style={{ marginBottom: 0 }}>
               <label className={styles.label}>
-                Select {genTarget === 'grade_level' ? 'Grade Level' : 'Course'}
+                {t('manager.finance.select')} {genTarget === 'grade_level' ? t('manager.finance.gradeLevel') : t('manager.finance.course')}
               </label>
               {genTarget === 'grade_level' ? (
                 <select className={styles.select} value={genTargetId} onChange={(e) => setGenTargetId(e.target.value)}>
-                  <option value="">Select Grade Level...</option>
+                  <option value="">{t('manager.finance.selectGradeLevel')}</option>
                   {gradeLevels?.map((gl: any) => (
                     <option key={gl.id} value={gl.id}>{gl.name}</option>
                   ))}
@@ -437,7 +446,7 @@ export default function FinancePage() {
                 <input 
                   className={styles.input} 
                   type="number" 
-                  placeholder="Enter Course ID" 
+                  placeholder={t('manager.finance.enterCourseId')}
                   value={genTargetId} 
                   onChange={(e) => setGenTargetId(e.target.value)} 
                 />
@@ -451,7 +460,7 @@ export default function FinancePage() {
               onClick={() => generateMutation.mutate()} 
               disabled={generateMutation.isPending || !genFeeStructureId || (genTarget !== 'all' && !genTargetId)}
             >
-              {generateMutation.isPending ? 'Generating...' : 'Generate Fees'}
+              {generateMutation.isPending ? t('manager.finance.generating') : t('manager.finance.generateFees')}
             </button>
           </div>
         </div>
@@ -461,40 +470,40 @@ export default function FinancePage() {
       <SlideOver 
         open={!!selectedFee} 
         onClose={() => setSelectedFee(null)} 
-        title="Fee Details"
+        title={t('manager.finance.feeDetails')}
       >
         {selectedFee && (
           <div>
             <div style={{ marginBottom: '24px' }}>
               <StatusBadge status={selectedFee.status} />
               <h3 style={{ fontSize: '1.25rem', fontWeight: 700, marginTop: '12px' }}>{selectedFee.student_name}</h3>
-              <p style={{ color: 'var(--text-muted)', fontSize: '0.875rem' }}>Student Code: {selectedFee.student_code}</p>
+              <p style={{ color: 'var(--text-muted)', fontSize: '0.875rem' }}>{t('manager.finance.studentCode')}: {selectedFee.student_code}</p>
             </div>
-            
+
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px', marginBottom: '32px' }}>
               <div className={styles.formGroup}>
-                <label className={styles.label}>Amount</label>
+                <label className={styles.label}>{t('manager.finance.amount')}</label>
                 <div style={{ fontSize: '1rem', fontWeight: 700 }}>{formatCurrency(selectedFee.amount)} EGP</div>
               </div>
               <div className={styles.formGroup}>
-                <label className={styles.label}>Due Date</label>
+                <label className={styles.label}>{t('manager.finance.dueDate')}</label>
                 <div style={{ fontSize: '1rem' }}>{safeDate(selectedFee.due_date).toLocaleDateString()}</div>
               </div>
               <div className={styles.formGroup} style={{ gridColumn: 'span 2' }}>
-                <label className={styles.label}>Description</label>
+                <label className={styles.label}>{t('manager.finance.description')}</label>
                 <div style={{ fontSize: '0.875rem' }}>{selectedFee.description}</div>
               </div>
             </div>
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
               {(selectedFee.status === 'pending' || selectedFee.status === 'overdue') && (
-                <button className={`${styles.btn} ${styles.btnPrimary}`} onClick={() => setPaymentModalOpen(true)}>Mark as Paid</button>
+                <button className={`${styles.btn} ${styles.btnPrimary}`} onClick={() => setPaymentModalOpen(true)}>{t('manager.finance.markAsPaid')}</button>
               )}
               {selectedFee.status === 'pending' && (
-                <button className={styles.btn} onClick={() => statusActionMutation.mutate('overdue')}>Mark as Overdue</button>
+                <button className={styles.btn} onClick={() => statusActionMutation.mutate('overdue')}>{t('manager.finance.markAsOverdue')}</button>
               )}
               {selectedFee.status !== 'paid' && selectedFee.status !== 'waived' && (
-                <button className={styles.btn} style={{ color: 'oklch(58% 0.22 27)' }} onClick={() => statusActionMutation.mutate('waive')}>Waive Fee</button>
+                <button className={styles.btn} style={{ color: 'oklch(58% 0.22 27)' }} onClick={() => statusActionMutation.mutate('waive')}>{t('manager.finance.waiveFee')}</button>
               )}
             </div>
           </div>

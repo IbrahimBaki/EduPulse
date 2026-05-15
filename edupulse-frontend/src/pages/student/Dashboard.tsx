@@ -1,6 +1,7 @@
 import { useQuery } from '@tanstack/react-query'
 import { Link, useNavigate } from 'react-router-dom'
 import { useRef, useEffect, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { useAuthStore } from '../../stores/authStore'
 import api from '../../lib/axios'
 import styles from './Dashboard.module.css'
@@ -49,9 +50,9 @@ interface DashboardData {
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
-function getGreeting(name: string): string {
+function getGreeting(name: string, t: (key: string) => string): string {
   const hour = new Date().getHours()
-  const salutation = hour < 12 ? 'Good morning' : hour < 17 ? 'Good afternoon' : 'Good evening'
+  const salutation = hour < 12 ? t('student.dashboard.goodMorning') : hour < 17 ? t('student.dashboard.goodAfternoon') : t('student.dashboard.goodEvening')
   const firstName = name.trim().split(/\s+/)[0]
   return `${salutation}, ${firstName}`
 }
@@ -344,15 +345,16 @@ function StatCard({
 // ─── AI Tutor banner ──────────────────────────────────────────────────────────
 
 function AiTutorBanner() {
+  const { t } = useTranslation()
   const navigate = useNavigate()
   const [topic, setTopic] = useState('')
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
-    const t = topic.trim()
+    const trimmed = topic.trim()
     navigate(
-      t
-        ? `/student/ai-tutor?topic=${encodeURIComponent(t)}`
+      trimmed
+        ? `/student/ai-tutor?topic=${encodeURIComponent(trimmed)}`
         : '/student/ai-tutor'
     )
   }
@@ -362,26 +364,26 @@ function AiTutorBanner() {
       data-animate
       className={styles.aiTutorBanner}
       role="region"
-      aria-label="AI Tutor quick start"
+      aria-label={t('student.dashboard.aiTutorQuickStart')}
     >
       <div className={styles.aiTutorBannerIcon}>
         <SparklesIcon />
       </div>
       <div className={styles.aiTutorBannerBody}>
-        <p className={styles.aiTutorBannerTitle}>Your AI Tutor is ready.</p>
+        <p className={styles.aiTutorBannerTitle}>{t('student.dashboard.aiTutorReady')}</p>
         <form className={styles.aiTutorBannerForm} onSubmit={handleSubmit}>
           <input
             type="text"
             className={styles.aiTutorBannerInput}
-            placeholder="What do you want to learn today?"
+            placeholder={t('student.dashboard.whatToLearn')}
             value={topic}
             onChange={e => setTopic(e.target.value)}
-            aria-label="Topic to learn with AI Tutor"
+            aria-label={t('student.dashboard.topicAriaLabel')}
           />
           <button
             type="submit"
             className={styles.aiTutorBannerBtn}
-            aria-label="Start learning"
+            aria-label={t('student.dashboard.startLearning')}
           >
             <ArrowRightIcon />
           </button>
@@ -404,7 +406,8 @@ function HeroSection({
   data?: DashboardData
   loading: boolean
 }) {
-  const greeting   = userName ? getGreeting(userName) : 'Welcome back'
+  const { t } = useTranslation()
+  const greeting   = userName ? getGreeting(userName, t) : t('student.dashboard.welcomeBack')
   const motivation = getMotivation(data)
 
   return (
@@ -425,8 +428,9 @@ function HeroSection({
 // ─── Next session banner ──────────────────────────────────────────────────────
 
 function NextSessionBanner({ session }: { session: UpcomingSession }) {
+  const { t } = useTranslation()
   const mins  = minutesUntil(session.starts_at)
-  const label = mins <= 1 ? 'Starting now' : `Starts in ${mins} min`
+  const label = mins <= 1 ? t('student.dashboard.startingNow') : t('student.dashboard.startsIn', { mins })
 
   return (
     <div className={styles.sessionBanner} role="status">
@@ -442,7 +446,7 @@ function NextSessionBanner({ session }: { session: UpcomingSession }) {
           rel="noopener noreferrer"
           className={styles.joinBtn}
         >
-          Join now <ExternalLinkIcon />
+          {t('session.joinNow')} <ExternalLinkIcon />
         </a>
       )}
     </div>
@@ -458,10 +462,11 @@ function UpcomingSessions({
   sessions?: UpcomingSession[]
   loading: boolean
 }) {
+  const { t } = useTranslation()
   return (
     <section data-animate aria-labelledby="upcoming-label">
       <h2 id="upcoming-label" className={styles.sectionLabel}>
-        <CalendarIcon /> Upcoming sessions
+        <CalendarIcon /> {t('student.dashboard.upcomingSessions')}
       </h2>
 
       {loading ? (
@@ -490,14 +495,14 @@ function UpcomingSessions({
               <polyline points="9 16 11 18 15 14"/>
             </svg>
           </div>
-          <p className={styles.emptyTitle}>Your schedule is clear today</p>
-          <p className={styles.emptyHint}>Use the time to get ahead.</p>
+          <p className={styles.emptyTitle}>{t('student.dashboard.scheduleClear')}</p>
+          <p className={styles.emptyHint}>{t('student.dashboard.scheduleClearHint')}</p>
           <div className={styles.emptyActions}>
             <Link to="/student/courses" className={styles.emptyBtn}>
-              Browse lessons <ChevronRightIcon />
+              {t('student.dashboard.browseLessons')} <ChevronRightIcon />
             </Link>
             <Link to="/student/ai-tutor" className={styles.emptyBtnOutline}>
-              Practice with AI Tutor <ChevronRightIcon />
+              {t('student.dashboard.practiceWithAiTutor')} <ChevronRightIcon />
             </Link>
           </div>
         </div>
@@ -549,6 +554,7 @@ function RecentQuizzes({
   quizzes?: RecentQuiz[]
   loading: boolean
 }) {
+  const { t } = useTranslation()
   const navigate = useNavigate()
 
   return (
@@ -557,7 +563,7 @@ function RecentQuizzes({
         <span className={`${styles.cardHeaderIcon} ${styles.cardHeaderIconBlue}`}>
           <TrophyIcon />
         </span>
-        <h2 id="quizzes-label" className={styles.cardTitle}>Recent results</h2>
+        <h2 id="quizzes-label" className={styles.cardTitle}>{t('student.dashboard.recentResults')}</h2>
       </header>
 
       {loading ? (
@@ -575,20 +581,20 @@ function RecentQuizzes({
           <div className={styles.cardEmptyIcon} aria-hidden="true">
             <TrophyIcon />
           </div>
-          <p className={styles.cardEmptyTitle}>Your score board is empty</p>
+          <p className={styles.cardEmptyTitle}>{t('student.dashboard.scoreBoardEmpty')}</p>
           <p className={styles.cardEmptyHint}>
-            Your first quiz starts a learning streak. It takes 5 minutes.
+            {t('student.dashboard.scoreBoardEmptyHint')}
           </p>
           <button
             type="button"
             className={styles.emptyBtn}
             onClick={() => navigate('/student/ai-tutor')}
           >
-            Start with AI Tutor <ArrowRightIcon />
+            {t('student.dashboard.startWithAiTutor')} <ArrowRightIcon />
           </button>
         </div>
       ) : (
-        <ul className={styles.quizList} aria-label="Recent quiz results">
+        <ul className={styles.quizList} aria-label={t('student.dashboard.recentResults')}>
           {quizzes.map((q, i) => (
             <li
               key={i}
@@ -604,7 +610,7 @@ function RecentQuizzes({
                 }`}
               >
                 {q.score === 100 && (
-                  <span className={styles.quizStar} aria-label="Perfect score">
+                  <span className={styles.quizStar} aria-label={t('student.dashboard.perfectScore')}>
                     ★
                   </span>
                 )}
@@ -630,6 +636,7 @@ function AttendanceSummarySection({
   summary?: AttendanceSummary
   loading: boolean
 }) {
+  const { t } = useTranslation()
   const isExcellent =
     (summary?.rate ?? 0) >= 90 && (summary?.total ?? 0) > 0
 
@@ -644,7 +651,7 @@ function AttendanceSummarySection({
           <UserCheckIcon />
         </span>
         <h2 id="attendance-label" className={styles.cardTitle}>
-          Attendance
+          {t('student.dashboard.attendance')}
         </h2>
       </header>
 
@@ -664,9 +671,9 @@ function AttendanceSummarySection({
           <div className={styles.cardEmptyIcon} aria-hidden="true">
             <UserCheckIcon />
           </div>
-          <p className={styles.cardEmptyTitle}>No records yet</p>
+          <p className={styles.cardEmptyTitle}>{t('student.dashboard.noRecords')}</p>
           <p className={styles.cardEmptyHint}>
-            Attend your first session to start tracking your progress here.
+            {t('student.dashboard.noRecordsHint')}
           </p>
         </div>
       ) : (
@@ -674,9 +681,9 @@ function AttendanceSummarySection({
           <p className={styles.attendanceFraction}>
             {summary.present}{' '}
             <span className={styles.attendanceFractionOf}>
-              of {summary.total}
+              {t('student.dashboard.of')} {summary.total}
             </span>{' '}
-            attended
+            {t('student.dashboard.attended')}
           </p>
           <div
             className={styles.attendanceBar}
@@ -684,7 +691,7 @@ function AttendanceSummarySection({
             aria-valuenow={summary.rate}
             aria-valuemin={0}
             aria-valuemax={100}
-            aria-label={`${summary.rate}% attendance`}
+            aria-label={`${summary.rate}% ${t('student.dashboard.attendance')}`}
           >
             <div
               className={`${styles.attendanceBarFill} ${
@@ -696,23 +703,23 @@ function AttendanceSummarySection({
           <div className={styles.attendanceBreakdown}>
             <div className={styles.attendanceStat}>
               <span className={styles.attendanceStatNum}>{summary.rate}%</span>
-              <span className={styles.attendanceStatLabel}>Rate</span>
+              <span className={styles.attendanceStatLabel}>{t('student.dashboard.rate')}</span>
             </div>
             <div className={styles.attendanceDivider} />
             <div className={styles.attendanceStat}>
               <span className={styles.attendanceStatNum}>
                 {summary.total - summary.present}
               </span>
-              <span className={styles.attendanceStatLabel}>Absent</span>
+              <span className={styles.attendanceStatLabel}>{t('student.dashboard.absent')}</span>
             </div>
           </div>
           {isExcellent && (
             <div
               className={styles.attendanceCelebration}
-              aria-label="Excellent attendance"
+              aria-label={t('student.dashboard.excellentAttendance')}
             >
               <FlameIcon />
-              <span>Excellent attendance — keep it up</span>
+              <span>{t('student.dashboard.excellentAttendance')}</span>
             </div>
           )}
         </>
@@ -724,6 +731,7 @@ function AttendanceSummarySection({
 // ─── Level-up topics ─────────────────────────────────────────────────────────
 
 function LevelUpTopics({ topics }: { topics?: WeakTopic[] }) {
+  const { t } = useTranslation()
   const navigate   = useNavigate()
   const sectionRef = useRef<HTMLElement>(null)
 
@@ -747,26 +755,26 @@ function LevelUpTopics({ topics }: { topics?: WeakTopic[] }) {
   return (
     <section ref={sectionRef} aria-labelledby="topics-label">
       <h2 id="topics-label" className={styles.sectionLabel}>
-        <SparklesIcon /> Level up on these
+        <SparklesIcon /> {t('student.dashboard.levelUpTopics')}
       </h2>
       <div className={styles.topicPills} role="list">
-        {topics.map((t, i) => (
+        {topics.map((topic, i) => (
           <button
             key={i}
             role="listitem"
             type="button"
             className={`${styles.topicPill} ${
-              t.score < 60 ? styles.topicPillWeak : styles.topicPillMedium
+              topic.score < 60 ? styles.topicPillWeak : styles.topicPillMedium
             }`}
             onClick={() =>
               navigate(
-                `/student/ai-tutor?topic=${encodeURIComponent(t.topic)}`
+                `/student/ai-tutor?topic=${encodeURIComponent(topic.topic)}`
               )
             }
-            aria-label={`Practice ${t.topic} — ${t.score}% score`}
+            aria-label={`${t('student.dashboard.practice')} ${topic.topic} — ${topic.score}% ${t('student.dashboard.score')}`}
           >
-            <span lang="ar">{t.topic}</span>
-            <span className={styles.topicScore}>{t.score}%</span>
+            <span lang="ar">{topic.topic}</span>
+            <span className={styles.topicScore}>{topic.score}%</span>
             <span className={styles.topicArrow} aria-hidden="true">
               <ChevronRightIcon />
             </span>
@@ -780,6 +788,7 @@ function LevelUpTopics({ topics }: { topics?: WeakTopic[] }) {
 // ─── Dashboard page ───────────────────────────────────────────────────────────
 
 export default function DashboardPage() {
+  const { t } = useTranslation()
   const user       = useAuthStore(s => s.user)
   const tenantCode = useAuthStore(s => s.tenantCode)
   const pageRef    = useRef<HTMLDivElement>(null)
@@ -833,25 +842,25 @@ export default function DashboardPage() {
         loading={isLoading}
       />
 
-      <div className={styles.statCardsGrid} aria-label="Quick overview">
+      <div className={styles.statCardsGrid} aria-label={t('student.dashboard.quickOverview')}>
         <StatCard
           icon={<BookOpenIcon />}
           value={data?.enrolled_courses ?? 0}
-          label="courses enrolled"
+          label={t('student.dashboard.coursesEnrolled')}
           colorVariant="blue"
           loading={isLoading}
         />
         <StatCard
           icon={<CalendarIcon />}
           value={data?.attendance_summary?.total ?? 0}
-          label="sessions attended"
+          label={t('student.dashboard.sessionsAttended')}
           colorVariant="amber"
           loading={isLoading}
         />
         <StatCard
           icon={<TrophyIcon />}
           value={data?.recent_quizzes?.length ?? 0}
-          label="quizzes taken"
+          label={t('student.dashboard.quizzesTaken')}
           colorVariant="green"
           loading={isLoading}
         />
@@ -866,13 +875,13 @@ export default function DashboardPage() {
       {isError && (
         <div className={styles.errorBanner} role="alert">
           <AlertTriangleIcon />
-          <span>Could not load your dashboard.</span>
+          <span>{t('student.dashboard.couldNotLoad')}</span>
           <button
             type="button"
             onClick={() => refetch()}
             className={styles.retryBtn}
           >
-            Retry
+            {t('common.retry')}
           </button>
         </div>
       )}
@@ -900,19 +909,19 @@ export default function DashboardPage() {
           <span className={styles.coursePillNum}>
             {data?.enrolled_courses ?? 0}
           </span>
-          {(data?.enrolled_courses ?? 0) === 1 ? 'course' : 'courses'} enrolled
+          {t('student.dashboard.coursesEnrolled')}
           <ChevronRightIcon />
         </Link>
 
         {(data?.pending_fees ?? 0) > 0 && (
           <Link to="/student/fees" className={styles.feesBadge}>
             <AlertTriangleIcon />
-            {data!.pending_fees.toLocaleString()} pending
+            {data!.pending_fees.toLocaleString()} {t('student.dashboard.pending')}
           </Link>
         )}
 
         <Link to="/student/ai-tutor" className={styles.aiTutorCta}>
-          <SparklesIcon /> Go to AI Tutor <ArrowRightIcon />
+          <SparklesIcon /> {t('student.dashboard.goToAiTutor')} <ArrowRightIcon />
         </Link>
       </footer>
 

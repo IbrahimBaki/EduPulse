@@ -1,6 +1,6 @@
 import { useState, useCallback, useRef } from 'react'
 import { useParams, Link } from 'react-router-dom'
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import { useQuery, useMutation, useQueryClient, type QueryClient } from '@tanstack/react-query'
 import api from '../../lib/axios'
 import { SlideOver } from '../../components/SlideOver'
 import styles from './CourseDetail.module.css'

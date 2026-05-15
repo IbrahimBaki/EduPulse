@@ -1,5 +1,6 @@
 import { useState, useCallback } from 'react'
 import { useQuery, useMutation } from '@tanstack/react-query'
+import { useTranslation } from 'react-i18next'
 import api from '../../lib/axios'
 import { SlideOver } from '../../components/SlideOver'
 import styles from './Students.module.css'
@@ -122,6 +123,7 @@ function SkeletonRow() {
 // ─── Student detail slide-over ────────────────────────────────────────────────
 
 function StudentDetailPanel({ student, courseId, onClose }: { student: Student; courseId: string; onClose: () => void }) {
+  const { t } = useTranslation()
   const { data: detail, isLoading } = useQuery<StudentDetail>({
     queryKey: ['student-detail', student.id, courseId],
     queryFn: () => api.get(`/teacher/courses/${courseId}/students/${student.id}`).then(r => r.data.data ?? r.data),
@@ -159,24 +161,24 @@ function StudentDetailPanel({ student, courseId, onClose }: { student: Student; 
         <>
           {/* Personal info */}
           <div className={styles.detailSection}>
-            <div className={styles.detailLabel}>Personal Info</div>
+            <div className={styles.detailLabel}>{t('teacher.students.personalInfo')}</div>
             <div className={styles.infoGrid}>
               <div className={styles.infoItem}>
-                <div className={styles.infoKey}>Name</div>
+                <div className={styles.infoKey}>{t('teacher.students.name')}</div>
                 <div className={styles.infoValue}>{student.name}</div>
               </div>
               <div className={styles.infoItem}>
-                <div className={styles.infoKey}>Student Code</div>
+                <div className={styles.infoKey}>{t('teacher.students.studentCode')}</div>
                 <div className={styles.infoValue}>{student.code}</div>
               </div>
               {student.grade_level && (
                 <div className={styles.infoItem}>
-                  <div className={styles.infoKey}>Grade</div>
+                  <div className={styles.infoKey}>{t('teacher.students.grade')}</div>
                   <div className={styles.infoValue}>{student.grade_level}</div>
                 </div>
               )}
               <div className={styles.infoItem}>
-                <div className={styles.infoKey}>Last Active</div>
+                <div className={styles.infoKey}>{t('teacher.students.lastActive')}</div>
                 <div className={styles.infoValue}>{formatDate(student.last_activity_at)}</div>
               </div>
             </div>
@@ -184,9 +186,9 @@ function StudentDetailPanel({ student, courseId, onClose }: { student: Student; 
 
           {/* Weak topics */}
           <div className={styles.detailSection}>
-            <div className={styles.detailLabel}>Weak Topics</div>
+            <div className={styles.detailLabel}>{t('teacher.students.weakTopics')}</div>
             {(detail?.weak_topics ?? []).length === 0 ? (
-              <p style={{ fontSize: '0.8125rem', color: 'var(--text-muted)' }}>No weak topics identified.</p>
+              <p style={{ fontSize: '0.8125rem', color: 'var(--text-muted)' }}>{t('teacher.students.noWeakTopics')}</p>
             ) : (
               <div className={styles.pillRow}>
                 {(detail?.weak_topics ?? []).map((t, i) => (
@@ -201,17 +203,17 @@ function StudentDetailPanel({ student, courseId, onClose }: { student: Student; 
 
           {/* Recent quiz attempts */}
           <div className={styles.detailSection}>
-            <div className={styles.detailLabel}>Recent Quiz Attempts</div>
+            <div className={styles.detailLabel}>{t('teacher.students.recentQuizAttempts')}</div>
             {(detail?.recent_quiz_attempts ?? []).length === 0 ? (
-              <p style={{ fontSize: '0.8125rem', color: 'var(--text-muted)' }}>No quiz attempts yet.</p>
+              <p style={{ fontSize: '0.8125rem', color: 'var(--text-muted)' }}>{t('teacher.students.noQuizAttempts')}</p>
             ) : (
-              <table className={styles.quizTable} aria-label="Recent quiz attempts">
+              <table className={styles.quizTable} aria-label={t('teacher.students.recentQuizAttempts')}>
                 <thead>
                   <tr>
-                    <th>Topic</th>
-                    <th>Score</th>
-                    <th>Level</th>
-                    <th>Date</th>
+                    <th>{t('teacher.students.topic')}</th>
+                    <th>{t('teacher.students.score')}</th>
+                    <th>{t('teacher.students.level')}</th>
+                    <th>{t('teacher.students.date')}</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -230,17 +232,17 @@ function StudentDetailPanel({ student, courseId, onClose }: { student: Student; 
 
           {/* Attendance breakdown */}
           <div className={styles.detailSection}>
-            <div className={styles.detailLabel}>Attendance</div>
-            <div className={styles.attendanceBreakdown} role="list" aria-label="Attendance breakdown">
+            <div className={styles.detailLabel}>{t('teacher.attendance.title')}</div>
+            <div className={styles.attendanceBreakdown} role="list" aria-label={t('teacher.students.attendanceBreakdown')}>
               {([
-                { key: 'present', label: 'Present', cls: styles.attPresent },
-                { key: 'absent',  label: 'Absent',  cls: styles.attAbsent },
-                { key: 'late',    label: 'Late',     cls: styles.attLate },
-                { key: 'excused', label: 'Excused',  cls: styles.attExcused },
-              ] as const).map(({ key, label, cls }) => (
+                { key: 'present', labelKey: 'teacher.students.present', cls: styles.attPresent },
+                { key: 'absent',  labelKey: 'teacher.students.absent',  cls: styles.attAbsent },
+                { key: 'late',    labelKey: 'teacher.students.late',     cls: styles.attLate },
+                { key: 'excused', labelKey: 'teacher.students.excused',  cls: styles.attExcused },
+              ] as const).map(({ key, labelKey, cls }) => (
                 <div key={key} className={styles.attStat} role="listitem">
                   <div className={`${styles.attNum} ${cls}`}>{breakdown[key]}</div>
-                  <div className={styles.attLabel}>{label}</div>
+                  <div className={styles.attLabel}>{t(labelKey)}</div>
                 </div>
               ))}
             </div>
@@ -253,14 +255,14 @@ function StudentDetailPanel({ student, courseId, onClose }: { student: Student; 
               className={styles.aiExamBtn}
               onClick={handleGenerateExam}
               disabled={examMutation.isPending}
-              aria-label={`Generate AI exam for ${student.name}`}
+              aria-label={`${t('teacher.students.generateAiExam')} ${student.name}`}
             >
               <SparkleIcon />
-              {examMutation.isPending ? 'Generating...' : 'Generate AI Exam'}
+              {examMutation.isPending ? t('teacher.students.generating') : t('teacher.students.generateAiExam')}
             </button>
             {(detail?.weak_topics ?? []).length > 0 && (
               <p style={{ marginBlockStart: 6, fontSize: '0.75rem', color: 'var(--text-muted)', textAlign: 'center' }}>
-                Pre-filled with {detail!.weak_topics!.length} weak topic{detail!.weak_topics!.length !== 1 ? 's' : ''}
+                {t('teacher.students.preFilledWith', { count: detail!.weak_topics!.length })}
               </p>
             )}
           </div>
@@ -273,6 +275,7 @@ function StudentDetailPanel({ student, courseId, onClose }: { student: Student; 
 // ─── Main page ────────────────────────────────────────────────────────────────
 
 export default function TeacherStudents() {
+  const { t } = useTranslation()
   const [courseId, setCourseId] = useState('')
   const [selectedStudent, setSelectedStudent] = useState<Student | null>(null)
 
@@ -296,12 +299,12 @@ export default function TeacherStudents() {
     <div className={styles.page}>
       <header className={styles.pageHead}>
         <div>
-          <h1 className={styles.pageTitle}>Students</h1>
+          <h1 className={styles.pageTitle}>{t('teacher.students.title')}</h1>
           <p className={styles.pageSubtitle}>
             {!courseId
-              ? 'Select a course to view students'
+              ? t('teacher.students.selectCoursePrompt')
               : isLoading
-                ? 'Loading...'
+                ? t('common.loading')
                 : `${students.length} student${students.length !== 1 ? 's' : ''}`}
           </p>
         </div>
@@ -312,9 +315,9 @@ export default function TeacherStudents() {
           className={styles.courseSelect}
           value={courseId}
           onChange={e => setCourseId(e.target.value)}
-          aria-label="Select course"
+          aria-label={t('teacher.students.selectCourse')}
         >
-          <option value="">Select a course...</option>
+          <option value="">{t('teacher.students.selectCourse')}</option>
           {courses.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
         </select>
       </div>
@@ -322,31 +325,31 @@ export default function TeacherStudents() {
       {!courseId ? (
         <div className={styles.emptyState}>
           <div style={{ color: 'oklch(44% 0.018 255)' }}><UsersIcon /></div>
-          <p className={styles.emptyTitle}>Select a course</p>
-          <p className={styles.emptyText}>Choose a course above to view its enrolled students.</p>
+          <p className={styles.emptyTitle}>{t('teacher.students.selectCourseTitle')}</p>
+          <p className={styles.emptyText}>{t('teacher.students.selectCourseText')}</p>
         </div>
       ) : isError ? (
         <div className={styles.emptyState}>
           <div style={{ color: 'var(--color-amber)' }}><AlertIcon /></div>
-          <p className={styles.emptyTitle}>Failed to load students</p>
-          <button type="button" className={`${styles.btn} ${styles.btnOutline}`} onClick={() => refetch()}>Retry</button>
+          <p className={styles.emptyTitle}>{t('common.errorLoadFailed')}</p>
+          <button type="button" className={`${styles.btn} ${styles.btnOutline}`} onClick={() => refetch()}>{t('common.retry')}</button>
         </div>
       ) : !isLoading && students.length === 0 ? (
         <div className={styles.emptyState}>
           <div style={{ color: 'oklch(44% 0.018 255)' }}><UsersIcon /></div>
-          <p className={styles.emptyTitle}>No students enrolled</p>
-          <p className={styles.emptyText}>No students are enrolled in this course yet.</p>
+          <p className={styles.emptyTitle}>{t('teacher.students.noStudentsEnrolled')}</p>
+          <p className={styles.emptyText}>{t('teacher.students.noStudentsEnrolledText')}</p>
         </div>
       ) : (
         <div className={styles.tableWrap}>
-          <table className={styles.table} aria-label="Students">
+          <table className={styles.table} aria-label={t('teacher.students.title')}>
             <thead>
               <tr>
-                <th>Student</th>
-                <th>Attendance</th>
-                <th>Avg Score</th>
-                <th>Weak Topics</th>
-                <th>Last Active</th>
+                <th>{t('teacher.students.student')}</th>
+                <th>{t('teacher.students.attendance')}</th>
+                <th>{t('teacher.students.avgScore')}</th>
+                <th>{t('teacher.students.weakTopics')}</th>
+                <th>{t('teacher.students.lastActive')}</th>
               </tr>
             </thead>
             <tbody>
@@ -374,7 +377,7 @@ export default function TeacherStudents() {
                       </td>
                       <td>
                         <div className={styles.inlineProgress}>
-                          <div className={styles.miniProgress} role="progressbar" aria-valuenow={s.attendance_rate} aria-valuemin={0} aria-valuemax={100} aria-label={`${s.attendance_rate}% attendance`}>
+                          <div className={styles.miniProgress} role="progressbar" aria-valuenow={s.attendance_rate} aria-valuemin={0} aria-valuemax={100} aria-label={`${s.attendance_rate}% ${t('teacher.students.attendance')}`}>
                             <div className={styles.miniProgressBar} style={{ width: `${s.attendance_rate}%` }} />
                           </div>
                           <span className={styles.progressPct}>{s.attendance_rate}%</span>
@@ -385,8 +388,8 @@ export default function TeacherStudents() {
                           {s.avg_quiz_score !== null ? `${s.avg_quiz_score}%` : '—'}
                         </span>
                         {atRisk && (
-                          <span className={styles.atRiskBadge} style={{ marginInlineStart: 8 }} aria-label="At risk">
-                            <AlertIcon /> At Risk
+                          <span className={styles.atRiskBadge} style={{ marginInlineStart: 8 }} aria-label={t('teacher.students.atRisk')}>
+                            <AlertIcon /> {t('teacher.students.atRisk')}
                           </span>
                         )}
                       </td>

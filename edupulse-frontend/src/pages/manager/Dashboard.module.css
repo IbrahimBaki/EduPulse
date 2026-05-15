@@ -64,7 +64,7 @@
 
 .statCard:hover {
   transform: translateY(-2px);
-  box-shadow: 0 8px 24px oklch(6% 0.015 255 / 0.22), 0 0 0 1px oklch(62% 0.26 255 / 0.15);
+  box-shadow: var(--shadow-md), 0 0 0 1px oklch(62% 0.26 255 / 0.15);
   border-color: oklch(62% 0.26 255 / 0.3);
 }
 
@@ -126,7 +126,7 @@
 
 .panel:hover {
   transform: translateY(-2px);
-  box-shadow: 0 8px 24px oklch(6% 0.015 255 / 0.18);
+  box-shadow: var(--shadow-md);
 }
 
 .panelHead {
@@ -282,7 +282,7 @@
 }
 
 .sessionRow:hover {
-  background: oklch(22% 0.026 255);
+  background: var(--surface-elevated);
   border-color: oklch(62% 0.26 255 / 0.18);
 }
 
@@ -408,7 +408,7 @@
 }
 
 .financeCollected {
-  color: oklch(68% 0.18 148);
+  color: var(--color-green);
 }
 
 .financePending {
@@ -438,6 +438,10 @@
   transform-origin: left;
   animation: expandBar 0.9s var(--ease-out-expo) both;
   animation-delay: 0.15s;
+}
+
+:global([dir="rtl"]) .progressBar {
+  transform-origin: right;
 }
 
 @keyframes expandBar {
@@ -541,7 +545,7 @@
   align-items: center;
   gap: 8px;
   font-size: 0.8125rem;
-  color: oklch(68% 0.18 148);
+  color: var(--color-green);
   padding: 8px 0;
 }
 

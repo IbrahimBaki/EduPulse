@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef, useMemo, type ReactNode } from 'react'
 import { createPortal } from 'react-dom'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import { useTranslation } from 'react-i18next'
 import api from '../../lib/axios'
 import styles from './Schedule.module.css'
 
@@ -141,6 +142,7 @@ async function createScheduleApi(courseId: number, payload: CreateSchedulePayloa
 function SlideOver({ open, onClose, onSave, isLoading, title, children }: {
   open: boolean; onClose: () => void; onSave: () => void; isLoading?: boolean; title: string; children: ReactNode
 }) {
+  const { t } = useTranslation()
   const closeRef = useRef<HTMLButtonElement>(null)
   useEffect(() => {
     if (!open) return
@@ -162,9 +164,9 @@ function SlideOver({ open, onClose, onSave, isLoading, title, children }: {
         </div>
         <div className={styles.panelBody}>{children}</div>
         <div className={styles.panelFoot}>
-          <button className={`${styles.btn} ${styles.btnOutline}`} onClick={onClose} disabled={isLoading}>Cancel</button>
+          <button className={`${styles.btn} ${styles.btnOutline}`} onClick={onClose} disabled={isLoading}>{t('common.cancel')}</button>
           <button className={`${styles.btn} ${styles.btnPrimary}`} onClick={onSave} disabled={isLoading}>
-            {isLoading ? 'Saving...' : 'Save Schedule'}
+            {isLoading ? t('common.saving') : t('manager.schedule.saveSchedule')}
           </button>
         </div>
       </div>
@@ -174,6 +176,7 @@ function SlideOver({ open, onClose, onSave, isLoading, title, children }: {
 }
 
 export default function SchedulePage() {
+  const { t } = useTranslation()
   const queryClient = useQueryClient()
   const [view, setView] = useState<'month' | 'week' | 'list'>('week')
   const [currentDate, setCurrentDate] = useState(new Date())
@@ -239,9 +242,9 @@ export default function SchedulePage() {
     <div className={styles.page}>
       <header className={styles.pageHead}>
         <div>
-          <h1 className={styles.pageTitle}>Academic Schedule</h1>
+          <h1 className={styles.pageTitle}>{t('manager.schedule.title')}</h1>
           <p className={styles.pageCount}>
-            {selectedCourse ? `Viewing schedule for ${selectedCourse.name}` : 'Select a course to view its timeline'}
+            {selectedCourse ? `${t('manager.schedule.viewingScheduleFor')} ${selectedCourse.name}` : t('manager.schedule.selectCoursePrompt')}
           </p>
         </div>
 

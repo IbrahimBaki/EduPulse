@@ -1,5 +1,6 @@
 import { useState, useCallback } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import { useTranslation } from 'react-i18next'
 import api from '../../lib/axios'
 import { SlideOver } from '../../components/SlideOver'
 import styles from './Schedule.module.css'
@@ -169,6 +170,7 @@ function CalendarEmptyIcon() {
 // ─── Add session slide-over ────────────────────────────────────────────────────
 
 function AddSessionPanel({ open, onClose, courses }: { open: boolean; onClose: () => void; courses: Course[] }) {
+  const { t } = useTranslation()
   const qc = useQueryClient()
   const [form, setForm] = useState({ course_id: '', title: '', description: '', date: '', starts_at: '', ends_at: '', type: 'online' as 'online' | 'in_person' | 'recorded' })
 
@@ -177,7 +179,7 @@ function AddSessionPanel({ open, onClose, courses }: { open: boolean; onClose: (
     : null
 
   const addMutation = useMutation({
-    mutationFn: (body: object & { course_id: number }) =>
+    mutationFn: (body: Record<string, unknown> & { course_id: number }) =>
       api.post(`/teacher/courses/${body.course_id}/schedules`, body),
     onSuccess: (_data, vars) => {
       qc.invalidateQueries({ queryKey: ['teacher-schedules', String(vars.course_id)] })
@@ -206,13 +208,13 @@ function AddSessionPanel({ open, onClose, courses }: { open: boolean; onClose: (
     <SlideOver
       open={open}
       onClose={onClose}
-      title="Add Session"
-      description="Schedule a new class session"
+      title={t('teacher.schedule.addSession')}
+      description={t('teacher.schedule.scheduleSession')}
       footer={
         <>
-          <button type="button" className={`${styles.btn} ${styles.btnOutline}`} onClick={onClose}>Cancel</button>
+          <button type="button" className={`${styles.btn} ${styles.btnOutline}`} onClick={onClose}>{t('common.cancel')}</button>
           <button type="button" className={`${styles.btn} ${styles.btnPrimary}`} disabled={addMutation.isPending || !canSubmit} onClick={e => handleSubmit(e as unknown as React.FormEvent)}>
-            {addMutation.isPending ? 'Saving...' : 'Save Session'}
+            {addMutation.isPending ? t('common.saving') : t('teacher.schedule.saveSchedule')}
           </button>
         </>
       }
@@ -221,7 +223,7 @@ function AddSessionPanel({ open, onClose, courses }: { open: boolean; onClose: (
         <div className={styles.formRow}>
           <label className={styles.label} htmlFor="sess-course">Course</label>
           <select id="sess-course" className={styles.soSelect} value={form.course_id} onChange={e => setForm(f => ({ ...f, course_id: e.target.value }))} required>
-            <option value="">Select course...</option>
+            <option value="">{t('teacher.schedule.selectCourse')}</option>
             {courses.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
           </select>
         </div>
@@ -250,9 +252,9 @@ function AddSessionPanel({ open, onClose, courses }: { open: boolean; onClose: (
         <div className={styles.formRow}>
           <label className={styles.label} htmlFor="sess-type">Type</label>
           <select id="sess-type" className={styles.soSelect} value={form.type} onChange={e => setForm(f => ({ ...f, type: e.target.value as typeof form.type }))}>
-            <option value="online">Online</option>
-            <option value="in_person">In Person</option>
-            <option value="recorded">Recorded</option>
+            <option value="online">{t('teacher.schedule.sessionType.online')}</option>
+            <option value="in_person">{t('teacher.schedule.sessionType.inPerson')}</option>
+            <option value="recorded">{t('teacher.schedule.sessionType.recorded')}</option>
           </select>
         </div>
         {jitsiUrl && (
@@ -269,6 +271,7 @@ function AddSessionPanel({ open, onClose, courses }: { open: boolean; onClose: (
 // ─── Attendance slide-over ────────────────────────────────────────────────────
 
 function AttendancePanel({ open, onClose, session }: { open: boolean; onClose: () => void; session: Session }) {
+  const { t } = useTranslation()
   const qc = useQueryClient()
   const [attendance, setAttendance] = useState<Record<number, AttendanceStatus>>({})
 
@@ -305,13 +308,13 @@ function AttendancePanel({ open, onClose, session }: { open: boolean; onClose: (
     <SlideOver
       open={open}
       onClose={onClose}
-      title="Attendance"
+      title={t('teacher.attendance.title')}
       description={session.title}
       footer={
         <>
-          <button type="button" className={`${styles.btn} ${styles.btnOutline}`} onClick={onClose}>Cancel</button>
+          <button type="button" className={`${styles.btn} ${styles.btnOutline}`} onClick={onClose}>{t('common.cancel')}</button>
           <button type="button" className={`${styles.btn} ${styles.btnPrimary}`} disabled={submitMutation.isPending || attendees.length === 0} onClick={() => submitMutation.mutate()}>
-            {submitMutation.isPending ? 'Submitting...' : 'Submit Attendance'}
+            {submitMutation.isPending ? t('teacher.attendance.submitting') : t('teacher.attendance.submit')}
           </button>
         </>
       }
@@ -323,7 +326,7 @@ function AttendancePanel({ open, onClose, session }: { open: boolean; onClose: (
           ))}
         </div>
       ) : attendees.length === 0 ? (
-        <p style={{ color: 'var(--text-muted)', fontSize: '0.875rem' }}>No enrolled students found.</p>
+        <p style={{ color: 'var(--text-muted)', fontSize: '0.875rem' }}>{t('teacher.attendance.noStudents')}</p>
       ) : (
         <>
           <div className={styles.attendanceBulkRow}>
@@ -366,6 +369,7 @@ function AttendancePanel({ open, onClose, session }: { open: boolean; onClose: (
 // ─── Main page ────────────────────────────────────────────────────────────────
 
 export default function TeacherSchedule() {
+  const { t } = useTranslation()
   const qc = useQueryClient()
   const today = new Date()
   const [anchor, setAnchor] = useState(today)
@@ -446,14 +450,14 @@ export default function TeacherSchedule() {
           <h1 className={styles.pageTitle}>Schedule</h1>
           <p className={styles.pageSubtitle}>
             {!courseFilter
-              ? 'Select a course to view sessions'
+              ? t('teacher.schedule.selectCourse')
               : isLoading
-                ? 'Loading...'
+                ? t('common.loading')
                 : `${filtered.length} session${filtered.length !== 1 ? 's' : ''}`}
           </p>
         </div>
         <button type="button" className={`${styles.btn} ${styles.btnPrimary}`} onClick={() => setShowAdd(true)}>
-          <PlusIcon /> Add Session
+          <PlusIcon /> {t('teacher.schedule.addSession')}
         </button>
       </header>
 
@@ -464,7 +468,7 @@ export default function TeacherSchedule() {
           onChange={e => setCourseFilter(e.target.value)}
           aria-label="Filter by course"
         >
-          <option value="">All Courses</option>
+          <option value="">{t('teacher.schedule.allCourses')}</option>
           {courses.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
         </select>
 
@@ -609,7 +613,7 @@ export default function TeacherSchedule() {
                           disabled={statusMutation.isPending}
                           onClick={() => statusMutation.mutate({ session: s, status: 'live' })}
                         >
-                          Go Live
+                          {t('session.goLive')}
                         </button>
                       )}
                       {s.status === 'live' && (
@@ -620,7 +624,7 @@ export default function TeacherSchedule() {
                               className={`${styles.btn} ${styles.btnGreen} ${styles.btnSm}`}
                               onClick={() => joinAsHost(s)}
                             >
-                              Join
+                              {t('session.joinNow')}
                             </button>
                           )}
                           <button
@@ -629,7 +633,7 @@ export default function TeacherSchedule() {
                             disabled={statusMutation.isPending}
                             onClick={() => statusMutation.mutate({ session: s, status: 'completed' })}
                           >
-                            End Session
+                            {t('session.endSession')}
                           </button>
                         </>
                       )}
@@ -639,7 +643,7 @@ export default function TeacherSchedule() {
                           className={`${styles.btn} ${styles.btnOutline} ${styles.btnSm}`}
                           onClick={() => setAttendanceSession(s)}
                         >
-                          Attendance
+                          {t('teacher.attendance.title')}
                         </button>
                       )}
                     </div>

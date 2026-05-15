@@ -1,5 +1,6 @@
-import { useState, useEffect, useRef } from 'react'
+import { useState, useRef } from 'react'
 import { useQuery } from '@tanstack/react-query'
+import { useTranslation } from 'react-i18next'
 import api from '../../lib/axios'
 import styles from './Announcements.module.css'
 
@@ -115,6 +116,7 @@ function SkeletonCard() {
 // ─── Announcement card ─────────────────────────────────────────────────────────
 
 function AnnouncementCard({ ann, isUnread, onRead }: { ann: Announcement; isUnread: boolean; onRead: (id: number) => void }) {
+  const { t } = useTranslation()
   const [expanded, setExpanded] = useState(false)
   const cardRef = useRef<HTMLElement>(null)
 
@@ -133,7 +135,7 @@ function AnnouncementCard({ ann, isUnread, onRead }: { ann: Announcement; isUnre
     >
       <div className={styles.cardTop}>
         <h2 className={styles.cardTitle}>{ann.title}</h2>
-        {isUnread && <span className={styles.unreadDot} aria-label="Unread" />}
+        {isUnread && <span className={styles.unreadDot} aria-label={t('student.announcements.unread')} />}
       </div>
       <p className={`${styles.cardBody} ${expanded ? styles.cardBodyExpanded : ''}`}>
         {ann.body}
@@ -145,7 +147,7 @@ function AnnouncementCard({ ann, isUnread, onRead }: { ann: Announcement; isUnre
           onClick={handleExpand}
           aria-expanded={expanded}
         >
-          {expanded ? 'Show less' : 'Read more'}
+          {expanded ? t('student.announcements.showLess') : t('student.announcements.readMore')}
         </button>
       )}
       <div className={styles.cardMeta}>
@@ -163,6 +165,7 @@ function AnnouncementCard({ ann, isUnread, onRead }: { ann: Announcement; isUnre
 // ─── Main page ────────────────────────────────────────────────────────────────
 
 export default function StudentAnnouncements() {
+  const { t } = useTranslation()
   const [filter, setFilter] = useState<Filter>('all')
   const [readSet, setReadSet] = useState<Set<number>>(getReadSet)
 
@@ -185,28 +188,28 @@ export default function StudentAnnouncements() {
   const unreadCount = announcements.filter(a => !readSet.has(a.id)).length
 
   const FILTERS: { key: Filter; label: string }[] = [
-    { key: 'all', label: 'All' },
-    { key: 'school', label: 'School' },
-    { key: 'course', label: 'My Courses' },
+    { key: 'all', label: t('common.all') },
+    { key: 'school', label: t('student.announcements.school') },
+    { key: 'course', label: t('student.announcements.myCourses') },
   ]
 
   return (
     <div className={styles.page}>
       <header className={styles.pageHead}>
         <div>
-          <h1 className={styles.pageTitle}>Announcements</h1>
+          <h1 className={styles.pageTitle}>{t('student.announcements.title')}</h1>
           <p className={styles.pageCount}>
-            {isLoading ? 'Loading...' : (
+            {isLoading ? t('common.loading') : (
               <>
-                {announcements.length} total
-                {unreadCount > 0 && <span className={styles.unreadCount}>{unreadCount} unread</span>}
+                {announcements.length} {t('student.announcements.total')}
+                {unreadCount > 0 && <span className={styles.unreadCount}>{unreadCount} {t('student.announcements.unread')}</span>}
               </>
             )}
           </p>
         </div>
       </header>
 
-      <div className={styles.filters} role="group" aria-label="Filter announcements">
+      <div className={styles.filters} role="group" aria-label={t('student.announcements.filterAnnouncements')}>
         {FILTERS.map(({ key, label }) => (
           <button
             key={key}
@@ -226,14 +229,14 @@ export default function StudentAnnouncements() {
       ) : isError ? (
         <div className={styles.emptyState}>
           <div style={{ color: 'var(--color-amber)' }}><AlertIcon /></div>
-          <p className={styles.emptyTitle}>Failed to load announcements</p>
-          <button type="button" className={styles.retryBtn} onClick={() => refetch()}>Retry</button>
+          <p className={styles.emptyTitle}>{t('common.errorLoadFailed')}</p>
+          <button type="button" className={styles.retryBtn} onClick={() => refetch()}>{t('common.retry')}</button>
         </div>
       ) : filtered.length === 0 ? (
         <div className={styles.emptyState}>
           <div style={{ color: 'var(--text-muted)' }}><BellOffIcon /></div>
-          <p className={styles.emptyTitle}>No announcements yet</p>
-          <p className={styles.emptyText}>School and course announcements will appear here.</p>
+          <p className={styles.emptyTitle}>{t('student.announcements.noAnnouncements')}</p>
+          <p className={styles.emptyText}>{t('student.announcements.noAnnouncementsHint')}</p>
         </div>
       ) : (
         <div className={styles.list} role="list">

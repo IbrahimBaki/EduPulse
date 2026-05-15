@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
+import { useTranslation } from 'react-i18next'
 import api from '../../lib/axios'
 import styles from './Courses.module.css'
 
@@ -124,6 +125,7 @@ function SkeletonCard() {
 // ─── Course card ──────────────────────────────────────────────────────────────
 
 function CourseCard({ course }: { course: Course }) {
+  const { t } = useTranslation()
   const navigate = useNavigate()
   const hue = subjectHue(course.subject)
   const color = `oklch(62% 0.22 ${hue})`
@@ -147,7 +149,7 @@ function CourseCard({ course }: { course: Course }) {
         <div className={styles.cardBadges}>
           <span className={styles.badgeGrade}>{str(course.grade_level)}</span>
           <span className={styles.badgeSubject} style={{ background: `oklch(62% 0.22 ${hue} / 0.15)`, color }}>{str(course.subject)}</span>
-          {course.status === 'archived' && <span className={styles.badgeArchived}>Archived</span>}
+          {course.status === 'archived' && <span className={styles.badgeArchived}>{t('student.courses.archived')}</span>}
         </div>
 
         {course.teacher && (
@@ -165,20 +167,20 @@ function CourseCard({ course }: { course: Course }) {
           aria-valuenow={pct}
           aria-valuemin={0}
           aria-valuemax={100}
-          aria-label={`${pct}% lessons completed`}
+          aria-label={`${pct}% ${t('student.courses.lessonsCompleted')}`}
         >
           <div className={styles.progressBar} style={{ width: `${pct}%`, background: color }} />
         </div>
-        <p className={styles.progressLabel}>{completed}/{course.lessons_count ?? 0} lessons completed</p>
+        <p className={styles.progressLabel}>{completed}/{course.lessons_count ?? 0} {t('student.courses.lessonsCompleted')}</p>
 
         {course.next_session && (
           <p className={styles.nextSession}>
-            Next: {formatNextSession(course.next_session.starts_at)}
+            {t('student.courses.next')}: {formatNextSession(course.next_session.starts_at)}
           </p>
         )}
       </div>
       <div className={styles.cardOverlay} aria-hidden="true">
-        Open Course <ArrowRightIcon />
+        {t('student.courses.openCourse')} <ArrowRightIcon />
       </div>
     </article>
   )
@@ -187,6 +189,7 @@ function CourseCard({ course }: { course: Course }) {
 // ─── Main page ────────────────────────────────────────────────────────────────
 
 export default function StudentCourses() {
+  const { t } = useTranslation()
   const [search, setSearch] = useState('')
 
   const { data: courses, isLoading, isError, refetch } = useQuery<Course[]>({
@@ -205,19 +208,19 @@ export default function StudentCourses() {
     <div className={styles.page}>
       <header className={styles.pageHead}>
         <div>
-          <h1 className={styles.pageTitle}>My Courses</h1>
+          <h1 className={styles.pageTitle}>{t('student.courses.myCourses')}</h1>
           <p className={styles.pageCount}>
-            {isLoading ? 'Loading...' : `${filtered.length} course${filtered.length !== 1 ? 's' : ''}`}
+            {isLoading ? t('common.loading') : `${filtered.length} course${filtered.length !== 1 ? 's' : ''}`}
           </p>
         </div>
         <div className={styles.searchWrap}>
           <input
             type="search"
             className={styles.searchInput}
-            placeholder="Search courses..."
+            placeholder={t('student.courses.searchPlaceholder')}
             value={search}
             onChange={e => setSearch(e.target.value)}
-            aria-label="Search courses"
+            aria-label={t('student.courses.searchPlaceholder')}
           />
         </div>
       </header>
@@ -228,15 +231,15 @@ export default function StudentCourses() {
         ) : isError ? (
           <div className={styles.emptyState}>
             <div style={{ color: 'var(--color-amber)' }}><AlertIcon /></div>
-            <p className={styles.emptyTitle}>Failed to load courses</p>
-            <button type="button" className={styles.retryBtn} onClick={() => refetch()}>Retry</button>
+            <p className={styles.emptyTitle}>{t('common.errorLoadFailed')}</p>
+            <button type="button" className={styles.retryBtn} onClick={() => refetch()}>{t('common.retry')}</button>
           </div>
         ) : filtered.length === 0 ? (
           <div className={styles.emptyState}>
             <div style={{ color: 'var(--text-muted)' }}><BookIcon /></div>
-            <p className={styles.emptyTitle}>{search ? 'No matching courses' : 'No courses enrolled'}</p>
+            <p className={styles.emptyTitle}>{search ? t('student.courses.noMatchingCourses') : t('student.courses.noCoursesEnrolled')}</p>
             <p className={styles.emptyText}>
-              {search ? 'Try adjusting your search.' : 'Courses you are enrolled in will appear here.'}
+              {search ? t('student.courses.noMatchingCoursesHint') : t('student.courses.noCoursesEnrolledHint')}
             </p>
           </div>
         ) : (

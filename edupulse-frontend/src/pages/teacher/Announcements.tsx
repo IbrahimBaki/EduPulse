@@ -1,5 +1,6 @@
 import { useState, useCallback } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import { useTranslation } from 'react-i18next'
 import api from '../../lib/axios'
 import { SlideOver } from '../../components/SlideOver'
 import styles from './Announcements.module.css'
@@ -101,6 +102,7 @@ function RichTextArea({ value, onChange, placeholder, id }: { value: string; onC
 // ─── Add announcement slide-over ───────────────────────────────────────────────
 
 function AddAnnouncementPanel({ open, onClose, courses }: { open: boolean; onClose: () => void; courses: Course[] }) {
+  const { t } = useTranslation()
   const qc = useQueryClient()
   const [form, setForm] = useState({ title: '', body: '', course_id: '', publish_immediately: false })
 
@@ -131,18 +133,18 @@ function AddAnnouncementPanel({ open, onClose, courses }: { open: boolean; onClo
     <SlideOver
       open={open}
       onClose={onClose}
-      title="New Announcement"
-      description="Share an update with your students"
+      title={t('teacher.announcements.new')}
+      description={t('teacher.announcements.description')}
       footer={
         <>
-          <button type="button" className={`${styles.btn} ${styles.btnOutline}`} onClick={onClose}>Cancel</button>
+          <button type="button" className={`${styles.btn} ${styles.btnOutline}`} onClick={onClose}>{t('common.cancel')}</button>
           <button
             type="button"
             className={`${styles.btn} ${styles.btnPrimary}`}
             disabled={addMutation.isPending || !canSubmit}
             onClick={e => handleSubmit(e as unknown as React.FormEvent)}
           >
-            {addMutation.isPending ? 'Posting...' : form.publish_immediately ? 'Publish' : 'Save as Draft'}
+            {addMutation.isPending ? t('teacher.announcements.posting') : form.publish_immediately ? t('common.publish') : t('teacher.announcements.saveDraft')}
           </button>
         </>
       }
@@ -167,7 +169,7 @@ function AddAnnouncementPanel({ open, onClose, courses }: { open: boolean; onClo
             id="ann-body"
             value={form.body}
             onChange={body => setForm(f => ({ ...f, body }))}
-            placeholder="Write your announcement here..."
+            placeholder={t('teacher.announcements.writePlaceholder')}
           />
         </div>
 
@@ -180,7 +182,7 @@ function AddAnnouncementPanel({ open, onClose, courses }: { open: boolean; onClo
             onChange={e => setForm(f => ({ ...f, course_id: e.target.value }))}
             required
           >
-            <option value="">Select a course...</option>
+            <option value="">{t('teacher.announcements.selectCourse')}</option>
             {courses.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
           </select>
         </div>
@@ -204,6 +206,7 @@ function AddAnnouncementPanel({ open, onClose, courses }: { open: boolean; onClo
 // ─── Main page ────────────────────────────────────────────────────────────────
 
 export default function TeacherAnnouncements() {
+  const { t } = useTranslation()
   const qc = useQueryClient()
   const [showAdd, setShowAdd] = useState(false)
 
@@ -228,13 +231,13 @@ export default function TeacherAnnouncements() {
     <div className={styles.page}>
       <header className={styles.pageHead}>
         <div>
-          <h1 className={styles.pageTitle}>Announcements</h1>
+          <h1 className={styles.pageTitle}>{t('teacher.announcements.title')}</h1>
           <p className={styles.pageCount}>
-            {isLoading ? 'Loading...' : `${announcements.length} announcement${announcements.length !== 1 ? 's' : ''}`}
+            {isLoading ? t('common.loading') : `${announcements.length} announcement${announcements.length !== 1 ? 's' : ''}`}
           </p>
         </div>
         <button type="button" className={`${styles.btn} ${styles.btnPrimary}`} onClick={() => setShowAdd(true)}>
-          <PlusIcon /> New Announcement
+          <PlusIcon /> {t('teacher.announcements.new')}
         </button>
       </header>
 
@@ -245,16 +248,16 @@ export default function TeacherAnnouncements() {
       ) : isError ? (
         <div className={styles.emptyState}>
           <div style={{ color: 'var(--color-amber)' }}><AlertIcon /></div>
-          <p className={styles.emptyTitle}>Failed to load announcements</p>
-          <button type="button" className={`${styles.btn} ${styles.btnOutline}`} onClick={() => refetch()}>Retry</button>
+          <p className={styles.emptyTitle}>{t('common.errorLoadFailed')}</p>
+          <button type="button" className={`${styles.btn} ${styles.btnOutline}`} onClick={() => refetch()}>{t('common.retry')}</button>
         </div>
       ) : announcements.length === 0 ? (
         <div className={styles.emptyState}>
           <div style={{ color: 'oklch(44% 0.018 255)' }}><BellOffIcon /></div>
-          <p className={styles.emptyTitle}>No announcements yet</p>
-          <p className={styles.emptyText}>Post an announcement to keep your students informed.</p>
+          <p className={styles.emptyTitle}>{t('teacher.announcements.noAnnouncements')}</p>
+          <p className={styles.emptyText}>{t('teacher.announcements.noAnnouncementsText')}</p>
           <button type="button" className={`${styles.btn} ${styles.btnPrimary}`} onClick={() => setShowAdd(true)}>
-            <PlusIcon /> New Announcement
+            <PlusIcon /> {t('teacher.announcements.new')}
           </button>
         </div>
       ) : (
@@ -265,7 +268,7 @@ export default function TeacherAnnouncements() {
                 <h2 className={styles.cardTitle}>{a.title}</h2>
                 <div className={styles.cardMeta}>
                   <span className={`${styles.badge} ${a.is_published ? styles.badgePublished : styles.badgeDraft}`}>
-                    {a.is_published ? 'Published' : 'Draft'}
+                    {a.is_published ? t('common.publish') : t('common.draft')}
                   </span>
                   {a.course && (
                     <span className={`${styles.badge} ${styles.badgeCourse}`}>{a.course.name}</span>
@@ -284,9 +287,9 @@ export default function TeacherAnnouncements() {
                     className={`${styles.btn} ${styles.btnOutline} ${styles.btnSm}`}
                     disabled={publishMutation.isPending}
                     onClick={() => publishMutation.mutate(a.id)}
-                    aria-label={`Publish ${a.title}`}
+                    aria-label={`${t('common.publish')} ${a.title}`}
                   >
-                    Publish
+                    {t('common.publish')}
                   </button>
                 </div>
               )}

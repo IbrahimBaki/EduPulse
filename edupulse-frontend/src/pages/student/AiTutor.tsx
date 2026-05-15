@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { useQuery, useMutation } from '@tanstack/react-query'
+import { useTranslation } from 'react-i18next'
 import { motion, AnimatePresence } from 'framer-motion'
 import api from '../../lib/axios'
 import styles from './AiTutor.module.css'
@@ -153,20 +154,21 @@ function ChevronRightIcon() {
 // ─── Course selection step ────────────────────────────────────────────────────
 
 function CourseStep({ courses, loading, onSelect }: { courses: Course[]; loading: boolean; onSelect: (c: Course) => void }) {
+  const { t } = useTranslation()
   return (
     <div className={styles.selectionPane}>
       <div className={styles.selectionInner}>
         <div className={styles.selectionHeader}>
           <div className={styles.selectionIcon}><SparklesIcon size={24} /></div>
-          <h2 className={styles.selectionTitle}>Which course are you studying?</h2>
-          <p className={styles.selectionSub}>Select a course to get lesson-specific help from your AI tutor.</p>
+          <h2 className={styles.selectionTitle}>{t('student.aiTutor.whichCourse')}</h2>
+          <p className={styles.selectionSub}>{t('student.aiTutor.selectCourseHint')}</p>
         </div>
         {loading ? (
           <div className={styles.selectionLoading}>
             <span className={styles.dot} /><span className={styles.dot} /><span className={styles.dot} />
           </div>
         ) : courses.length === 0 ? (
-          <p className={styles.selectionEmpty}>You are not enrolled in any courses yet.</p>
+          <p className={styles.selectionEmpty}>{t('student.aiTutor.notEnrolled')}</p>
         ) : (
           <div className={styles.courseGrid}>
             {courses.map(c => (
@@ -196,18 +198,19 @@ function CourseStep({ courses, loading, onSelect }: { courses: Course[]; loading
 function LessonStep({
   course, lessons, loading, onBack, onSelect,
 }: { course: Course; lessons: SelectableLesson[]; loading: boolean; onBack: () => void; onSelect: (l: SelectableLesson) => void }) {
+  const { t } = useTranslation()
   return (
     <div className={styles.selectionPane}>
       <div className={styles.selectionInner}>
         <button type="button" className={styles.backBtn} onClick={onBack}>
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><polyline points="15 18 9 12 15 6"/></svg>
-          Back to courses
+          {t('student.aiTutor.backToCourses')}
         </button>
         <div className={styles.selectionHeader}>
           <div className={styles.selectionIcon}><SparklesIcon size={24} /></div>
-          <h2 className={styles.selectionTitle}>Which lesson?</h2>
+          <h2 className={styles.selectionTitle}>{t('student.aiTutor.whichLesson')}</h2>
           <p className={styles.selectionSub}>
-            <span className={styles.courseNameInline}>{course.name}</span> — choose the lesson you want help with.
+            <span className={styles.courseNameInline}>{course.name}</span> — {t('student.aiTutor.chooseLessonHint')}
           </p>
         </div>
         {loading ? (
@@ -215,7 +218,7 @@ function LessonStep({
             <span className={styles.dot} /><span className={styles.dot} /><span className={styles.dot} />
           </div>
         ) : lessons.length === 0 ? (
-          <p className={styles.selectionEmpty}>No published lessons found for this course.</p>
+          <p className={styles.selectionEmpty}>{t('student.aiTutor.noPublishedLessons')}</p>
         ) : (
           <div className={styles.lessonList}>
             {lessons.map((l, idx) => (
@@ -250,6 +253,7 @@ interface QuizProps {
 }
 
 function QuizMode({ topic, lessonId, onClose, onComplete }: QuizProps) {
+  const { t } = useTranslation()
   const [questions, setQuestions] = useState<QuizQuestion[]>([])
   const [level, setLevel] = useState(1)
   const [current, setCurrent] = useState(0)
@@ -350,9 +354,9 @@ function QuizMode({ topic, lessonId, onClose, onComplete }: QuizProps) {
         <div className={styles.quizHeader}>
           <div className={styles.quizMeta}>
             <span className={styles.quizTopic}>{topic}</span>
-            <span className={styles.quizLevel}>Level {level}</span>
+            <span className={styles.quizLevel}>{t('student.aiTutor.level')} {level}</span>
           </div>
-          <button type="button" className={styles.quizClose} onClick={onClose} aria-label="Close quiz">
+          <button type="button" className={styles.quizClose} onClick={onClose} aria-label={t('student.aiTutor.closeQuiz')}>
             <CloseIcon />
           </button>
         </div>
@@ -369,7 +373,7 @@ function QuizMode({ topic, lessonId, onClose, onComplete }: QuizProps) {
                 <span className={styles.dot} />
                 <span className={styles.dot} />
               </div>
-              <p>Generating your quiz...</p>
+              <p>{t('student.aiTutor.generatingQuiz')}</p>
             </motion.div>
           )}
 
@@ -383,7 +387,7 @@ function QuizMode({ topic, lessonId, onClose, onComplete }: QuizProps) {
               <div className={styles.progressBar} role="progressbar" aria-valuenow={pct} aria-valuemin={0} aria-valuemax={100}>
                 <div className={styles.progressFill} style={{ width: `${pct}%` }} />
               </div>
-              <p className={styles.questionCount}>{current + 1} of {questions.length}</p>
+              <p className={styles.questionCount}>{current + 1} {t('student.aiTutor.of')} {questions.length}</p>
               <p className={styles.questionText}>{q.question}</p>
               <div className={styles.options}>
                 {q.options.map((opt, i) => (
@@ -406,8 +410,8 @@ function QuizMode({ topic, lessonId, onClose, onComplete }: QuizProps) {
                 onClick={handleNext}
               >
                 {current + 1 === questions.length
-                  ? (submitMutation.isPending ? 'Submitting...' : 'Submit')
-                  : 'Next'}
+                  ? (submitMutation.isPending ? t('student.aiTutor.submitting') : t('student.aiTutor.submit'))
+                  : t('student.aiTutor.next')}
                 {current + 1 < questions.length && <ChevronRightIcon />}
               </button>
             </motion.div>
@@ -419,13 +423,13 @@ function QuizMode({ topic, lessonId, onClose, onComplete }: QuizProps) {
               className={styles.quizLoading}
               initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
             >
-              <p style={{ color: 'var(--color-red)', fontWeight: 600 }}>Failed to load quiz.</p>
+              <p style={{ color: 'var(--color-red)', fontWeight: 600 }}>{t('student.aiTutor.quizLoadFailed')}</p>
               <button
                 type="button"
                 className={styles.nextBtn}
                 onClick={() => { setPhase('loading'); genMutation.mutate(level) }}
               >
-                Try again
+                {t('common.retry')}
               </button>
             </motion.div>
           )}
@@ -444,7 +448,7 @@ function QuizMode({ topic, lessonId, onClose, onComplete }: QuizProps) {
                 <span className={styles.scoreEmoji}>{results.passed ? '🎉' : '📚'}</span>
               </div>
               <p className={styles.resultLabel} style={{ color: results.passed ? 'oklch(65% 0.2 145)' : 'var(--color-red)' }}>
-                {results.passed ? 'Passed!' : 'Keep studying'}
+                {results.passed ? t('student.aiTutor.passed') : t('student.aiTutor.keepStudying')}
               </p>
 
               {results.breakdown.length > 0 && (
@@ -464,11 +468,11 @@ function QuizMode({ topic, lessonId, onClose, onComplete }: QuizProps) {
               <div className={styles.resultActions}>
                 {results.passed && level < 3 && (
                   <button type="button" className={styles.nextLevelBtn} onClick={handleNextLevel}>
-                    Try Level {level + 1} <SparklesIcon size={13} />
+                    {t('student.aiTutor.tryLevel')} {level + 1} <SparklesIcon size={13} />
                   </button>
                 )}
                 <button type="button" className={styles.backToChatBtn} onClick={() => { onComplete(results.score); onClose() }}>
-                  Back to Chat
+                  {t('student.aiTutor.backToChat')}
                 </button>
               </div>
             </motion.div>
@@ -482,6 +486,7 @@ function QuizMode({ topic, lessonId, onClose, onComplete }: QuizProps) {
 // ─── Main AI Tutor page ───────────────────────────────────────────────────────
 
 export default function StudentAiTutor() {
+  const { t } = useTranslation()
   const [searchParams] = useSearchParams()
   const initLessonId = searchParams.get('lesson_id') ? Number(searchParams.get('lesson_id')) : undefined
   const initLesson   = searchParams.get('lesson') ?? undefined
@@ -622,14 +627,14 @@ export default function StudentAiTutor() {
   return (
     <div className={styles.shell}>
       {/* ── Sidebar ── */}
-      <aside className={`${styles.sidebar} ${sidebarOpen ? styles.sidebarOpen : ''}`} aria-label="Chat history and topics">
+      <aside className={`${styles.sidebar} ${sidebarOpen ? styles.sidebarOpen : ''}`} aria-label={t('student.aiTutor.chatHistoryAndTopics')}>
         <button type="button" className={styles.newTopicBtn} onClick={startNewSession}>
-          <PlusIcon /> Start New Topic
+          <PlusIcon /> {t('student.aiTutor.startNewTopic')}
         </button>
 
         {history.length > 0 && (
           <section className={styles.historySection}>
-            <h3 className={styles.sidebarLabel}>Recent Sessions</h3>
+            <h3 className={styles.sidebarLabel}>{t('student.aiTutor.recentSessions')}</h3>
             <div className={styles.historyList}>
               {history.slice(0, 12).map(s => (
                 <button
@@ -649,7 +654,7 @@ export default function StudentAiTutor() {
 
         {weakTopics.length > 0 && (
           <section className={styles.weakSection}>
-            <h3 className={styles.sidebarLabel}>Weak Topics</h3>
+            <h3 className={styles.sidebarLabel}>{t('student.aiTutor.weakTopics')}</h3>
             <div className={styles.weakList}>
               {weakTopics.map(t => (
                 <button
@@ -681,7 +686,7 @@ export default function StudentAiTutor() {
             type="button"
             className={styles.menuBtn}
             onClick={() => setSidebarOpen(s => !s)}
-            aria-label="Toggle history sidebar"
+            aria-label={t('student.aiTutor.toggleSidebar')}
           >
             <SparklesIcon size={15} />
           </button>
@@ -689,7 +694,7 @@ export default function StudentAiTutor() {
             {currentTopic ? (
               <span className={styles.topicChip}>{currentTopic}</span>
             ) : (
-              <span className={styles.topBarTitle}>AI Tutor</span>
+              <span className={styles.topBarTitle}>{t('student.aiTutor.title')}</span>
             )}
             {lessonId && initLesson && (
               <span className={styles.lessonChip}>{initLesson}</span>
@@ -701,7 +706,7 @@ export default function StudentAiTutor() {
             disabled={selectionPhase !== 'chat' || messages.length === 0}
             onClick={() => setShowQuiz(true)}
           >
-            Take Quiz
+            {t('student.aiTutor.takeQuiz')}
           </button>
         </div>
 
@@ -724,19 +729,19 @@ export default function StudentAiTutor() {
         )}
 
         {/* Messages */}
-        {selectionPhase === 'chat' && <div className={styles.messages} role="log" aria-live="polite" aria-label="Chat messages">
+        {selectionPhase === 'chat' && <div className={styles.messages} role="log" aria-live="polite" aria-label={t('student.aiTutor.chatMessages')}>
           {messages.length === 0 ? (
             <div className={styles.welcomeState}>
               <div className={styles.welcomeIcon}>
                 <SparklesIcon size={28} />
               </div>
-              <h2 className={styles.welcomeTitle}>Ask me anything</h2>
+              <h2 className={styles.welcomeTitle}>{t('student.aiTutor.askMeAnything')}</h2>
               <p className={styles.welcomeText}>
-                I can explain concepts, answer questions about your lessons, and quiz you on any topic.
+                {t('student.aiTutor.welcomeText')}
               </p>
               {weakTopics.length > 0 && (
                 <div className={styles.welcomeTopics}>
-                  <p className={styles.welcomeTopicsLabel}>Your weak topics:</p>
+                  <p className={styles.welcomeTopicsLabel}>{t('student.aiTutor.yourWeakTopics')}</p>
                   <div className={styles.welcomeTopicPills}>
                     {weakTopics.slice(0, 4).map(t => (
                       <button
@@ -801,25 +806,25 @@ export default function StudentAiTutor() {
             <textarea
               ref={inputRef}
               className={styles.textInput}
-              placeholder={currentTopic ? `Ask about ${currentTopic}...` : 'Ask anything — a concept, a lesson, a question...'}
+              placeholder={currentTopic ? `${t('student.aiTutor.askAbout')} ${currentTopic}...` : t('student.aiTutor.inputPlaceholder')}
               value={input}
               onChange={e => setInput(e.target.value)}
               onKeyDown={handleKeyDown}
               rows={1}
-              aria-label="Message input"
+              aria-label={t('student.aiTutor.messageInput')}
             />
             <button
               type="button"
               className={styles.sendBtn}
               disabled={!input.trim() || isLoading}
               onClick={handleSend}
-              aria-label="Send message"
+              aria-label={t('student.aiTutor.sendMessage')}
             >
               <SendIcon />
             </button>
           </div>
           <div className={styles.inputHint}>
-            Press Enter to send · Shift+Enter for new line
+            {t('student.aiTutor.inputHint')}
           </div>
         </div>}
       </div>
