@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef, type ReactNode } from 'react'
 import { createPortal } from 'react-dom'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import { useTranslation } from 'react-i18next'
 import api from '../../lib/axios'
 import styles from './Students.module.css'
 
@@ -181,14 +182,15 @@ function SkeletonRows() {
 function SlideOver({ open, onClose, title, children, width = 480 }: {
   open: boolean; onClose: () => void; title: string; children: ReactNode; width?: number
 }) {
+  const { t } = useTranslation()
   const closeRef = useRef<HTMLButtonElement>(null)
 
   useEffect(() => {
     if (!open) return
-    const t = setTimeout(() => closeRef.current?.focus(), 50)
+    const timer = setTimeout(() => closeRef.current?.focus(), 50)
     document.body.style.overflow = 'hidden'
     return () => {
-      clearTimeout(t)
+      clearTimeout(timer)
       document.body.style.overflow = ''
     }
   }, [open])
@@ -219,7 +221,7 @@ function SlideOver({ open, onClose, title, children, width = 480 }: {
             type="button"
             className={styles.panelClose}
             onClick={onClose}
-            aria-label="Close"
+            aria-label={t('common.close')}
           >
             <svg width="15" height="15" viewBox="0 0 15 15" fill="none">
               <path d="M2 2L13 13M13 2L2 13" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round"/>

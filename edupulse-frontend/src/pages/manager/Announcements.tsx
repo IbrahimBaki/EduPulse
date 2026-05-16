@@ -1,6 +1,7 @@
 import { useState, type ReactNode } from 'react'
 import { createPortal } from 'react-dom'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import { useTranslation } from 'react-i18next'
 import api from '../../lib/axios'
 import styles from './Announcements.module.css'
 
@@ -12,9 +13,10 @@ interface Announcement {
   created_at: string
 }
 
-function SlideOver({ open, onClose, title, children, onSave, isPending }: { 
-  open: boolean; onClose: () => void; title: string; children: ReactNode; onSave: () => void; isPending: boolean 
+function SlideOver({ open, onClose, title, children, onSave, isPending }: {
+  open: boolean; onClose: () => void; title: string; children: ReactNode; onSave: () => void; isPending: boolean
 }) {
+  const { t } = useTranslation()
   if (!open) return null
   return createPortal(
     <div className={styles.slideOverRoot}>
@@ -26,9 +28,9 @@ function SlideOver({ open, onClose, title, children, onSave, isPending }: {
         </div>
         <div style={{ flex: 1, padding: '24px 0', overflowY: 'auto' }}>{children}</div>
         <div style={{ padding: '20px 24px', borderTop: '1px solid var(--neutral-border)', display: 'flex', justifyContent: 'flex-end', gap: '12px' }}>
-          <button className={styles.btn} onClick={onClose}>Cancel</button>
+          <button className={styles.btn} onClick={onClose}>{t('manager.announcements.cancel')}</button>
           <button className={`${styles.btn} ${styles.btnPrimary}`} onClick={onSave} disabled={isPending}>
-            {isPending ? 'Saving...' : 'Create Announcement'}
+            {isPending ? t('manager.announcements.saving') : t('manager.announcements.createAnnouncement')}
           </button>
         </div>
       </div>
@@ -38,10 +40,12 @@ function SlideOver({ open, onClose, title, children, onSave, isPending }: {
 }
 
 export default function AnnouncementsPage() {
+  const { t } = useTranslation()
   const queryClient = useQueryClient()
   const [isSlideOverOpen, setSlideOverOpen] = useState(false)
   const [newTitle, setNewTitle] = useState('')
   const [newContent, setNewContent] = useState('')
+  const [pendingDeleteId, setPendingDeleteId] = useState<number | null>(null)
 
   const { data: announcements, isLoading } = useQuery({
     queryKey: ['manager-announcements'],
@@ -63,7 +67,10 @@ export default function AnnouncementsPage() {
 
   const deleteMutation = useMutation({
     mutationFn: (id: number) => api.delete(`/manager/announcements/${id}`),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['manager-announcements'] })
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['manager-announcements'] })
+      setPendingDeleteId(null)
+    }
   })
 
   const publishMutation = useMutation({
@@ -74,9 +81,9 @@ export default function AnnouncementsPage() {
   return (
     <div className={styles.page}>
       <header className={styles.pageHead}>
-        <h1 className={styles.pageTitle}>Announcements</h1>
+        <h1 className={styles.pageTitle}>{t('manager.announcements.title')}</h1>
         <button className={`${styles.btn} ${styles.btnPrimary}`} onClick={() => setSlideOverOpen(true)}>
-          + New Announcement
+          {t('manager.announcements.newAnnouncement')}
         </button>
       </header>
 
@@ -85,7 +92,7 @@ export default function AnnouncementsPage() {
           [1, 2, 3].map(i => <div key={i} className={`${styles.announcementCard} ${styles.skeleton}`} style={{ height: '140px' }} />)
         ) : announcements?.length === 0 ? (
           <div className={styles.emptyState}>
-            <p>No announcements found.</p>
+            <p>{t('manager.announcements.noAnnouncements')}</p>
           </div>
         ) : (
           announcements?.map(a => (
@@ -93,36 +100,44 @@ export default function AnnouncementsPage() {
               <div className={styles.cardHead}>
                 <h2 className={styles.cardTitle}>{a.title}</h2>
                 <span className={`${styles.badge} ${a.status === 'published' ? styles.badgePublished : ''}`}>
-                  {a.status}
+                  {a.status === 'published' ? t('manager.announcements.statusPublished') : t('common.draft')}
                 </span>
               </div>
               <p className={styles.cardDate}>{new Date(a.created_at).toLocaleDateString()}</p>
               <div className={styles.cardContent}>{a.content}</div>
               <div className={styles.cardActions}>
                 {a.status === 'draft' && (
-                  <button className={styles.btn} onClick={() => publishMutation.mutate(a.id)}>Publish</button>
+                  <button className={styles.btn} onClick={() => publishMutation.mutate(a.id)}>{t('manager.announcements.publish')}</button>
                 )}
-                <button className={styles.btn} style={{ color: 'var(--color-red)' }} onClick={() => { if(confirm('Delete?')) deleteMutation.mutate(a.id) }}>Delete</button>
+                {pendingDeleteId === a.id ? (
+                  <>
+                    <span style={{ fontSize: '0.8125rem', color: 'var(--text-muted)' }}>{t('manager.announcements.deleteConfirm')}</span>
+                    <button className={styles.btn} style={{ color: 'var(--color-red)' }} onClick={() => { deleteMutation.mutate(a.id); setPendingDeleteId(null) }}>{t('manager.announcements.yes')}</button>
+                    <button className={styles.btn} onClick={() => setPendingDeleteId(null)}>{t('manager.announcements.cancel')}</button>
+                  </>
+                ) : (
+                  <button className={styles.btn} style={{ color: 'var(--color-red)' }} onClick={() => setPendingDeleteId(a.id)}>{t('common.delete')}</button>
+                )}
               </div>
             </div>
           ))
         )}
       </main>
 
-      <SlideOver 
-        open={isSlideOverOpen} 
-        onClose={() => setSlideOverOpen(false)} 
-        title="New Announcement"
+      <SlideOver
+        open={isSlideOverOpen}
+        onClose={() => setSlideOverOpen(false)}
+        title={t('manager.announcements.newAnnouncementTitle')}
         onSave={() => createMutation.mutate({ title: newTitle, content: newContent })}
         isPending={createMutation.isPending}
       >
         <div className={styles.formGroup}>
-          <label className={styles.label}>Title</label>
-          <input className={styles.input} value={newTitle} onChange={e => setNewTitle(e.target.value)} placeholder="Announcement heading" />
+          <label className={styles.label}>{t('manager.announcements.titleLabel')}</label>
+          <input className={styles.input} value={newTitle} onChange={e => setNewTitle(e.target.value)} placeholder={t('manager.announcements.announcementHeading')} />
         </div>
         <div className={styles.formGroup}>
-          <label className={styles.label}>Content</label>
-          <textarea className={styles.textarea} rows={6} value={newContent} onChange={e => setNewContent(e.target.value)} placeholder="Full message..." />
+          <label className={styles.label}>{t('manager.announcements.contentLabel')}</label>
+          <textarea className={styles.textarea} rows={6} value={newContent} onChange={e => setNewContent(e.target.value)} placeholder={t('manager.announcements.fullMessage')} />
         </div>
       </SlideOver>
     </div>

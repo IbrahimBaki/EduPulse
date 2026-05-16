@@ -10,7 +10,6 @@ use Filament\Pages;
 use Filament\Panel;
 use Filament\PanelProvider;
 use Filament\Support\Colors\Color;
-use Filament\Widgets;
 use Filament\View\PanelsRenderHook;
 use Filament\Navigation\NavigationGroup;
 use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
@@ -25,9 +24,9 @@ class AdminPanelProvider extends PanelProvider
 {
     public function panel(Panel $panel): Panel
     {
-        $logoHtml = '<div style="display:flex; align-items:center; gap:0.75rem;">
-            <img src="'.asset('images/epa-logo.png').'" style="height:3.5rem; width:auto; border-radius:0.5rem; box-shadow:0 4px 6px -1px rgba(0,0,0,0.1);">
-            <span style="font-size:1.5rem; font-weight:800; color:#1e1b4b;">EduPulse </span>
+        $logoHtml = '<div style="display:flex;align-items:center;gap:0.625rem;">
+            <img src="'.asset('images/epa-logo.png').'" style="height:2rem;width:auto;border-radius:0.375rem;">
+            <span style="font-size:1rem;font-weight:800;letter-spacing:-0.02em;color:oklch(96% 0.005 255);">EduPulse</span>
         </div>';
 
         return $panel
@@ -40,6 +39,7 @@ class AdminPanelProvider extends PanelProvider
             ->brandLogoHeight('3.5rem')
             ->favicon(asset('images/epa-logo.png'))
             ->sidebarCollapsibleOnDesktop()
+            ->darkMode(true)
             ->font('Plus Jakarta Sans')
             ->colors([
                 'primary' => Color::Indigo,
@@ -72,17 +72,18 @@ class AdminPanelProvider extends PanelProvider
                      ->label('Platform')
                      ->icon('heroicon-o-cog-8-tooth'),
             ])
-            ->viteTheme('resources/css/filament/admin/theme.css')
+            ->viteTheme('resources/css/filament/admin/custom.css')
+            ->renderHook(
+                PanelsRenderHook::TOPBAR_END,
+                fn (): string => view('filament.components.theme-toggle')->render(),
+            )
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\\Filament\\Resources')
             ->discoverPages(in: app_path('Filament/Pages'), for: 'App\\Filament\\Pages')
             ->pages([
                 Pages\Dashboard::class,
             ])
             ->discoverWidgets(in: app_path('Filament/Widgets'), for: 'App\\Filament\\Widgets')
-            ->widgets([
-                Widgets\AccountWidget::class,
-                Widgets\FilamentInfoWidget::class,
-            ])
+            ->widgets([])
             ->middleware([
                 EncryptCookies::class,
                 AddQueuedCookiesToResponse::class,

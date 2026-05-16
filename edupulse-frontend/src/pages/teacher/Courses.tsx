@@ -72,10 +72,6 @@ function statusBadgeClass(status: string): string {
   return styles.badgeDraft
 }
 
-function statusLabel(s: string): string {
-  return s.charAt(0).toUpperCase() + s.slice(1)
-}
-
 // ─── Icons ────────────────────────────────────────────────────────────────────
 
 function SearchIcon() {
@@ -88,7 +84,7 @@ function SearchIcon() {
 
 function ArrowRightIcon() {
   return (
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" data-rtl-flip="">
       <line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/>
     </svg>
   )
@@ -137,6 +133,7 @@ function SkeletonCard() {
 // ─── Course card ──────────────────────────────────────────────────────────────
 
 function CourseCard({ course }: { course: Course }) {
+  const { t } = useTranslation()
   const navigate = useNavigate()
   const total = course.lessons_count || 1
   const published = course.published_lessons_count ?? 0
@@ -158,23 +155,23 @@ function CourseCard({ course }: { course: Course }) {
         <div className={styles.cardBadges}>
           <span className={`${styles.badge} ${styles.badgeGrade}`}>{str(course.grade_level)}</span>
           <span className={`${styles.badge} ${styles.badgeSubject}`}>{str(course.subject)}</span>
-          <span className={`${styles.badge} ${statusBadgeClass(course.status)}`}>{statusLabel(course.status)}</span>
+          <span className={`${styles.badge} ${statusBadgeClass(course.status)}`}>{course.status === 'draft' ? t('common.draft') : course.status === 'active' ? t('common.active') : t('common.archived')}</span>
         </div>
         <div className={styles.cardStats}>
           <span className={styles.statItem}>
-            <span className={styles.statNum}>{course.enrolled_count ?? 0}</span> students
+            <span className={styles.statNum}>{course.enrolled_count ?? 0}</span> {t('teacher.courses.studentsCount')}
           </span>
           <span className={styles.statItem}>
-            <span className={styles.statNum}>{course.lessons_count ?? 0}</span> lessons
+            <span className={styles.statNum}>{course.lessons_count ?? 0}</span> {t('teacher.courses.lessonsCount')}
           </span>
         </div>
-        <div className={styles.progressWrap} role="progressbar" aria-valuenow={pct} aria-valuemin={0} aria-valuemax={100} aria-label={`${pct}% lessons published`}>
+        <div className={styles.progressWrap} role="progressbar" aria-valuenow={pct} aria-valuemin={0} aria-valuemax={100} aria-label={`${pct}% ${t('teacher.courses.lessonsPublished')}`}>
           <div className={styles.progressBar} style={{ width: `${pct}%`, background: progressColor(course.subject) }} />
         </div>
-        <p className={styles.progressLabel}>{published} / {course.lessons_count ?? 0} lessons published</p>
+        <p className={styles.progressLabel}>{published} / {course.lessons_count ?? 0} {t('teacher.courses.lessonsPublished')}</p>
       </div>
       <div className={styles.cardOverlay} aria-hidden="true">
-        View Course <ArrowRightIcon />
+        {t('teacher.courses.viewCourse')} <ArrowRightIcon />
       </div>
     </article>
   )
@@ -234,7 +231,7 @@ export default function TeacherCourses() {
           <option value="">{t('common.all')}</option>
           <option value="active">{t('common.active')}</option>
           <option value="draft">{t('common.draft')}</option>
-          <option value="archived">Archived</option>
+          <option value="archived">{t('teacher.courses.archived')}</option>
         </select>
       </div>
 
@@ -245,14 +242,14 @@ export default function TeacherCourses() {
           <div className={styles.emptyState}>
             <div style={{ color: 'var(--color-amber)' }}><AlertIcon /></div>
             <p className={styles.emptyTitle}>{t('common.errorLoadFailed')}</p>
-            <button type="button" className={`${styles.btn} ${styles.btnOutline}`} onClick={() => refetch()}>Retry</button>
+            <button type="button" className={`${styles.btn} ${styles.btnOutline}`} onClick={() => refetch()}>{t('common.retry')}</button>
           </div>
         ) : filtered.length === 0 ? (
           <div className={styles.emptyState}>
             <div style={{ color: 'oklch(44% 0.018 255)' }}><BookIcon /></div>
             <p className={styles.emptyTitle}>{search || status ? t('teacher.courses.noCoursesSearch') : t('teacher.courses.noCourses')}</p>
             <p className={styles.emptyText}>
-              {search || status ? 'Try adjusting your search or filter.' : 'Courses assigned to you will appear here.'}
+              {search || status ? t('teacher.courses.adjustSearchOrFilter') : t('teacher.courses.coursesAssigned')}
             </p>
           </div>
         ) : (

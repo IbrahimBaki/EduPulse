@@ -1,192 +1,817 @@
 @import "tailwindcss";
 @import "../../../../vendor/filament/filament/resources/css/base.css";
 
-/* EduPulse "Precision Cockpit" Redesign */
+/* ═══════════════════════════════════════════════════════════════
+   EduPulse Admin — "Precision Cockpit" Design System
+   Dark mode first · OKLCH throughout · CSS logical properties
+   ═══════════════════════════════════════════════════════════════ */
 
-:root {
-    /* Base background: deep navy */
-    --fi-bg-base: oklch(18% 0.02 255);
-    /* Sidebar: slightly darker than base */
-    --fi-bg-sidebar: oklch(14% 0.025 255);
-    
-    /* Primary Accent: Electric blue */
-    --c-primary-50: oklch(95% 0.05 255);
-    --c-primary-100: oklch(90% 0.1 255);
-    --c-primary-200: oklch(85% 0.15 255);
-    --c-primary-300: oklch(80% 0.2 255);
-    --c-primary-400: oklch(75% 0.23 255);
-    --c-primary-500: oklch(62% 0.26 255);
-    --c-primary-600: oklch(55% 0.24 255);
-    --c-primary-700: oklch(48% 0.2 255);
-    --c-primary-800: oklch(40% 0.15 255);
-    --c-primary-900: oklch(35% 0.1 255);
-    --c-primary-950: oklch(25% 0.05 255);
+/* ── Keyframes ───────────────────────────────────────────────── */
 
-    /* Neutral Overrides: Tinted towards navy (Hue 255) */
-    --c-gray-50: oklch(98% 0.005 255);
-    --c-gray-100: oklch(95% 0.008 255);
-    --c-gray-200: oklch(90% 0.01 255);
-    --c-gray-300: oklch(80% 0.012 255);
-    --c-gray-400: oklch(70% 0.015 255);
-    --c-gray-500: oklch(60% 0.018 255);
-    --c-gray-600: oklch(50% 0.02 255);
-    --c-gray-700: oklch(40% 0.022 255);
-    --c-gray-800: oklch(30% 0.02 255);
-    --c-gray-900: oklch(22% 0.022 255);
-    --c-gray-950: oklch(18% 0.02 255);
-
-    /* Amber (Warning) Overrides */
-    --c-warning-500: oklch(78% 0.18 80);
-
-    /* Adjusting typography to the brand */
-    font-family: 'Plus Jakarta Sans', sans-serif;
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to   { opacity: 1; }
 }
 
-/* 1. SIDEBAR & LOGO AREA */
+@keyframes slideUp {
+    from { opacity: 0; transform: translateY(8px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes slideDown {
+    from { opacity: 0; transform: translateY(-8px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50%       { opacity: 0.5; }
+}
+
+@keyframes shimmer {
+    0%   { background-position: -200% 0; }
+    100% { background-position: 200% 0; }
+}
+
+/* ── Design tokens: dark (default) ──────────────────────────── */
+
+:root,
+html.dark {
+    /* Backgrounds */
+    --ep-bg:        oklch(13% 0.022 255);
+    --ep-sidebar:   oklch(10% 0.02 255);
+    --ep-surface:   oklch(17% 0.022 255);
+    --ep-surface-2: oklch(22% 0.022 255);
+    --ep-surface-3: oklch(26% 0.022 255);
+
+    /* Borders */
+    --ep-border:       oklch(28% 0.02 255);
+    --ep-border-strong: oklch(36% 0.02 255);
+
+    /* Text */
+    --ep-text-primary:   oklch(96% 0.005 255);
+    --ep-text-secondary: oklch(72% 0.015 255);
+    --ep-text-muted:     oklch(52% 0.015 255);
+    --ep-text-disabled:  oklch(38% 0.012 255);
+
+    /* Accent */
+    --ep-accent:      oklch(62% 0.26 255);
+    --ep-accent-dim:  oklch(62% 0.26 255 / 0.15);
+    --ep-accent-glow: oklch(62% 0.26 255 / 0.35);
+    --ep-accent-hover: oklch(68% 0.26 255);
+
+    /* Status */
+    --ep-success: oklch(68% 0.18 145);
+    --ep-warning: oklch(78% 0.18 80);
+    --ep-danger:  oklch(62% 0.22 27);
+    --ep-info:    oklch(68% 0.2 220);
+
+    /* Shadows */
+    --ep-shadow-sm:  0 1px 3px oklch(5% 0 0 / 0.4), 0 1px 2px oklch(5% 0 0 / 0.3);
+    --ep-shadow-md:  0 4px 12px oklch(5% 0 0 / 0.4), 0 2px 4px oklch(5% 0 0 / 0.3);
+    --ep-shadow-lg:  0 12px 32px oklch(5% 0 0 / 0.5), 0 4px 8px oklch(5% 0 0 / 0.3);
+    --ep-shadow-accent: 0 0 16px var(--ep-accent-glow);
+
+    /* Filament overrides */
+    --fi-bg-base:    var(--ep-bg);
+    --fi-bg-sidebar: var(--ep-sidebar);
+}
+
+/* ── Design tokens: light ────────────────────────────────────── */
+
+html:not(.dark),
+html.light {
+    --ep-bg:        oklch(97% 0.005 255);
+    --ep-sidebar:   oklch(100% 0 0);
+    --ep-surface:   oklch(100% 0 0);
+    --ep-surface-2: oklch(96% 0.006 255);
+    --ep-surface-3: oklch(93% 0.008 255);
+
+    --ep-border:       oklch(88% 0.01 255);
+    --ep-border-strong: oklch(78% 0.012 255);
+
+    --ep-text-primary:   oklch(14% 0.025 255);
+    --ep-text-secondary: oklch(38% 0.02 255);
+    --ep-text-muted:     oklch(55% 0.018 255);
+    --ep-text-disabled:  oklch(70% 0.012 255);
+
+    --ep-accent:       oklch(52% 0.26 255);
+    --ep-accent-dim:   oklch(52% 0.26 255 / 0.1);
+    --ep-accent-glow:  oklch(52% 0.26 255 / 0.2);
+    --ep-accent-hover: oklch(48% 0.26 255);
+
+    --ep-shadow-sm:  0 1px 3px oklch(60% 0.01 255 / 0.12), 0 1px 2px oklch(60% 0.01 255 / 0.08);
+    --ep-shadow-md:  0 4px 12px oklch(60% 0.01 255 / 0.12), 0 2px 4px oklch(60% 0.01 255 / 0.08);
+    --ep-shadow-lg:  0 12px 32px oklch(60% 0.01 255 / 0.14), 0 4px 8px oklch(60% 0.01 255 / 0.08);
+
+    --fi-bg-base:    var(--ep-bg);
+    --fi-bg-sidebar: var(--ep-sidebar);
+}
+
+/* ── Global base ─────────────────────────────────────────────── */
+
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+}
+
+html {
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+    background-color: var(--ep-bg) !important;
+    color: var(--ep-text-primary) !important;
+    font-family: 'Plus Jakarta Sans', sans-serif !important;
+}
+
+/* ── Sidebar ─────────────────────────────────────────────────── */
+
 .fi-sidebar {
-    background-color: var(--fi-bg-sidebar) !important;
-    border-right: 1px solid oklch(24% 0.02 255) !important;
+    background-color: var(--ep-sidebar) !important;
+    border-inline-end: 1px solid var(--ep-border) !important;
+    box-shadow: none !important;
 }
 
 .fi-sidebar-header {
-    padding: 1.5rem !important;
-    border-bottom: none !important;
+    padding: 1.25rem 1.5rem !important;
+    border-block-end: 1px solid var(--ep-border) !important;
     background: transparent !important;
 }
 
-/* 2. NAV ITEMS HOVER & ACTIVE */
+.fi-sidebar-nav {
+    padding-block: 0.75rem !important;
+    padding-inline: 0.75rem !important;
+}
+
+/* Group labels */
+.fi-sidebar-group-label {
+    color: var(--ep-text-muted) !important;
+    font-size: 0.6875rem !important;
+    font-weight: 700 !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.08em !important;
+    padding-inline: 0.75rem !important;
+    padding-block: 0.25rem !important;
+    margin-block-start: 1rem !important;
+}
+
+/* Nav items */
 .fi-sidebar-item {
-    transition: all 150ms ease-out;
+    transition: none;
 }
 
 .fi-sidebar-item-button {
-    color: oklch(70% 0.015 255) !important;
-    transition: all 150ms ease-out !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 0.625rem !important;
+    padding-block: 0.5rem !important;
+    padding-inline: 0.75rem !important;
+    border-radius: 0.5rem !important;
+    color: var(--ep-text-secondary) !important;
+    font-size: 0.875rem !important;
+    font-weight: 500 !important;
+    transition: background 130ms ease-out, color 130ms ease-out !important;
+    border: none !important;
+    box-shadow: none !important;
 }
 
 .fi-sidebar-item-button:hover {
-    color: #fff !important;
-    background-color: oklch(25% 0.05 255) !important;
+    background-color: var(--ep-surface-2) !important;
+    color: var(--ep-text-primary) !important;
 }
 
 .fi-sidebar-item-icon {
-    color: oklch(70% 0.015 255) !important;
-    transition: all 150ms ease-out !important;
+    width: 1.125rem !important;
+    height: 1.125rem !important;
+    color: inherit !important;
+    flex-shrink: 0 !important;
+    transition: color 130ms ease-out !important;
 }
 
-.fi-sidebar-item-button:hover .fi-sidebar-item-icon {
-    color: #fff !important;
+/* Active item — using inline-start border (logical) */
+.fi-sidebar-item.fi-active .fi-sidebar-item-button,
+.fi-sidebar-item-button[aria-current] {
+    background-color: var(--ep-accent-dim) !important;
+    color: var(--ep-text-primary) !important;
+    box-shadow: inset 3px 0 0 var(--ep-accent) !important;
+    font-weight: 600 !important;
 }
 
-/* Active Nav Item */
-.fi-sidebar-item.fi-active .fi-sidebar-item-button {
-    background-color: oklch(62% 0.26 255 / 0.15) !important;
-    color: #fff !important;
-    border-left: 3px solid oklch(62% 0.26 255) !important;
-    box-shadow: inset 0 0 10px rgba(99,102,241,0.1);
+[dir='rtl'] .fi-sidebar-item.fi-active .fi-sidebar-item-button,
+[dir='rtl'] .fi-sidebar-item-button[aria-current] {
+    box-shadow: inset -3px 0 0 var(--ep-accent) !important;
 }
 
-.fi-sidebar-item.fi-active .fi-sidebar-item-icon {
-    color: oklch(62% 0.26 255) !important;
+.fi-sidebar-item.fi-active .fi-sidebar-item-icon,
+.fi-sidebar-item-button[aria-current] .fi-sidebar-item-icon {
+    color: var(--ep-accent) !important;
 }
 
-/* Group Labels */
-.fi-sidebar-group-label {
-    color: oklch(60% 0.018 255) !important;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-}
-
-/* 3. LAYOUT & CARDS */
-.fi-main {
-    background-color: var(--fi-bg-base) !important;
-}
-
-.fi-ta-content, .fi-wi-stats-overview-stat, .fi-section, .fi-modal-window {
-    background-color: oklch(22% 0.022 255) !important; /* surface elevation */
-    border: 1px solid oklch(30% 0.02 255) !important;
-    box-shadow: none !important;
-    border-radius: 0.75rem !important;
-}
+/* ── Topbar ──────────────────────────────────────────────────── */
 
 .fi-topbar {
-    background-color: oklch(22% 0.022 255) !important;
-    border-bottom: 1px solid oklch(30% 0.02 255) !important;
+    background-color: var(--ep-surface) !important;
+    border-block-end: 1px solid var(--ep-border) !important;
     box-shadow: none !important;
+    height: 3.5rem !important;
+    animation: slideDown 180ms ease-out;
 }
 
-/* 4. TABLES */
-.fi-ta-row {
-    transition: background-color 150ms ease-out !important;
-    border-bottom: 1px solid oklch(26% 0.02 255) !important;
+.fi-topbar-breadcrumbs {
+    color: var(--ep-text-muted) !important;
+    font-size: 0.875rem !important;
 }
 
-.fi-ta-row:hover {
-    background-color: oklch(26% 0.025 255) !important; /* subtle background shift */
+.fi-breadcrumb-item {
+    color: var(--ep-text-muted) !important;
+    transition: color 130ms ease-out !important;
 }
 
-/* Very subtle alternating rows */
-.fi-ta-table tbody tr:nth-child(even) {
-    background-color: oklch(20% 0.02 255);
+.fi-breadcrumb-item:last-child {
+    color: var(--ep-text-primary) !important;
+}
+
+/* ── Main content ────────────────────────────────────────────── */
+
+.fi-main {
+    background-color: var(--ep-bg) !important;
+}
+
+.fi-main-ctn {
+    padding-block: 1.5rem !important;
+    padding-inline: 1.5rem !important;
+    animation: fadeIn 200ms ease-out;
+}
+
+/* ── Page header ─────────────────────────────────────────────── */
+
+.fi-page-header {
+    margin-block-end: 1.5rem !important;
+    animation: slideDown 200ms ease-out;
+}
+
+.fi-page-header-heading {
+    font-size: 1.375rem !important;
+    font-weight: 700 !important;
+    color: var(--ep-text-primary) !important;
+    letter-spacing: -0.015em !important;
+}
+
+.fi-page-header-subheading {
+    color: var(--ep-text-muted) !important;
+    font-size: 0.875rem !important;
+    margin-block-start: 0.25rem !important;
+}
+
+/* ── Section / Card surface ──────────────────────────────────── */
+
+.fi-section {
+    background-color: var(--ep-surface) !important;
+    border: 1px solid var(--ep-border) !important;
+    border-radius: 0.75rem !important;
+    box-shadow: var(--ep-shadow-sm) !important;
+    animation: slideUp 200ms ease-out;
+}
+
+.fi-section-header {
+    padding-block: 1rem !important;
+    padding-inline: 1.25rem !important;
+    border-block-end: 1px solid var(--ep-border) !important;
+}
+
+.fi-section-header-heading {
+    font-size: 0.9375rem !important;
+    font-weight: 600 !important;
+    color: var(--ep-text-primary) !important;
+}
+
+.fi-section-content {
+    padding-block: 1rem !important;
+    padding-inline: 1.25rem !important;
+}
+
+/* ── Widgets ─────────────────────────────────────────────────── */
+
+.fi-wi {
+    animation: slideUp 220ms ease-out;
+}
+
+.fi-wi-stats-overview-stat {
+    background-color: var(--ep-surface) !important;
+    border: 1px solid var(--ep-border) !important;
+    border-radius: 0.75rem !important;
+    padding: 1.25rem !important;
+    box-shadow: var(--ep-shadow-sm) !important;
+    transition: box-shadow 180ms ease-out, border-color 180ms ease-out !important;
+}
+
+.fi-wi-stats-overview-stat:hover {
+    border-color: var(--ep-border-strong) !important;
+    box-shadow: var(--ep-shadow-md) !important;
+}
+
+.fi-wi-stats-overview-stat-value {
+    font-size: 1.75rem !important;
+    font-weight: 700 !important;
+    color: var(--ep-text-primary) !important;
+    letter-spacing: -0.02em !important;
+}
+
+.fi-wi-stats-overview-stat-label {
+    font-size: 0.8125rem !important;
+    color: var(--ep-text-muted) !important;
+    font-weight: 500 !important;
+}
+
+.fi-wi-stats-overview-stat-description {
+    font-size: 0.8125rem !important;
+    color: var(--ep-text-secondary) !important;
+}
+
+.fi-wi-stats-overview-stat-increase {
+    color: var(--ep-success) !important;
+}
+
+.fi-wi-stats-overview-stat-decrease {
+    color: var(--ep-danger) !important;
+}
+
+/* ── Tables ──────────────────────────────────────────────────── */
+
+.fi-ta-content {
+    background-color: var(--ep-surface) !important;
+    border: 1px solid var(--ep-border) !important;
+    border-radius: 0.75rem !important;
+    box-shadow: var(--ep-shadow-sm) !important;
+    overflow: hidden !important;
+    animation: slideUp 220ms ease-out;
 }
 
 .fi-ta-header-cell {
-    background-color: oklch(18% 0.02 255) !important;
-    border-bottom: 1px solid oklch(30% 0.02 255) !important;
+    background-color: var(--ep-surface-2) !important;
+    border-block-end: 1px solid var(--ep-border) !important;
+    padding-block: 0.75rem !important;
+    padding-inline: 1rem !important;
 }
 
 .fi-ta-header-cell-label {
-    text-transform: uppercase !important;
-    letter-spacing: 0.05em !important;
-    color: oklch(60% 0.018 255) !important;
     font-size: 0.75rem !important;
+    font-weight: 700 !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.06em !important;
+    color: var(--ep-text-muted) !important;
 }
 
-/* 5. BUTTONS */
+.fi-ta-row {
+    border-block-end: 1px solid var(--ep-border) !important;
+    transition: background 130ms ease-out !important;
+}
+
+.fi-ta-row:last-child {
+    border-block-end: none !important;
+}
+
+.fi-ta-row:hover {
+    background-color: var(--ep-surface-2) !important;
+}
+
+.fi-ta-cell {
+    padding-block: 0.875rem !important;
+    padding-inline: 1rem !important;
+    color: var(--ep-text-secondary) !important;
+    font-size: 0.875rem !important;
+}
+
+.fi-ta-cell:first-child {
+    color: var(--ep-text-primary) !important;
+    font-weight: 500 !important;
+}
+
+.fi-ta-filters {
+    padding-block: 0.75rem !important;
+    padding-inline: 1rem !important;
+    border-block-end: 1px solid var(--ep-border) !important;
+    background-color: var(--ep-surface) !important;
+}
+
+.fi-ta-empty-state {
+    padding-block: 3rem !important;
+    text-align: center !important;
+}
+
+.fi-ta-empty-state-label {
+    color: var(--ep-text-secondary) !important;
+    font-weight: 600 !important;
+}
+
+.fi-ta-empty-state-description {
+    color: var(--ep-text-muted) !important;
+    font-size: 0.875rem !important;
+    margin-block-start: 0.25rem !important;
+}
+
+.fi-ta-pagination {
+    padding-block: 0.75rem !important;
+    padding-inline: 1rem !important;
+    border-block-start: 1px solid var(--ep-border) !important;
+}
+
+/* ── Buttons ─────────────────────────────────────────────────── */
+
 .fi-btn {
-    transition: all 150ms ease-out !important;
+    font-family: 'Plus Jakarta Sans', sans-serif !important;
+    font-weight: 600 !important;
+    font-size: 0.875rem !important;
+    border-radius: 0.5rem !important;
+    padding-block: 0.5rem !important;
+    padding-inline: 1rem !important;
+    transition: background 130ms ease-out, box-shadow 130ms ease-out, opacity 130ms ease-out !important;
+    border: 1px solid transparent !important;
 }
 
 .fi-btn-color-primary {
-    background-color: oklch(62% 0.26 255) !important;
-    color: #fff !important;
+    background-color: var(--ep-accent) !important;
+    color: oklch(98% 0.003 255) !important;
+    border-color: transparent !important;
 }
 
 .fi-btn-color-primary:hover {
-    box-shadow: 0 0 15px oklch(62% 0.26 255 / 0.4) !important; /* slight glow */
-    filter: brightness(1.1);
+    background-color: var(--ep-accent-hover) !important;
+    box-shadow: var(--ep-shadow-accent) !important;
+}
+
+.fi-btn-color-gray {
+    background-color: var(--ep-surface-2) !important;
+    color: var(--ep-text-secondary) !important;
+    border-color: var(--ep-border) !important;
+}
+
+.fi-btn-color-gray:hover {
+    background-color: var(--ep-surface-3) !important;
+    color: var(--ep-text-primary) !important;
+    border-color: var(--ep-border-strong) !important;
 }
 
 .fi-btn-color-danger {
-    background-color: oklch(48% 0.18 27) !important; /* softer red tint */
-    color: #fff !important;
+    background-color: transparent !important;
+    color: var(--ep-danger) !important;
+    border-color: var(--ep-danger) !important;
 }
 
-/* 6. FORMS */
-.fi-input, .fi-select, .fi-textarea {
-    background-color: oklch(18% 0.02 255) !important;
-    border: 1px solid oklch(30% 0.02 255) !important;
-    color: oklch(98% 0.005 255) !important;
-    transition: all 150ms ease-out !important;
+.fi-btn-color-danger:hover {
+    background-color: var(--ep-danger) !important;
+    color: oklch(98% 0.003 255) !important;
 }
 
-.fi-input:focus, .fi-select:focus, .fi-textarea:focus, .fi-input:focus-within {
-    border-color: oklch(62% 0.26 255) !important;
-    box-shadow: 0 0 0 2px oklch(62% 0.26 255 / 0.3) !important; /* electric blue ring */
+.fi-btn-color-success {
+    background-color: var(--ep-success) !important;
+    color: oklch(14% 0.025 255) !important;
+}
+
+.fi-btn[disabled],
+.fi-btn:disabled {
+    opacity: 0.45 !important;
+    cursor: not-allowed !important;
+}
+
+/* ── Forms ───────────────────────────────────────────────────── */
+
+.fi-input,
+.fi-select,
+.fi-textarea {
+    background-color: var(--ep-surface-2) !important;
+    border: 1px solid var(--ep-border) !important;
+    border-radius: 0.5rem !important;
+    color: var(--ep-text-primary) !important;
+    font-family: 'Plus Jakarta Sans', sans-serif !important;
+    font-size: 0.875rem !important;
+    padding-block: 0.5625rem !important;
+    padding-inline: 0.75rem !important;
+    transition: border-color 130ms ease-out, box-shadow 130ms ease-out !important;
+}
+
+.fi-input::placeholder,
+.fi-textarea::placeholder {
+    color: var(--ep-text-disabled) !important;
+}
+
+.fi-input:focus,
+.fi-select:focus,
+.fi-textarea:focus,
+.fi-input:focus-within,
+.fi-fo-wrp-input-txt:focus-within {
+    border-color: var(--ep-accent) !important;
+    box-shadow: 0 0 0 3px var(--ep-accent-dim) !important;
     outline: none !important;
 }
 
 .fi-fo-field-wrp-label {
-    color: oklch(80% 0.012 255) !important; /* proper contrast */
-    font-weight: 500 !important;
+    font-size: 0.875rem !important;
+    font-weight: 600 !important;
+    color: var(--ep-text-secondary) !important;
+    margin-block-end: 0.375rem !important;
+}
+
+.fi-fo-field-wrp-hint {
+    font-size: 0.8125rem !important;
+    color: var(--ep-text-muted) !important;
 }
 
 .fi-fo-field-wrp-error-message {
-    color: oklch(78% 0.18 80) !important; /* Amber instead of red */
+    font-size: 0.8125rem !important;
+    color: var(--ep-danger) !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 0.375rem !important;
+    margin-block-start: 0.25rem !important;
 }
 
-/* Global text color fix for dark mode assumption */
-body {
-    color: oklch(95% 0.008 255) !important;
+.fi-fo-section {
+    background-color: var(--ep-surface) !important;
+    border: 1px solid var(--ep-border) !important;
+    border-radius: 0.75rem !important;
+}
+
+/* ── Modal ───────────────────────────────────────────────────── */
+
+.fi-modal-window {
+    background-color: var(--ep-surface) !important;
+    border: 1px solid var(--ep-border-strong) !important;
+    border-radius: 0.875rem !important;
+    box-shadow: var(--ep-shadow-lg) !important;
+    animation: slideUp 200ms ease-out;
+}
+
+.fi-modal-header {
+    padding: 1.25rem 1.5rem !important;
+    border-block-end: 1px solid var(--ep-border) !important;
+}
+
+.fi-modal-heading {
+    font-size: 1.0625rem !important;
+    font-weight: 700 !important;
+    color: var(--ep-text-primary) !important;
+}
+
+.fi-modal-footer {
+    padding: 1rem 1.5rem !important;
+    border-block-start: 1px solid var(--ep-border) !important;
+    display: flex !important;
+    justify-content: flex-end !important;
+    gap: 0.75rem !important;
+}
+
+.fi-modal-close-btn {
+    color: var(--ep-text-muted) !important;
+    transition: color 130ms ease-out !important;
+}
+
+.fi-modal-close-btn:hover {
+    color: var(--ep-text-primary) !important;
+}
+
+.fi-modal-overlay {
+    background-color: oklch(5% 0 0 / 0.7) !important;
+    backdrop-filter: blur(2px) !important;
+    animation: fadeIn 150ms ease-out;
+}
+
+/* ── Dropdown / Actions ──────────────────────────────────────── */
+
+.fi-dropdown-panel {
+    background-color: var(--ep-surface) !important;
+    border: 1px solid var(--ep-border-strong) !important;
+    border-radius: 0.625rem !important;
+    box-shadow: var(--ep-shadow-md) !important;
+    padding-block: 0.375rem !important;
+    animation: slideDown 150ms ease-out;
+}
+
+.fi-dropdown-list-item-label {
+    color: var(--ep-text-secondary) !important;
+    font-size: 0.875rem !important;
+}
+
+.fi-dropdown-list-item-button:hover {
+    background-color: var(--ep-surface-2) !important;
+}
+
+.fi-dropdown-list-item-button:hover .fi-dropdown-list-item-label {
+    color: var(--ep-text-primary) !important;
+}
+
+/* ── Badges / Status indicators ──────────────────────────────── */
+
+.fi-badge {
+    font-size: 0.75rem !important;
+    font-weight: 600 !important;
+    border-radius: 9999px !important;
+    padding-block: 0.1875rem !important;
+    padding-inline: 0.625rem !important;
+}
+
+.fi-badge-color-success {
+    background-color: oklch(68% 0.18 145 / 0.15) !important;
+    color: var(--ep-success) !important;
+}
+
+.fi-badge-color-warning {
+    background-color: oklch(78% 0.18 80 / 0.15) !important;
+    color: var(--ep-warning) !important;
+}
+
+.fi-badge-color-danger {
+    background-color: oklch(62% 0.22 27 / 0.15) !important;
+    color: var(--ep-danger) !important;
+}
+
+.fi-badge-color-gray {
+    background-color: var(--ep-surface-2) !important;
+    color: var(--ep-text-secondary) !important;
+}
+
+.fi-badge-color-primary,
+.fi-badge-color-info {
+    background-color: var(--ep-accent-dim) !important;
+    color: var(--ep-accent) !important;
+}
+
+/* ── Notifications ───────────────────────────────────────────── */
+
+.fi-no-notification {
+    background-color: var(--ep-surface) !important;
+    border: 1px solid var(--ep-border-strong) !important;
+    border-radius: 0.75rem !important;
+    box-shadow: var(--ep-shadow-md) !important;
+    animation: slideDown 200ms ease-out;
+}
+
+.fi-no-notification-title {
+    color: var(--ep-text-primary) !important;
+    font-weight: 600 !important;
+}
+
+.fi-no-notification-body {
+    color: var(--ep-text-muted) !important;
+    font-size: 0.875rem !important;
+}
+
+/* ── Select / Toggle inputs ──────────────────────────────────── */
+
+.fi-toggle {
+    transition: background 150ms ease-out !important;
+}
+
+.fi-checkbox-label,
+.fi-radio-label {
+    color: var(--ep-text-secondary) !important;
+    font-size: 0.875rem !important;
+}
+
+/* ── Pagination ──────────────────────────────────────────────── */
+
+.fi-pagination-previous-btn,
+.fi-pagination-next-btn {
+    background-color: var(--ep-surface-2) !important;
+    border: 1px solid var(--ep-border) !important;
+    color: var(--ep-text-secondary) !important;
+    border-radius: 0.5rem !important;
+    padding-block: 0.375rem !important;
+    padding-inline: 0.75rem !important;
+    font-size: 0.8125rem !important;
+    transition: background 130ms ease-out, border-color 130ms ease-out !important;
+}
+
+.fi-pagination-previous-btn:hover,
+.fi-pagination-next-btn:hover {
+    background-color: var(--ep-surface-3) !important;
+    border-color: var(--ep-border-strong) !important;
+    color: var(--ep-text-primary) !important;
+}
+
+.fi-pagination-item-btn {
+    border-radius: 0.375rem !important;
+    font-size: 0.875rem !important;
+    color: var(--ep-text-muted) !important;
+    padding-block: 0.375rem !important;
+    padding-inline: 0.5rem !important;
+    transition: background 130ms ease-out !important;
+}
+
+.fi-pagination-item-btn:hover {
+    background-color: var(--ep-surface-2) !important;
+    color: var(--ep-text-primary) !important;
+}
+
+.fi-pagination-item-btn.fi-active {
+    background-color: var(--ep-accent) !important;
+    color: oklch(98% 0.003 255) !important;
+    font-weight: 600 !important;
+}
+
+/* ── User menu (topbar avatar) ───────────────────────────────── */
+
+.fi-user-menu-trigger {
+    border-radius: 0.5rem !important;
+    padding: 0.375rem !important;
+    transition: background 130ms ease-out !important;
+}
+
+.fi-user-menu-trigger:hover {
+    background-color: var(--ep-surface-2) !important;
+}
+
+/* ── Loading / skeleton ──────────────────────────────────────── */
+
+.fi-loading-indicator {
+    color: var(--ep-accent) !important;
+}
+
+[wire\:loading] {
+    animation: pulse 1.4s ease-in-out infinite;
+}
+
+/* ── Tabs ────────────────────────────────────────────────────── */
+
+.fi-tabs {
+    border-block-end: 1px solid var(--ep-border) !important;
+    margin-block-end: 1.25rem !important;
+}
+
+.fi-tabs-tab {
+    color: var(--ep-text-muted) !important;
+    font-size: 0.875rem !important;
+    font-weight: 500 !important;
+    padding-block: 0.625rem !important;
+    padding-inline: 1rem !important;
+    border-block-end: 2px solid transparent !important;
+    transition: color 130ms ease-out, border-color 130ms ease-out !important;
+}
+
+.fi-tabs-tab:hover {
+    color: var(--ep-text-primary) !important;
+}
+
+.fi-tabs-tab[aria-selected="true"],
+.fi-tabs-tab.fi-active {
+    color: var(--ep-accent) !important;
+    border-block-end-color: var(--ep-accent) !important;
+    font-weight: 600 !important;
+}
+
+/* ── Scrollbars ──────────────────────────────────────────────── */
+
+::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
+
+::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--ep-border-strong);
+    border-radius: 9999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: var(--ep-text-muted);
+}
+
+/* ── Focus rings ─────────────────────────────────────────────── */
+
+:focus-visible {
+    outline: 2px solid var(--ep-accent) !important;
+    outline-offset: 2px !important;
+}
+
+/* ── Topbar theme + lang toggle ──────────────────────────────── */
+
+.ep-tlt {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+}
+
+/* ── RTL adjustments ─────────────────────────────────────────── */
+
+[dir='rtl'] .fi-sidebar-group-label {
+    letter-spacing: 0;
+}
+
+[dir='rtl'] .fi-topbar-breadcrumbs {
+    direction: rtl;
+}
+
+/* ── Dark mode specific overrides for Filament's own theming ─── */
+
+html.dark .fi-color-custom {
+    --c-50: var(--ep-surface);
+    --c-400: var(--ep-accent-dim);
+    --c-600: var(--ep-accent);
 }

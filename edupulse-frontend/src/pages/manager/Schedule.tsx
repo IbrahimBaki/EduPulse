@@ -52,13 +52,13 @@ const IconPlus = () => (
 )
 
 const IconChevronLeft = () => (
-  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" data-rtl-flip="">
     <polyline points="15 18 9 12 15 6" />
   </svg>
 )
 
 const IconChevronRight = () => (
-  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" data-rtl-flip="">
     <polyline points="9 18 15 12 9 6" />
   </svg>
 )
@@ -187,6 +187,7 @@ export default function SchedulePage() {
   const [formValues, setFormValues] = useState<CreateSchedulePayload>({
     title: '', starts_at: '', ends_at: '', type: 'online', description: '', meeting_url: '',
   })
+  const [formError, setFormError] = useState('')
 
   const { data: courses, isLoading: coursesLoading } = useQuery({
     queryKey: ['manager-courses'],
@@ -210,9 +211,10 @@ export default function SchedulePage() {
 
   const handleSave = () => {
     if (!formValues.title || !formValues.starts_at || !formValues.ends_at) {
-      alert('Please fill in title, start time and end time.')
+      setFormError(t('manager.schedule.validationRequired'))
       return
     }
+    setFormError('')
     createMutation.mutate(formValues)
   }
 
@@ -253,14 +255,14 @@ export default function SchedulePage() {
             <button className={`${styles.btn} ${styles.btnOutline} ${styles.btnIcon}`} onClick={handlePrev}><IconChevronLeft /></button>
             <span className={styles.periodLabel}>{formatPeriodLabel(view === 'month' ? 'month' : 'week', currentDate)}</span>
             <button className={`${styles.btn} ${styles.btnOutline} ${styles.btnIcon}`} onClick={handleNext}><IconChevronRight /></button>
-            <button className={`${styles.btn} ${styles.btnOutline}`} style={{ marginInlineStart: '8px' }} onClick={() => setCurrentDate(new Date())}>Today</button>
+            <button className={`${styles.btn} ${styles.btnOutline}`} style={{ marginInlineStart: '8px' }} onClick={() => setCurrentDate(new Date())}>{t('manager.schedule.today')}</button>
           </div>
-          <button 
-            className={`${styles.btn} ${styles.btnPrimary}`} 
+          <button
+            className={`${styles.btn} ${styles.btnPrimary}`}
             onClick={() => setSlideOverOpen(true)}
             disabled={!selectedCourseId}
           >
-            <IconPlus /> New Session
+            <IconPlus /> {t('manager.schedule.newSession')}
           </button>
         </div>
       </header>
@@ -272,14 +274,14 @@ export default function SchedulePage() {
           onChange={(e) => setSelectedCourseId(e.target.value ? Number(e.target.value) : '')}
           disabled={coursesLoading}
         >
-          <option value="">Select Course...</option>
+          <option value="">{t('manager.schedule.selectCourse')}</option>
           {courses?.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
         </select>
 
         <div className={styles.viewToggle} role="group" style={{ marginInlineStart: 'auto' }}>
-          <button className={styles.viewToggleBtn} aria-pressed={view === 'week'} onClick={() => setView('week')}>Week</button>
-          <button className={styles.viewToggleBtn} aria-pressed={view === 'month'} onClick={() => setView('month')}>Month</button>
-          <button className={styles.viewToggleBtn} aria-pressed={view === 'list'} onClick={() => setView('list')}>List</button>
+          <button className={styles.viewToggleBtn} aria-pressed={view === 'week'} onClick={() => setView('week')}>{t('manager.schedule.week')}</button>
+          <button className={styles.viewToggleBtn} aria-pressed={view === 'month'} onClick={() => setView('month')}>{t('manager.schedule.month')}</button>
+          <button className={styles.viewToggleBtn} aria-pressed={view === 'list'} onClick={() => setView('list')}>{t('manager.schedule.list')}</button>
         </div>
       </div>
 
@@ -287,25 +289,25 @@ export default function SchedulePage() {
         {!selectedCourseId ? (
           <div className={styles.emptyState}>
             <IconCalendar />
-            <h3 className={styles.emptyTitle}>No Course Selected</h3>
-            <p className={styles.emptyText}>Please select a course from the dropdown above to manage its academic schedule.</p>
+            <h3 className={styles.emptyTitle}>{t('manager.schedule.noCourseSelected')}</h3>
+            <p className={styles.emptyText}>{t('manager.schedule.noCourseSelectedHint')}</p>
           </div>
         ) : schedulesLoading ? (
           <div className={`${styles.calendarContainer} ${styles.skeleton}`} style={{ height: '600px' }} />
         ) : isError ? (
           <div className={styles.emptyState}>
             <IconAlert />
-            <h3 className={styles.emptyTitle}>Failed to Load Data</h3>
-            <p className={styles.emptyText}>There was an error fetching the schedule. Please try again.</p>
-            <button className={`${styles.btn} ${styles.btnOutline}`} onClick={() => refetch()}>Retry</button>
+            <h3 className={styles.emptyTitle}>{t('common.errorLoadFailed')}</h3>
+            <p className={styles.emptyText}>{t('manager.schedule.errorHint')}</p>
+            <button className={`${styles.btn} ${styles.btnOutline}`} onClick={() => refetch()}>{t('common.retry')}</button>
           </div>
         ) : schedules?.length === 0 ? (
           <div className={styles.emptyState}>
             <IconCalendar />
-            <h3 className={styles.emptyTitle}>Empty Schedule</h3>
-            <p className={styles.emptyText}>No sessions have been scheduled for this course yet.</p>
+            <h3 className={styles.emptyTitle}>{t('manager.schedule.emptySchedule')}</h3>
+            <p className={styles.emptyText}>{t('manager.schedule.emptyScheduleHint')}</p>
             <button className={`${styles.btn} ${styles.btnPrimary}`} onClick={() => setSlideOverOpen(true)}>
-              <IconPlus /> Create First Session
+              <IconPlus /> {t('manager.schedule.createFirstSession')}
             </button>
           </div>
         ) : (
@@ -323,47 +325,50 @@ export default function SchedulePage() {
           <div className={styles.popoverPanel} style={{ top: `${popover.y}px`, left: `${popover.x}px` }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '12px' }}>
               <h3 style={{ fontSize: '0.9375rem', fontWeight: 700 }}>{popover.session.title}</h3>
-              {popover.session.status === 'live' && <span className={styles.statusLive}>Live</span>}
+              {popover.session.status === 'live' && <span className={styles.statusLive}>{t('manager.schedule.live')}</span>}
             </div>
             <p style={{ fontSize: '0.8125rem', color: 'var(--text-secondary)', marginBottom: '16px' }}>
-              {popover.session.description || 'No description provided.'}
+              {popover.session.description || t('manager.schedule.noDescription')}
             </p>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginBottom: '20px' }}>
               <div>
-                <span className={styles.label} style={{ fontSize: '0.6875rem' }}>Type</span>
+                <span className={styles.label} style={{ fontSize: '0.6875rem' }}>{t('manager.schedule.type')}</span>
                 <span className={styles.statusBadge} style={{ background: 'oklch(22% 0.026 255)', color: 'var(--text-primary)' }}>{popover.session.type}</span>
               </div>
               <div>
-                <span className={styles.label} style={{ fontSize: '0.6875rem' }}>Time</span>
+                <span className={styles.label} style={{ fontSize: '0.6875rem' }}>{t('manager.schedule.time')}</span>
                 <span style={{ fontSize: '0.75rem', fontWeight: 600 }}>{safeDate(popover.session.starts_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
               </div>
             </div>
             {popover.session.meeting_url && (
-              <a href={popover.session.meeting_url} target="_blank" className={`${styles.btn} ${styles.btnPrimary}`} style={{ width: '100%', textDecoration: 'none' }}>Launch Session</a>
+              <a href={popover.session.meeting_url} target="_blank" className={`${styles.btn} ${styles.btnPrimary}`} style={{ width: '100%', textDecoration: 'none' }}>{t('manager.schedule.launchSession')}</a>
             )}
           </div>
         </>
       )}
 
-      <SlideOver open={isSlideOverOpen} onClose={() => setSlideOverOpen(false)} onSave={handleSave} isLoading={createMutation.isPending} title="Schedule New Session">
+      <SlideOver open={isSlideOverOpen} onClose={() => { setSlideOverOpen(false); setFormError('') }} onSave={handleSave} isLoading={createMutation.isPending} title={t('manager.schedule.scheduleNewSession')}>
+        {formError && (
+          <p role="alert" style={{ fontSize: '0.8125rem', color: 'var(--color-red)', marginBottom: '4px' }}>{formError}</p>
+        )}
         <div className={styles.formGroup}>
-          <label className={styles.label}>Session Title</label>
-          <input className={styles.input} placeholder="e.g. Week 4: Calculus Deep Dive" value={formValues.title} onChange={(e) => setFormValues({ ...formValues, title: e.target.value })} />
+          <label className={styles.label}>{t('manager.schedule.sessionTitle')}</label>
+          <input className={styles.input} placeholder={t('manager.schedule.sessionTitlePlaceholder')} value={formValues.title} onChange={(e) => { setFormError(''); setFormValues({ ...formValues, title: e.target.value }) }} />
         </div>
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
-          <div className={styles.formGroup}><label className={styles.label}>Start Date & Time</label><input className={styles.input} type="datetime-local" value={formValues.starts_at} onChange={(e) => setFormValues({ ...formValues, starts_at: e.target.value })} /></div>
-          <div className={styles.formGroup}><label className={styles.label}>End Date & Time</label><input className={styles.input} type="datetime-local" value={formValues.ends_at} onChange={(e) => setFormValues({ ...formValues, ends_at: e.target.value })} /></div>
+          <div className={styles.formGroup}><label className={styles.label}>{t('manager.schedule.startDateTime')}</label><input className={styles.input} type="datetime-local" value={formValues.starts_at} onChange={(e) => setFormValues({ ...formValues, starts_at: e.target.value })} /></div>
+          <div className={styles.formGroup}><label className={styles.label}>{t('manager.schedule.endDateTime')}</label><input className={styles.input} type="datetime-local" value={formValues.ends_at} onChange={(e) => setFormValues({ ...formValues, ends_at: e.target.value })} /></div>
         </div>
         <div className={styles.formGroup}>
-          <label className={styles.label}>Delivery Mode</label>
+          <label className={styles.label}>{t('manager.schedule.deliveryMode')}</label>
           <select className={styles.select} value={formValues.type} onChange={(e) => setFormValues({ ...formValues, type: e.target.value })}>
-            <option value="online">Online (Integrated)</option>
-            <option value="in-person">In-Person (On-Campus)</option>
-            <option value="recorded">Pre-recorded Video</option>
+            <option value="online">{t('manager.schedule.online')}</option>
+            <option value="in-person">{t('manager.schedule.inPerson')}</option>
+            <option value="recorded">{t('manager.schedule.preRecorded')}</option>
           </select>
         </div>
-        <div className={styles.formGroup}><label className={styles.label}>Meeting URL (Optional)</label><input className={styles.input} placeholder="https://..." value={formValues.meeting_url} onChange={(e) => setFormValues({ ...formValues, meeting_url: e.target.value })} /></div>
-        <div className={styles.formGroup}><label className={styles.label}>Description</label><textarea className={styles.textarea} rows={3} placeholder="Session objectives..." value={formValues.description} onChange={(e) => setFormValues({ ...formValues, description: e.target.value })} /></div>
+        <div className={styles.formGroup}><label className={styles.label}>{t('manager.schedule.meetingUrl')}</label><input className={styles.input} placeholder="https://..." value={formValues.meeting_url} onChange={(e) => setFormValues({ ...formValues, meeting_url: e.target.value })} /></div>
+        <div className={styles.formGroup}><label className={styles.label}>{t('manager.schedule.description')}</label><textarea className={styles.textarea} rows={3} placeholder={t('manager.schedule.descriptionPlaceholder')} value={formValues.description} onChange={(e) => setFormValues({ ...formValues, description: e.target.value })} /></div>
       </SlideOver>
     </div>
   )
@@ -462,17 +467,18 @@ function MonthView({ sessions, currentDate, onSessionClick }: {
 }
 
 function ListView({ sessions }: { sessions: Schedule[] }) {
+  const { t } = useTranslation()
   return (
     <div className={styles.listWrapper}>
-      <h3 className={styles.listGroupTitle}>Upcoming Sessions</h3>
+      <h3 className={styles.listGroupTitle}>{t('manager.schedule.upcomingSessions')}</h3>
       {sessions.map(s => (
         <div key={s.id} className={styles.listCard}>
           <div className={styles.listCardTime}>{safeDate(s.starts_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</div>
           <div className={styles.listCardBody}>
             <div className={styles.listCardTitle}>{s.title}</div>
             <div className={styles.listCardMeta}>
-              <span className={styles.statusBadge} style={{ background: 'oklch(22% 0.026 255)' }}>{s.type}</span>
-              <span>&bull;</span><span>{s.status}</span>
+              <span className={styles.statusBadge} style={{ background: 'oklch(22% 0.026 255)' }}>{s.type === 'online' ? t('common.online') : s.type === 'recorded' ? t('common.recorded') : t('common.inPerson')}</span>
+              <span>&bull;</span><span>{s.status === 'live' ? t('common.live') : s.status === 'completed' ? t('common.completed') : s.status === 'cancelled' ? t('common.cancelled') : t('common.scheduled')}</span>
             </div>
           </div>
           <div className={styles.pageActions}><button className={`${styles.btn} ${styles.btnOutline} ${styles.btnIcon}`}>...</button></div>

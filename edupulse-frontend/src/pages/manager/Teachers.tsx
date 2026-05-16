@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef, useMemo, type ReactNode } from 'react'
 import { createPortal } from 'react-dom'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import { useTranslation } from 'react-i18next'
 import api from '../../lib/axios'
 import styles from './Teachers.module.css'
 
@@ -212,6 +213,7 @@ function AddTeacherForm({ subjects, gradeLevels, onSuccess, onCancel }: {
   onSuccess: () => void
   onCancel: () => void
 }) {
+  const { t } = useTranslation()
   const qc = useQueryClient()
   const [form, setForm] = useState<CreatePayload>({
     name: '', email: '', password: '', phone: '', national_id: '', assignments: [],
@@ -286,33 +288,33 @@ function AddTeacherForm({ subjects, gradeLevels, onSuccess, onCancel }: {
       {serverError && <div className={styles.formBanner} role="alert">{serverError}</div>}
 
       <div className={styles.formSection}>
-        <p className={styles.formSectionHeading}>Account</p>
+        <p className={styles.formSectionHeading}>{t('manager.teachers.account')}</p>
         <div className={styles.formGroup}>
-          <label className={styles.formLabel} htmlFor="ft-name">Full name <span aria-hidden>*</span></label>
+          <label className={styles.formLabel} htmlFor="ft-name">{t('manager.teachers.fullName')} <span aria-hidden>*</span></label>
           <input id="ft-name" type="text" className={inp('name')} value={form.name}
             onChange={e => field('name', e.target.value)} autoComplete="name" />
           {errors.name && <p className={styles.fieldErr}>{errors.name}</p>}
         </div>
         <div className={styles.formGroup}>
-          <label className={styles.formLabel} htmlFor="ft-email">Email <span aria-hidden>*</span></label>
+          <label className={styles.formLabel} htmlFor="ft-email">{t('manager.teachers.email')} <span aria-hidden>*</span></label>
           <input id="ft-email" type="email" className={inp('email')} value={form.email}
             onChange={e => field('email', e.target.value)} autoComplete="email" />
           {errors.email && <p className={styles.fieldErr}>{errors.email}</p>}
         </div>
         <div className={styles.formGroup}>
-          <label className={styles.formLabel} htmlFor="ft-pw">Password <span aria-hidden>*</span></label>
+          <label className={styles.formLabel} htmlFor="ft-pw">{t('manager.teachers.password')} <span aria-hidden>*</span></label>
           <input id="ft-pw" type="password" className={inp('password')} value={form.password}
             onChange={e => field('password', e.target.value)} autoComplete="new-password" />
           {errors.password && <p className={styles.fieldErr}>{errors.password}</p>}
         </div>
         <div className={styles.formRow}>
           <div className={styles.formGroup}>
-            <label className={styles.formLabel} htmlFor="ft-phone">Phone</label>
+            <label className={styles.formLabel} htmlFor="ft-phone">{t('manager.teachers.phone')}</label>
             <input id="ft-phone" type="tel" className={styles.formInput} value={form.phone}
               onChange={e => field('phone', e.target.value)} autoComplete="tel" />
           </div>
           <div className={styles.formGroup}>
-            <label className={styles.formLabel} htmlFor="ft-nid">National ID</label>
+            <label className={styles.formLabel} htmlFor="ft-nid">{t('manager.teachers.nationalId')}</label>
             <input id="ft-nid" type="text" className={styles.formInput} value={form.national_id}
               onChange={e => field('national_id', e.target.value)} />
           </div>
@@ -321,13 +323,13 @@ function AddTeacherForm({ subjects, gradeLevels, onSuccess, onCancel }: {
 
       <div className={styles.formSection}>
         <div className={styles.formSectionHeadRow}>
-          <p className={styles.formSectionHeading}>Assignments</p>
+          <p className={styles.formSectionHeading}>{t('manager.teachers.assignmentsSection')}</p>
           <button type="button" className={styles.addAssignBtn} onClick={addAssignmentRow}>
-            + Add
+            {t('manager.teachers.addAssignment')}
           </button>
         </div>
         {form.assignments.length === 0 ? (
-          <p className={styles.assignEmptyHint}>No assignments yet.</p>
+          <p className={styles.assignEmptyHint}>{t('manager.teachers.noAssignmentsYet')}</p>
         ) : (
           <div className={styles.assignRows}>
             {form.assignments.map((a, i) => (
@@ -338,7 +340,7 @@ function AddTeacherForm({ subjects, gradeLevels, onSuccess, onCancel }: {
                   onChange={e => setAssignment(i, 'subject_id', e.target.value ? Number(e.target.value) : '')}
                   aria-label="Subject"
                 >
-                  <option value="">Subject</option>
+                  <option value="">{t('manager.teachers.subjectPlaceholder')}</option>
                   {subjects.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
                 </select>
                 <select
@@ -347,7 +349,7 @@ function AddTeacherForm({ subjects, gradeLevels, onSuccess, onCancel }: {
                   onChange={e => setAssignment(i, 'grade_level_id', e.target.value ? Number(e.target.value) : '')}
                   aria-label="Grade level"
                 >
-                  <option value="">Grade</option>
+                  <option value="">{t('manager.teachers.gradePlaceholder')}</option>
                   {gradeLevels.map(g => <option key={g.id} value={g.id}>{g.name}</option>)}
                 </select>
                 <button
@@ -372,9 +374,9 @@ function AddTeacherForm({ subjects, gradeLevels, onSuccess, onCancel }: {
       </div>
 
       <div className={styles.formFooter}>
-        <button type="button" className={styles.formCancel} onClick={onCancel}>Cancel</button>
+        <button type="button" className={styles.formCancel} onClick={onCancel}>{t('manager.teachers.cancel')}</button>
         <button type="submit" className={styles.formSubmit} disabled={mutation.isPending}>
-          {mutation.isPending ? 'Adding…' : 'Add teacher'}
+          {mutation.isPending ? t('manager.teachers.adding') : t('manager.teachers.addTeacherSubmit')}
         </button>
       </div>
     </form>
@@ -397,6 +399,7 @@ function TeacherDetailPanel({ id, subjects, gradeLevels }: {
   subjects: Subject[]
   gradeLevels: GradeLevel[]
 }) {
+  const { t } = useTranslation()
   const qc = useQueryClient()
   const [addingAssign, setAddingAssign]   = useState(false)
   const [newSubjectId, setNewSubjectId]   = useState<number | ''>('')
@@ -466,8 +469,8 @@ function TeacherDetailPanel({ id, subjects, gradeLevels }: {
   if (isError || !data) {
     return (
       <div className={styles.dError}>
-        <p>Failed to load teacher details.</p>
-        <button type="button" className={styles.retryBtn} onClick={() => refetch()}>Try again</button>
+        <p>{t('manager.teachers.failedToLoadDetails')}</p>
+        <button type="button" className={styles.retryBtn} onClick={() => refetch()}>{t('manager.teachers.tryAgain')}</button>
       </div>
     )
   }
@@ -483,32 +486,32 @@ function TeacherDetailPanel({ id, subjects, gradeLevels }: {
           <p className={styles.dSubName}>{data.email}</p>
           <div className={styles.dPills}>
             <span className={data.is_active ? styles.pillActive : styles.pillInactive}>
-              {data.is_active ? 'Active' : 'Inactive'}
+              {data.is_active ? t('manager.teachers.statusActive') : t('manager.teachers.statusInactive')}
             </span>
           </div>
         </div>
       </div>
 
       <section className={styles.dSection}>
-        <h3 className={styles.dSectionTitle}>Contact</h3>
+        <h3 className={styles.dSectionTitle}>{t('manager.teachers.contact')}</h3>
         <dl className={styles.dGrid}>
-          <DRow label="Phone">{data.phone}</DRow>
-          <DRow label="National ID">{data.national_id}</DRow>
+          <DRow label={t('manager.teachers.phone')}>{data.phone}</DRow>
+          <DRow label={t('manager.teachers.nationalId')}>{data.national_id}</DRow>
         </dl>
       </section>
 
       <section className={styles.dSection}>
         <div className={styles.dSectionHead}>
-          <h3 className={styles.dSectionTitle}>Assignments</h3>
+          <h3 className={styles.dSectionTitle}>{t('manager.teachers.assignmentsSection')}</h3>
           {!addingAssign && (
             <button type="button" className={styles.dAddBtn} onClick={() => setAddingAssign(true)}>
-              + Add
+              {t('manager.teachers.addAssignment')}
             </button>
           )}
         </div>
 
         {data.teacher_assignments.length === 0 && !addingAssign && (
-          <p className={styles.dPlaceholder}>No assignments. Click "+ Add" to assign subjects and grades.</p>
+          <p className={styles.dPlaceholder}>{t('manager.teachers.noAssignmentsHint')}</p>
         )}
 
         {data.teacher_assignments.length > 0 && (
@@ -517,18 +520,18 @@ function TeacherDetailPanel({ id, subjects, gradeLevels }: {
               <li key={a.id} className={styles.assignDetailItem}>
                 {confirmRemoveId === a.id ? (
                   <div className={styles.assignConfirm}>
-                    <span className={styles.assignConfirmText}>Remove this assignment?</span>
+                    <span className={styles.assignConfirmText}>{t('manager.teachers.removeAssignment')}</span>
                     <button
                       type="button"
                       className={styles.assignConfirmYes}
                       onClick={() => removeMutation.mutate(a.id)}
                       disabled={removeMutation.isPending}
                     >
-                      {removeMutation.isPending ? '…' : 'Remove'}
+                      {removeMutation.isPending ? '…' : t('manager.teachers.remove')}
                     </button>
                     <button type="button" className={styles.assignConfirmNo}
                       onClick={() => setConfirmRemoveId(null)}>
-                      Cancel
+                      {t('manager.teachers.cancel')}
                     </button>
                   </div>
                 ) : (
@@ -563,7 +566,7 @@ function TeacherDetailPanel({ id, subjects, gradeLevels }: {
                 onChange={e => { setNewSubjectId(e.target.value ? Number(e.target.value) : ''); setAddError(null) }}
                 aria-label="Subject"
               >
-                <option value="">Subject</option>
+                <option value="">{t('manager.teachers.subjectPlaceholder')}</option>
                 {subjects.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
               </select>
               <select
@@ -572,7 +575,7 @@ function TeacherDetailPanel({ id, subjects, gradeLevels }: {
                 onChange={e => { setNewGradeId(e.target.value ? Number(e.target.value) : ''); setAddError(null) }}
                 aria-label="Grade level"
               >
-                <option value="">Grade</option>
+                <option value="">{t('manager.teachers.gradePlaceholder')}</option>
                 {gradeLevels.map(g => <option key={g.id} value={g.id}>{g.name}</option>)}
               </select>
             </div>
@@ -580,10 +583,10 @@ function TeacherDetailPanel({ id, subjects, gradeLevels }: {
             <div className={styles.assignAddActions}>
               <button type="button" className={styles.formSubmit} onClick={submitAdd}
                 disabled={addMutation.isPending}>
-                {addMutation.isPending ? 'Adding…' : 'Add'}
+                {addMutation.isPending ? t('manager.teachers.adding') : t('manager.teachers.add')}
               </button>
               <button type="button" className={styles.formCancel} onClick={cancelAdd}>
-                Cancel
+                {t('manager.teachers.cancel')}
               </button>
             </div>
           </div>
@@ -596,6 +599,7 @@ function TeacherDetailPanel({ id, subjects, gradeLevels }: {
 // ─── TeachersPage ─────────────────────────────────────────────────────────────
 
 export default function TeachersPage() {
+  const { t } = useTranslation()
   const qc = useQueryClient()
 
   const [search, setSearch]           = useState('')
@@ -674,16 +678,16 @@ export default function TeachersPage() {
       {/* Header */}
       <div className={styles.pageHead}>
         <div>
-          <h1 className={styles.pageTitle}>Teachers</h1>
+          <h1 className={styles.pageTitle}>{t('manager.teachers.title')}</h1>
           {!teachersQ.isLoading && (
-            <p className={styles.pageCount}>{allTeachers.length.toLocaleString()} total</p>
+            <p className={styles.pageCount}>{allTeachers.length.toLocaleString()} {t('manager.teachers.total')}</p>
           )}
         </div>
         <button type="button" className={styles.addBtn} onClick={openAdd}>
           <svg width="13" height="13" viewBox="0 0 13 13" fill="none">
             <path d="M6.5 1v11M1 6.5h11" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round"/>
           </svg>
-          Add teacher
+          {t('manager.teachers.addTeacher')}
         </button>
       </div>
 
@@ -696,7 +700,7 @@ export default function TeachersPage() {
           </svg>
           <input
             type="search"
-            placeholder="Search by name or email"
+            placeholder={t('manager.teachers.searchPlaceholder')}
             className={styles.searchInput}
             value={search}
             onChange={e => setSearch(e.target.value)}
@@ -712,12 +716,12 @@ export default function TeachersPage() {
         <div className={styles.filters}>
           <select className={styles.filterSelect} value={subjectFilter}
             onChange={e => setSubjectFilter(e.target.value)}>
-            <option value="">All subjects</option>
+            <option value="">{t('manager.teachers.allSubjects')}</option>
             {subjectsQ.data?.map(s => <option key={s.id} value={String(s.id)}>{s.name}</option>)}
           </select>
           <select className={styles.filterSelect} value={gradeFilter}
             onChange={e => setGradeFilter(e.target.value)}>
-            <option value="">All grades</option>
+            <option value="">{t('manager.teachers.allGrades')}</option>
             {gradesQ.data?.map(g => <option key={g.id} value={String(g.id)}>{g.name}</option>)}
           </select>
         </div>
@@ -731,19 +735,19 @@ export default function TeachersPage() {
               <circle cx="16" cy="16" r="12" stroke="currentColor" strokeWidth="1.75"/>
               <path d="M16 10v7M16 21v1" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round"/>
             </svg>
-            <p className={styles.stateMsg}>Failed to load teachers.</p>
+            <p className={styles.stateMsg}>{t('manager.teachers.failedToLoad')}</p>
             <button type="button" className={styles.retryBtn} onClick={() => teachersQ.refetch()}>
-              Try again
+              {t('manager.teachers.tryAgain')}
             </button>
           </div>
         ) : (
           <table className={styles.table}>
             <thead>
               <tr>
-                <th className={styles.th}>Teacher</th>
-                <th className={`${styles.th} ${styles.hideOnMobile}`}>Phone</th>
-                <th className={styles.th}>Assignments</th>
-                <th className={`${styles.th} ${styles.thCenter}`}>Active</th>
+                <th className={styles.th}>{t('manager.teachers.teacherHeader')}</th>
+                <th className={`${styles.th} ${styles.hideOnMobile}`}>{t('manager.teachers.phone')}</th>
+                <th className={styles.th}>{t('manager.teachers.assignments')}</th>
+                <th className={`${styles.th} ${styles.thCenter}`}>{t('manager.teachers.active')}</th>
               </tr>
             </thead>
             <tbody>
@@ -759,16 +763,16 @@ export default function TeachersPage() {
                           stroke="currentColor" strokeWidth="1.75" strokeLinecap="round"/>
                       </svg>
                       <p className={styles.stateMsg}>
-                        {hasFilters ? 'No teachers match your filters.' : 'No teachers yet.'}
+                        {hasFilters ? t('manager.teachers.noTeachersMatch') : t('manager.teachers.noTeachersYet')}
                       </p>
                       {hasFilters ? (
                         <button type="button" className={styles.stateCta}
                           onClick={() => { setSearch(''); setSubjectFilter(''); setGradeFilter('') }}>
-                          Clear filters
+                          {t('manager.teachers.clearFilters')}
                         </button>
                       ) : (
                         <button type="button" className={styles.stateCta} onClick={openAdd}>
-                          Add first teacher
+                          {t('manager.teachers.addFirstTeacher')}
                         </button>
                       )}
                     </div>
@@ -831,7 +835,7 @@ export default function TeachersPage() {
       </div>
 
       {/* Add teacher slide-over */}
-      <SlideOver open={addOpen} onClose={() => setAddOpen(false)} title="Add teacher">
+      <SlideOver open={addOpen} onClose={() => setAddOpen(false)} title={t('manager.teachers.addTeacherTitle')}>
         <AddTeacherForm
           key={addKey}
           subjects={subjectsQ.data ?? []}
@@ -845,7 +849,7 @@ export default function TeachersPage() {
       <SlideOver
         open={detailId !== null}
         onClose={() => setDetailId(null)}
-        title="Teacher profile"
+        title={t('manager.teachers.teacherProfileTitle')}
         width={520}
       >
         {detailId !== null && (

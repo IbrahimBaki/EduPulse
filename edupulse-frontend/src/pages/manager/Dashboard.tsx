@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState, type ReactNode } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
+import { useTranslation } from 'react-i18next'
 import {
   AreaChart,
   Area,
@@ -127,12 +128,11 @@ function nameInitials(name: string): string {
     .toUpperCase()
 }
 
-function getGreeting(name: string): string {
+function getSalutationKey(): string {
   const hour = new Date().getHours()
-  const salutation =
-    hour < 12 ? 'Good morning' : hour < 17 ? 'Good afternoon' : 'Good evening'
-  return `${salutation}, ${name.trim().split(/\s+/)[0]}`
+  return hour < 12 ? 'manager.dashboard.goodMorning' : hour < 17 ? 'manager.dashboard.goodAfternoon' : 'manager.dashboard.goodEvening'
 }
+
 
 function formatDate(): string {
   return new Date().toLocaleDateString('en-US', {
@@ -338,11 +338,12 @@ function EnrollmentTrend({
   loading: boolean
   error: boolean
 }) {
+  const { t } = useTranslation()
   return (
     <div className={styles.panel}>
       <div className={styles.panelHead}>
-        <h2 className={styles.panelTitle}>Enrollment trend</h2>
-        <span className={styles.panelCount}>Last 6 months</span>
+        <h2 className={styles.panelTitle}>{t('manager.dashboard.enrollmentTrend')}</h2>
+        <span className={styles.panelCount}>{t('manager.dashboard.last6Months')}</span>
       </div>
 
       {loading ? (
@@ -350,7 +351,7 @@ function EnrollmentTrend({
       ) : error || !data?.length ? (
         <EmptyState
           icon={<TrendEmptyIcon />}
-          message="Enrollment history not available yet."
+          message={t('manager.dashboard.enrollmentNotAvailable')}
         />
       ) : (
         <div className={styles.chartWrap}>
@@ -437,14 +438,15 @@ function AtRiskStudents({
   error: boolean
   refetch: () => void
 }) {
+  const { t } = useTranslation()
   const atRisk = data?.filter(s => s.avg_quiz_score < 60 || (s.weak_topics?.length ?? 0) > 0) ?? []
 
   return (
     <div className={styles.panel}>
       <div className={styles.panelHead}>
-        <h2 className={styles.panelTitle}>At-risk students</h2>
+        <h2 className={styles.panelTitle}>{t('manager.dashboard.atRiskStudents')}</h2>
         {!loading && !error && (
-          <span className={styles.panelCount}>{atRisk.length} flagged</span>
+          <span className={styles.panelCount}>{atRisk.length} {t('manager.dashboard.flagged')}</span>
         )}
       </div>
 
@@ -463,16 +465,16 @@ function AtRiskStudents({
       ) : error ? (
         <div className={styles.errorInline} role="alert">
           <AlertIcon />
-          <span>Failed to load</span>
-          <button type="button" onClick={refetch} className={styles.retryBtnSmall}>Retry</button>
+          <span>{t('manager.dashboard.failedToLoad')}</span>
+          <button type="button" onClick={refetch} className={styles.retryBtnSmall}>{t('manager.dashboard.retry')}</button>
         </div>
       ) : atRisk.length === 0 ? (
         <div className={styles.emptyGood}>
           <CheckCircleIcon />
-          <span>All students performing well</span>
+          <span>{t('manager.dashboard.allPerformingWell')}</span>
         </div>
       ) : (
-        <ul className={styles.atRiskList} aria-label="At-risk students">
+        <ul className={styles.atRiskList} aria-label={t('manager.dashboard.atRiskStudents')}>
           {atRisk.slice(0, 8).map(s => (
             <li key={s.student.id} className={styles.atRiskRow}>
               <div className={styles.atRiskAvatar} aria-hidden="true">
@@ -481,9 +483,9 @@ function AtRiskStudents({
               <div className={styles.atRiskInfo}>
                 <div className={styles.atRiskName}>{s.student.name}</div>
                 <div className={styles.atRiskScore}>
-                  {s.avg_quiz_score}% avg
+                  {s.avg_quiz_score}{t('manager.dashboard.avg')}
                   {(s.weak_topics?.length ?? 0) > 0 &&
-                    ` · ${s.weak_topics!.length} weak topic${s.weak_topics!.length !== 1 ? 's' : ''}`
+                    ` · ${s.weak_topics!.length} ${s.weak_topics!.length !== 1 ? t('manager.dashboard.weakTopics') : t('manager.dashboard.weakTopic')}`
                   }
                 </div>
                 {(s.weak_topics?.length ?? 0) > 0 && (
@@ -513,10 +515,11 @@ function UpcomingSessions({
   loading: boolean
   onSchedule?: () => void
 }) {
+  const { t } = useTranslation()
   return (
     <div className={styles.panel}>
       <div className={styles.panelHead}>
-        <h2 className={styles.panelTitle}>Sessions today</h2>
+        <h2 className={styles.panelTitle}>{t('manager.dashboard.sessionsToday')}</h2>
         {!loading && (
           <span className={styles.panelCount}>{sessions?.length ?? 0}</span>
         )}
@@ -546,12 +549,12 @@ function UpcomingSessions({
       ) : !sessions?.length ? (
         <EmptyState
           icon={<CalendarEmptyIcon />}
-          message="No sessions scheduled for today."
-          action="View schedule"
+          message={t('manager.dashboard.noSessionsToday')}
+          action={t('manager.dashboard.viewSchedule')}
           onAction={onSchedule}
         />
       ) : (
-        <ul className={styles.sessionList} aria-label="Today's sessions">
+        <ul className={styles.sessionList} aria-label={t('manager.dashboard.sessionsToday')}>
           {sessions.map(s => {
             const courseName = typeof s.course === 'object' ? s.course?.name : s.course
             const teacherName = typeof s.teacher === 'object' ? s.teacher?.name : s.teacher
@@ -563,7 +566,7 @@ function UpcomingSessions({
                   {[courseName, teacherName].filter(Boolean).join(' · ')}
                 </span>
                 {s.enrolled_count != null && (
-                  <span className={styles.sessionEnrolled}>{s.enrolled_count} students</span>
+                  <span className={styles.sessionEnrolled}>{s.enrolled_count} {t('manager.dashboard.students')}</span>
                 )}
               </li>
             )
@@ -589,10 +592,11 @@ function RecentEnrollments({
   refetch: () => void
   onAdd?: () => void
 }) {
+  const { t } = useTranslation()
   return (
     <div className={styles.panel}>
       <div className={styles.panelHead}>
-        <h2 className={styles.panelTitle}>Recent enrollments</h2>
+        <h2 className={styles.panelTitle}>{t('manager.dashboard.recentEnrollments')}</h2>
       </div>
 
       {loading ? (
@@ -610,18 +614,18 @@ function RecentEnrollments({
       ) : error ? (
         <div className={styles.errorInline} role="alert">
           <AlertIcon />
-          <span>Failed to load</span>
-          <button type="button" onClick={refetch} className={styles.retryBtnSmall}>Retry</button>
+          <span>{t('manager.dashboard.failedToLoad')}</span>
+          <button type="button" onClick={refetch} className={styles.retryBtnSmall}>{t('manager.dashboard.retry')}</button>
         </div>
       ) : !data?.length ? (
         <EmptyState
           icon={<UsersEmptyIcon />}
-          message="No students enrolled recently."
-          action="Add student"
+          message={t('manager.dashboard.noStudentsEnrolled')}
+          action={t('manager.dashboard.addStudent')}
           onAction={onAdd}
         />
       ) : (
-        <ul className={styles.enrollList} aria-label="Recent enrollments">
+        <ul className={styles.enrollList} aria-label={t('manager.dashboard.recentEnrollments')}>
           {data.map(s => (
             <li key={s.id} className={styles.enrollRow}>
               <div className={styles.enrollAvatar} aria-hidden="true">
@@ -653,26 +657,27 @@ function FinanceSummary({
   error: boolean
   refetch: () => void
 }) {
+  const { t } = useTranslation()
   const rate = data ? parseRate(data.collection_rate) : 0
   const navigate = useNavigate()
 
   return (
     <div className={styles.panel}>
       <div className={styles.panelHead}>
-        <h2 className={styles.panelTitle}>Finance</h2>
+        <h2 className={styles.panelTitle}>{t('manager.dashboard.finance')}</h2>
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
           {data && (data.overdue_students?.length ?? 0) > 0 && (
             <span className={styles.overdueBadge}>
-              {data.overdue_students.length} overdue
+              {data.overdue_students.length} {t('manager.dashboard.overdueCount')}
             </span>
           )}
-          <button 
-            type="button" 
+          <button
+            type="button"
             onClick={() => navigate('/manager/finance')}
             className={styles.viewAllBtn}
             style={{ fontSize: '0.6875rem', fontWeight: 600, color: 'var(--color-blue)', background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}
           >
-            Manage
+            {t('manager.dashboard.manage')}
           </button>
         </div>
       </div>
@@ -690,19 +695,19 @@ function FinanceSummary({
       ) : error ? (
         <div className={styles.errorInline} role="alert">
           <AlertIcon />
-          <span>Failed to load</span>
-          <button type="button" onClick={refetch} className={styles.retryBtnSmall}>Retry</button>
+          <span>{t('manager.dashboard.failedToLoad')}</span>
+          <button type="button" onClick={refetch} className={styles.retryBtnSmall}>{t('manager.dashboard.retry')}</button>
         </div>
       ) : !data ? (
-        <EmptyState icon={<DollarEmptyIcon />} message="Finance data unavailable." />
+        <EmptyState icon={<DollarEmptyIcon />} message={t('manager.dashboard.financeUnavailable')} />
       ) : (
         <div className={styles.financeStack}>
           <div className={styles.financeRow}>
-            <span className={styles.financeLabel}>Expected</span>
+            <span className={styles.financeLabel}>{t('manager.dashboard.expected')}</span>
             <span className={styles.financeAmount}>EGP {formatCurrency(data.total_expected)}</span>
           </div>
           <div className={styles.financeRow}>
-            <span className={styles.financeLabel}>Collected</span>
+            <span className={styles.financeLabel}>{t('manager.dashboard.collected')}</span>
             <span className={`${styles.financeAmount} ${styles.financeCollected}`}>
               EGP {formatCurrency(data.collected)}
             </span>
@@ -717,16 +722,16 @@ function FinanceSummary({
           >
             <div className={styles.progressBar} style={{ width: `${rate}%` }} />
           </div>
-          <span className={styles.progressRate}>{rate}% collection rate</span>
+          <span className={styles.progressRate}>{rate}{t('manager.dashboard.collectionRate')}</span>
           <div className={styles.financeDivider} />
           <div className={styles.financeRow}>
-            <span className={styles.financeLabel}>Pending</span>
+            <span className={styles.financeLabel}>{t('manager.dashboard.pending')}</span>
             <span className={`${styles.financeAmount} ${styles.financePending}`}>
               EGP {formatCurrency(data.pending)}
             </span>
           </div>
           <div className={styles.financeRow}>
-            <span className={styles.financeLabel}>Overdue</span>
+            <span className={styles.financeLabel}>{t('manager.dashboard.overdue')}</span>
             <span className={`${styles.financeAmount} ${styles.financeOverdue}`}>
               EGP {formatCurrency(data.overdue)}
             </span>
@@ -740,6 +745,7 @@ function FinanceSummary({
 // ─── Main component ───────────────────────────────────────────────────────────
 
 export default function ManagerDashboard() {
+  const { t } = useTranslation()
   const user     = useAuthStore(s => s.user)
   const navigate = useNavigate()
 
@@ -823,7 +829,9 @@ export default function ManagerDashboard() {
 
       <header className={styles.pageHead}>
         <h1 className={styles.greeting}>
-          {user?.name ? getGreeting(user.name) : 'Manager Dashboard'}
+          {user?.name
+            ? `${t(getSalutationKey())}, ${user.name.trim().split(/\s+/)[0]}`
+            : t('manager.dashboard.managerDashboard')}
         </h1>
         <p className={styles.greetingDate}>{formatDate()}</p>
       </header>
@@ -831,36 +839,36 @@ export default function ManagerDashboard() {
       {dashError && (
         <div className={styles.errorBanner} role="alert">
           <AlertIcon />
-          <span>Dashboard overview failed to load.</span>
+          <span>{t('manager.dashboard.dashboardOverviewFailed')}</span>
           <button type="button" onClick={() => dashRefetch()} className={styles.retryBtn}>
-            Retry
+            {t('manager.dashboard.retry')}
           </button>
         </div>
       )}
 
       <div className={styles.statsRow}>
         <StatCard
-          label="Total students"
+          label={t('manager.dashboard.totalStudents')}
           value={dash?.totals?.students ?? 0}
-          sub={dash?.academics ? `${dash.academics.at_risk_students} at risk` : undefined}
+          sub={dash?.academics ? `${dash.academics.at_risk_students} ${t('manager.dashboard.atRisk')}` : undefined}
           loading={dashLoading}
         />
         <StatCard
-          label="Total teachers"
+          label={t('manager.dashboard.totalTeachers')}
           value={dash?.totals?.teachers ?? 0}
           loading={dashLoading}
         />
         <StatCard
-          label="Active courses"
+          label={t('manager.dashboard.activeCourses')}
           value={dash?.totals?.active_courses ?? 0}
-          sub={dash?.totals ? `of ${dash.totals.courses} total` : undefined}
+          sub={dash?.totals ? t('manager.dashboard.ofTotal', { total: dash.totals.courses }) : undefined}
           loading={dashLoading}
         />
         <StatCard
-          label="Attendance this week"
+          label={t('manager.dashboard.attendanceThisWeek')}
           value={attendanceRate}
           suffix="%"
-          sub={dash?.attendance ? `${dash.attendance.absent_today} absent today` : undefined}
+          sub={dash?.attendance ? `${dash.attendance.absent_today} ${t('manager.dashboard.absentToday')}` : undefined}
           loading={dashLoading}
           accent={attendanceRate > 0 && attendanceRate < 70 ? 'var(--color-amber)' : undefined}
         />

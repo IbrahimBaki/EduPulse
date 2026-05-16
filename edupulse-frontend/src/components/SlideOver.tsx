@@ -1,9 +1,11 @@
-import { useEffect, type ReactNode } from 'react'
+import { useEffect, useRef, type ReactNode } from 'react'
 import { createPortal } from 'react-dom'
 import { AnimatePresence, motion } from 'framer-motion'
 import styles from './SlideOver.module.css'
 
 const EASE = [0.25, 1, 0.5, 1] as const
+
+const FOCUSABLE = 'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
 
 function XIcon() {
   return (
@@ -24,14 +26,43 @@ interface SlideOverProps {
 }
 
 export function SlideOver({ open, onClose, title, description, children, footer, width = '480px' }: SlideOverProps) {
+  const panelRef = useRef<HTMLDivElement>(null)
+  const triggerRef = useRef<Element | null>(null)
+
   useEffect(() => {
     if (!open) return
-    const handler = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose() }
+    triggerRef.current = document.activeElement
+
+    const handler = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') { onClose(); return }
+      if (e.key !== 'Tab') return
+      const panel = panelRef.current
+      if (!panel) return
+      const focusable = Array.from(panel.querySelectorAll<HTMLElement>(FOCUSABLE)).filter(el => !el.hasAttribute('disabled'))
+      if (focusable.length === 0) return
+      const first = focusable[0]
+      const last = focusable[focusable.length - 1]
+      if (e.shiftKey) {
+        if (document.activeElement === first) { e.preventDefault(); last.focus() }
+      } else {
+        if (document.activeElement === last) { e.preventDefault(); first.focus() }
+      }
+    }
+
     document.addEventListener('keydown', handler)
     document.body.style.overflow = 'hidden'
+
+    const timer = setTimeout(() => {
+      const panel = panelRef.current
+      const first = panel?.querySelector<HTMLElement>(FOCUSABLE)
+      first?.focus()
+    }, 50)
+
     return () => {
+      clearTimeout(timer)
       document.removeEventListener('keydown', handler)
       document.body.style.overflow = ''
+      if (triggerRef.current instanceof HTMLElement) triggerRef.current.focus()
     }
   }, [open, onClose])
 
@@ -49,6 +80,7 @@ export function SlideOver({ open, onClose, title, description, children, footer,
             aria-hidden="true"
           />
           <motion.div
+            ref={panelRef}
             className={styles.panel}
             role="dialog"
             aria-modal="true"

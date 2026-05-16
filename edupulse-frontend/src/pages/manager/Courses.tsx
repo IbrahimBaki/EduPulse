@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef, useMemo, type ReactNode } from 'react'
 import { createPortal } from 'react-dom'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import { useTranslation } from 'react-i18next'
 import api from '../../lib/axios'
 import styles from './Courses.module.css'
 
@@ -236,6 +237,7 @@ function CourseForm({ course, subjects, gradeLevels, teachers, onSuccess, onCanc
   onSuccess: () => void
   onCancel: () => void
 }) {
+  const { t } = useTranslation()
   const qc = useQueryClient()
   const isEdit = !!course
 
@@ -334,37 +336,37 @@ function CourseForm({ course, subjects, gradeLevels, teachers, onSuccess, onCanc
       {serverError && <div className={styles.formBanner} role="alert">{serverError}</div>}
 
       <div className={styles.formSection}>
-        <p className={styles.formSectionHeading}>Identity</p>
+        <p className={styles.formSectionHeading}>{t('manager.courses.identity')}</p>
         <div className={styles.formGroup}>
-          <label className={styles.formLabel} htmlFor="cf-name">Course name <span aria-hidden>*</span></label>
+          <label className={styles.formLabel} htmlFor="cf-name">{t('manager.courses.courseName')} <span aria-hidden>*</span></label>
           <input id="cf-name" type="text" className={inp('name')} value={form.name}
             onChange={e => field('name', e.target.value)} />
           {errors.name && <p className={styles.fieldErr}>{errors.name}</p>}
         </div>
         <div className={styles.formGroup}>
-          <label className={styles.formLabel} htmlFor="cf-desc">Description</label>
+          <label className={styles.formLabel} htmlFor="cf-desc">{t('manager.courses.description')}</label>
           <textarea id="cf-desc" rows={3} className={styles.formTextarea} value={form.description}
             onChange={e => field('description', e.target.value)} />
         </div>
       </div>
 
       <div className={styles.formSection}>
-        <p className={styles.formSectionHeading}>Assignment</p>
+        <p className={styles.formSectionHeading}>{t('manager.courses.assignment')}</p>
         <div className={styles.formRow}>
           <div className={styles.formGroup}>
-            <label className={styles.formLabel} htmlFor="cf-subj">Subject <span aria-hidden>*</span></label>
+            <label className={styles.formLabel} htmlFor="cf-subj">{t('manager.courses.subject')} <span aria-hidden>*</span></label>
             <select id="cf-subj" className={sel('subject_id')} value={form.subject_id}
               onChange={e => field('subject_id', e.target.value ? Number(e.target.value) : '')}>
-              <option value="">Select subject</option>
+              <option value="">{t('manager.courses.selectSubject')}</option>
               {subjects.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
             </select>
             {errors.subject_id && <p className={styles.fieldErr}>{errors.subject_id}</p>}
           </div>
           <div className={styles.formGroup}>
-            <label className={styles.formLabel} htmlFor="cf-grade">Grade level <span aria-hidden>*</span></label>
+            <label className={styles.formLabel} htmlFor="cf-grade">{t('manager.courses.gradeLevel')} <span aria-hidden>*</span></label>
             <select id="cf-grade" className={sel('grade_level_id')} value={form.grade_level_id}
               onChange={e => field('grade_level_id', e.target.value ? Number(e.target.value) : '')}>
-              <option value="">Select grade</option>
+              <option value="">{t('manager.courses.selectGrade')}</option>
               {gradeLevels.map(g => <option key={g.id} value={g.id}>{g.name}</option>)}
             </select>
             {errors.grade_level_id && <p className={styles.fieldErr}>{errors.grade_level_id}</p>}
@@ -372,46 +374,46 @@ function CourseForm({ course, subjects, gradeLevels, teachers, onSuccess, onCanc
         </div>
         <div className={styles.formGroup}>
           <label className={styles.formLabel} htmlFor="cf-teacher">
-            Teacher <span aria-hidden>*</span>
+            {t('manager.courses.teacher')} <span aria-hidden>*</span>
           </label>
           <select id="cf-teacher" className={sel('teacher_id')} value={form.teacher_id}
             onChange={e => field('teacher_id', e.target.value ? Number(e.target.value) : '')}>
-            <option value="">Select teacher</option>
-            {eligibleTeachers.map(t => <option key={t.id} value={t.id}>{t.name}</option>)}
+            <option value="">{t('manager.courses.selectTeacher')}</option>
+            {eligibleTeachers.map(teacher => <option key={teacher.id} value={teacher.id}>{teacher.name}</option>)}
           </select>
           {teacherFiltered && (
-            <p className={styles.formHint}>Showing teachers qualified for this subject and grade.</p>
+            <p className={styles.formHint}>{t('manager.courses.qualifiedTeachersHint')}</p>
           )}
           {errors.teacher_id && <p className={styles.fieldErr}>{errors.teacher_id}</p>}
         </div>
       </div>
 
       <div className={styles.formSection}>
-        <p className={styles.formSectionHeading}>Schedule</p>
+        <p className={styles.formSectionHeading}>{t('manager.courses.schedule')}</p>
         <div className={styles.formRow}>
           <div className={styles.formGroup}>
-            <label className={styles.formLabel} htmlFor="cf-start">Start date</label>
+            <label className={styles.formLabel} htmlFor="cf-start">{t('manager.courses.startDate')}</label>
             <input id="cf-start" type="date" className={styles.formInput} value={form.start_date}
               onChange={e => field('start_date', e.target.value)} />
           </div>
           <div className={styles.formGroup}>
-            <label className={styles.formLabel} htmlFor="cf-end">End date</label>
+            <label className={styles.formLabel} htmlFor="cf-end">{t('manager.courses.endDate')}</label>
             <input id="cf-end" type="date" className={styles.formInput} value={form.end_date}
               onChange={e => field('end_date', e.target.value)} />
           </div>
         </div>
         <div className={styles.formGroup} style={{ maxWidth: '160px' }}>
-          <label className={styles.formLabel} htmlFor="cf-max">Max students</label>
+          <label className={styles.formLabel} htmlFor="cf-max">{t('manager.courses.maxStudents')}</label>
           <input id="cf-max" type="number" min="1" className={inp('max_students')} value={form.max_students}
-            onChange={e => field('max_students', e.target.value)} placeholder="Unlimited" />
+            onChange={e => field('max_students', e.target.value)} placeholder={t('manager.courses.unlimited')} />
           {errors.max_students && <p className={styles.fieldErr}>{errors.max_students}</p>}
         </div>
       </div>
 
       <div className={styles.formFooter}>
-        <button type="button" className={styles.formCancel} onClick={onCancel}>Cancel</button>
+        <button type="button" className={styles.formCancel} onClick={onCancel}>{t('manager.courses.cancel')}</button>
         <button type="submit" className={styles.formSubmit} disabled={mutation.isPending}>
-          {mutation.isPending ? (isEdit ? 'Saving…' : 'Creating…') : (isEdit ? 'Save changes' : 'Create course')}
+          {mutation.isPending ? (isEdit ? t('manager.courses.saving') : t('manager.courses.creating')) : (isEdit ? t('manager.courses.saveChanges') : t('manager.courses.createCourse'))}
         </button>
       </div>
     </form>
@@ -434,6 +436,7 @@ function CourseDetailPanel({ id, onEdit, onDeleted }: {
   onEdit: (course: Course) => void
   onDeleted: () => void
 }) {
+  const { t } = useTranslation()
   const qc = useQueryClient()
   const [confirmDelete, setConfirmDelete] = useState(false)
   const [deleteError, setDeleteError]     = useState<string | null>(null)
@@ -479,8 +482,8 @@ function CourseDetailPanel({ id, onEdit, onDeleted }: {
   if (isError || !data) {
     return (
       <div className={styles.dError}>
-        <p>Failed to load course details.</p>
-        <button type="button" className={styles.retryBtn} onClick={() => refetch()}>Try again</button>
+        <p>{t('manager.courses.failedToLoadDetails')}</p>
+        <button type="button" className={styles.retryBtn} onClick={() => refetch()}>{t('manager.courses.tryAgain')}</button>
       </div>
     )
   }
@@ -521,7 +524,7 @@ function CourseDetailPanel({ id, onEdit, onDeleted }: {
               onClick={() => statusMutation.mutate('active')}
               disabled={statusMutation.isPending}
             >
-              {statusMutation.isPending ? 'Activating…' : 'Activate course'}
+              {statusMutation.isPending ? t('manager.courses.activating') : t('manager.courses.activateCourse')}
             </button>
           )}
           {canArchive && (
@@ -531,39 +534,39 @@ function CourseDetailPanel({ id, onEdit, onDeleted }: {
               onClick={() => statusMutation.mutate('archived')}
               disabled={statusMutation.isPending}
             >
-              {statusMutation.isPending ? 'Archiving…' : 'Archive course'}
+              {statusMutation.isPending ? t('manager.courses.archiving') : t('manager.courses.archiveCourse')}
             </button>
           )}
           {statusMutation.isError && (
-            <p className={styles.fieldErr}>Failed to update status.</p>
+            <p className={styles.fieldErr}>{t('manager.courses.failedUpdateStatus')}</p>
           )}
         </div>
       )}
 
       <section className={styles.dSection}>
-        <h3 className={styles.dSectionTitle}>Course info</h3>
+        <h3 className={styles.dSectionTitle}>{t('manager.courses.courseInfo')}</h3>
         <dl className={styles.dGrid}>
-          <DRow label="Grade">{data.grade_level.name}</DRow>
-          <DRow label="Teacher">{data.teacher.name}</DRow>
-          {data.description && <DRow label="Description">{data.description}</DRow>}
+          <DRow label={t('manager.courses.grade')}>{data.grade_level.name}</DRow>
+          <DRow label={t('manager.courses.teacher')}>{data.teacher.name}</DRow>
+          {data.description && <DRow label={t('manager.courses.description')}>{data.description}</DRow>}
           {startFmt && endFmt && (
-            <DRow label="Dates">{startFmt} – {endFmt}</DRow>
+            <DRow label={t('manager.courses.dates')}>{startFmt} – {endFmt}</DRow>
           )}
           {data.max_students && (
-            <DRow label="Capacity">{data.max_students} students max</DRow>
+            <DRow label={t('manager.courses.capacity')}>{data.max_students} {t('manager.courses.studentsMax')}</DRow>
           )}
         </dl>
       </section>
 
       {(data.enrollments_count !== undefined || data.lessons_count !== undefined) && (
         <section className={styles.dSection}>
-          <h3 className={styles.dSectionTitle}>Activity</h3>
+          <h3 className={styles.dSectionTitle}>{t('manager.courses.activity')}</h3>
           <dl className={styles.dGrid}>
             {data.enrollments_count !== undefined && (
-              <DRow label="Enrolled">{data.enrollments_count} students</DRow>
+              <DRow label={t('manager.courses.enrolled')}>{data.enrollments_count} {t('manager.courses.students')}</DRow>
             )}
             {data.lessons_count !== undefined && (
-              <DRow label="Lessons">{data.lessons_count}</DRow>
+              <DRow label={t('manager.courses.lessons')}>{data.lessons_count}</DRow>
             )}
           </dl>
         </section>
@@ -574,27 +577,27 @@ function CourseDetailPanel({ id, onEdit, onDeleted }: {
           <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
             <path d="M7.5 2L10 4.5L4 10.5H1.5V8L7.5 2Z" stroke="currentColor" strokeWidth="1.25" strokeLinejoin="round"/>
           </svg>
-          Edit course
+          {t('manager.courses.editCourse')}
         </button>
 
         {canDelete && !confirmDelete && (
           <button type="button" className={styles.dDeleteBtn}
             onClick={() => setConfirmDelete(true)}>
-            Delete
+            {t('manager.courses.delete')}
           </button>
         )}
 
         {confirmDelete && (
           <div className={styles.dDeleteConfirm}>
-            <span className={styles.dDeleteConfirmText}>Delete this draft permanently?</span>
+            <span className={styles.dDeleteConfirmText}>{t('manager.courses.deleteDraft')}</span>
             <button type="button" className={styles.dDeleteConfirmYes}
               onClick={() => deleteMutation.mutate()}
               disabled={deleteMutation.isPending}>
-              {deleteMutation.isPending ? '…' : 'Delete'}
+              {deleteMutation.isPending ? '…' : t('manager.courses.delete')}
             </button>
             <button type="button" className={styles.dDeleteConfirmNo}
               onClick={() => setConfirmDelete(false)}>
-              Cancel
+              {t('manager.courses.cancel')}
             </button>
           </div>
         )}
@@ -616,6 +619,7 @@ interface CourseCardProps {
 }
 
 function CourseCard({ course, isUpdating, onCardClick, onEdit, onStatusAction }: CourseCardProps) {
+  const { t } = useTranslation()
   const accent    = subjectAccent(course.subject_id)
   const accentDim = subjectAccentDim(course.subject_id)
 
@@ -627,8 +631,8 @@ function CourseCard({ course, isUpdating, onCardClick, onEdit, onStatusAction }:
     course.status === 'active' ? 'archived' : null
 
   const actionLabel =
-    course.status === 'draft' ? 'Activate' :
-    course.status === 'active' ? 'Archive' : null
+    course.status === 'draft' ? t('manager.courses.activate') :
+    course.status === 'active' ? t('manager.courses.archive') : null
 
   const start = fmtDate(course.start_date)
   const end   = fmtDate(course.end_date)
@@ -696,7 +700,7 @@ function CourseCard({ course, isUpdating, onCardClick, onEdit, onStatusAction }:
           <svg width="11" height="11" viewBox="0 0 11 11" fill="none">
             <path d="M7 1.5L9.5 4L3.5 10H1V7.5L7 1.5Z" stroke="currentColor" strokeWidth="1.25" strokeLinejoin="round"/>
           </svg>
-          Edit
+          {t('manager.courses.edit')}
         </button>
       </div>
     </article>
@@ -708,6 +712,7 @@ function CourseCard({ course, isUpdating, onCardClick, onEdit, onStatusAction }:
 function EmptyCourses({ hasFilters, onAdd, onClear }: {
   hasFilters: boolean; onAdd: () => void; onClear: () => void
 }) {
+  const { t } = useTranslation()
   return (
     <div className={styles.emptyState}>
       <svg className={styles.emptyIllo} width="72" height="72" viewBox="0 0 72 72" fill="none">
@@ -716,11 +721,11 @@ function EmptyCourses({ hasFilters, onAdd, onClear }: {
         <path d="M36 30v12M30 36h12" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round"/>
       </svg>
       <p className={styles.emptyMsg}>
-        {hasFilters ? 'No courses match your filters.' : 'No courses yet.'}
+        {hasFilters ? t('manager.courses.noCoursesMatch') : t('manager.courses.noCoursesYet')}
       </p>
       {hasFilters
-        ? <button type="button" className={styles.stateCta} onClick={onClear}>Clear filters</button>
-        : <button type="button" className={styles.stateCta} onClick={onAdd}>Create first course</button>
+        ? <button type="button" className={styles.stateCta} onClick={onClear}>{t('manager.courses.clearFilters')}</button>
+        : <button type="button" className={styles.stateCta} onClick={onAdd}>{t('manager.courses.createFirstCourse')}</button>
       }
     </div>
   )
@@ -729,6 +734,7 @@ function EmptyCourses({ hasFilters, onAdd, onClear }: {
 // ─── CoursesPage ──────────────────────────────────────────────────────────────
 
 export default function CoursesPage() {
+  const { t } = useTranslation()
   const qc = useQueryClient()
 
   const [page, setPage]               = useState(1)
@@ -830,16 +836,16 @@ export default function CoursesPage() {
       {/* Header */}
       <div className={styles.pageHead}>
         <div>
-          <h1 className={styles.pageTitle}>Courses</h1>
+          <h1 className={styles.pageTitle}>{t('manager.courses.title')}</h1>
           {pagination && (
-            <p className={styles.pageCount}>{pagination.total.toLocaleString()} total</p>
+            <p className={styles.pageCount}>{pagination.total.toLocaleString()} {t('manager.courses.total')}</p>
           )}
         </div>
         <button type="button" className={styles.addBtn} onClick={openAdd}>
           <svg width="13" height="13" viewBox="0 0 13 13" fill="none">
             <path d="M6.5 1v11M1 6.5h11" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round"/>
           </svg>
-          Add course
+          {t('manager.courses.addCourse')}
         </button>
       </div>
 
@@ -852,7 +858,7 @@ export default function CoursesPage() {
           </svg>
           <input
             type="search"
-            placeholder="Search by name"
+            placeholder={t('manager.courses.searchPlaceholder')}
             className={styles.searchInput}
             value={search}
             onChange={e => setSearch(e.target.value)}
@@ -867,22 +873,22 @@ export default function CoursesPage() {
         </div>
         <div className={styles.filters}>
           <select className={styles.filterSelect} value={statusFilter} onChange={e => setStatusFilter(e.target.value)}>
-            <option value="">All status</option>
-            <option value="draft">Draft</option>
-            <option value="active">Active</option>
-            <option value="archived">Archived</option>
+            <option value="">{t('manager.courses.allStatus')}</option>
+            <option value="draft">{t('manager.courses.draft')}</option>
+            <option value="active">{t('manager.courses.active')}</option>
+            <option value="archived">{t('manager.courses.archived')}</option>
           </select>
           <select className={styles.filterSelect} value={subjectFilter} onChange={e => setSubjectFilter(e.target.value)}>
-            <option value="">All subjects</option>
+            <option value="">{t('manager.courses.allSubjects')}</option>
             {subjectsQ.data?.map(s => <option key={s.id} value={String(s.id)}>{s.name}</option>)}
           </select>
           <select className={styles.filterSelect} value={gradeFilter} onChange={e => setGradeFilter(e.target.value)}>
-            <option value="">All grades</option>
+            <option value="">{t('manager.courses.allGrades')}</option>
             {gradesQ.data?.map(g => <option key={g.id} value={String(g.id)}>{g.name}</option>)}
           </select>
           <select className={styles.filterSelect} value={teacherFilter} onChange={e => setTeacherFilter(e.target.value)}>
-            <option value="">All teachers</option>
-            {teachersQ.data?.map(t => <option key={t.id} value={String(t.id)}>{t.name}</option>)}
+            <option value="">{t('manager.courses.allTeachers')}</option>
+            {teachersQ.data?.map(teacher => <option key={teacher.id} value={String(teacher.id)}>{teacher.name}</option>)}
           </select>
         </div>
       </div>
@@ -894,8 +900,8 @@ export default function CoursesPage() {
             <circle cx="16" cy="16" r="12" stroke="currentColor" strokeWidth="1.75"/>
             <path d="M16 10v7M16 21v1" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round"/>
           </svg>
-          <p className={styles.stateMsg}>Failed to load courses.</p>
-          <button type="button" className={styles.retryBtn} onClick={() => coursesQ.refetch()}>Try again</button>
+          <p className={styles.stateMsg}>{t('manager.courses.failedToLoad')}</p>
+          <button type="button" className={styles.retryBtn} onClick={() => coursesQ.refetch()}>{t('manager.courses.tryAgain')}</button>
         </div>
       ) : coursesQ.isLoading ? (
         <div className={styles.grid}><SkeletonCards /></div>
@@ -955,7 +961,7 @@ export default function CoursesPage() {
       <SlideOver
         open={addOpen || editCourse !== null}
         onClose={closeForm}
-        title={editCourse ? 'Edit course' : 'Add course'}
+        title={editCourse ? t('manager.courses.editCourseTitle') : t('manager.courses.addCourseTitle')}
       >
         <CourseForm
           key={editCourse?.id ?? addKey}
@@ -972,7 +978,7 @@ export default function CoursesPage() {
       <SlideOver
         open={detailId !== null}
         onClose={() => setDetailId(null)}
-        title="Course details"
+        title={t('manager.courses.courseDetailsTitle')}
         width={520}
       >
         {detailId !== null && (

@@ -210,9 +210,9 @@ export default function FinancePage() {
   const [genTarget, setGenTarget] = useState('grade_level')
   const [genTargetId, setGenTargetId] = useState('')
 
-  const { data: summary, isLoading: summaryLoading } = useQuery({ queryKey: ['manager-finance-summary'], queryFn: fetchSummary })
-  const { data: transactions, isLoading: transactionsLoading } = useQuery({ queryKey: ['manager-finance-transactions'], queryFn: fetchTransactions })
-  const { data: feesData, isLoading: feesLoading } = useQuery({
+  const { data: summary, isLoading: summaryLoading, isError: summaryError, refetch: refetchSummary } = useQuery({ queryKey: ['manager-finance-summary'], queryFn: fetchSummary })
+  const { data: transactions, isLoading: transactionsLoading, isError: transactionsError, refetch: refetchTransactions } = useQuery({ queryKey: ['manager-finance-transactions'], queryFn: fetchTransactions })
+  const { data: feesData, isLoading: feesLoading, isError: feesError, refetch: refetchFees } = useQuery({
     queryKey: ['manager-student-fees', page, statusFilter, search],
     queryFn: () => fetchStudentFees({ page, status: statusFilter, search })
   })
@@ -262,6 +262,11 @@ export default function FinancePage() {
       <section className={styles.summaryGrid}>
         {summaryLoading ? (
           Array.from({ length: 4 }).map((_, i) => <div key={i} className={`${styles.statCard} ${styles.skeleton}`} style={{ height: '120px' }} />)
+        ) : summaryError ? (
+          <div style={{ gridColumn: '1 / -1', padding: '20px', color: 'var(--color-red)', fontSize: '0.875rem', display: 'flex', alignItems: 'center', gap: '10px' }}>
+            {t('common.errorLoadFailed')}
+            <button className={styles.btn} onClick={() => refetchSummary()}>{t('common.retry')}</button>
+          </div>
         ) : (
           <>
             <MetricCard label={t('manager.finance.totalExpected')} value={summary?.expected ?? 0} trend={summary?.expected_trend} />
@@ -315,6 +320,15 @@ export default function FinancePage() {
                       <td colSpan={5} className={styles.td}><div className={styles.skeleton} style={{ height: '24px' }} /></td>
                     </tr>
                   ))
+                ) : feesError ? (
+                  <tr>
+                    <td colSpan={5}>
+                      <div className={styles.emptyState} style={{ color: 'var(--color-red)' }}>
+                        <p className={styles.emptyText}>{t('common.errorLoadFailed')}</p>
+                        <button className={`${styles.btn} ${styles.btnPrimary}`} style={{ marginTop: '12px' }} onClick={() => refetchFees()}>{t('common.retry')}</button>
+                      </div>
+                    </td>
+                  </tr>
                 ) : feesData?.data.length === 0 ? (
                   <tr>
                     <td colSpan={5}>
@@ -362,6 +376,11 @@ export default function FinancePage() {
           <div className={styles.transactionsList}>
             {transactionsLoading ? (
               Array.from({ length: 5 }).map((_, i) => <div key={i} className={styles.txItem}><div className={styles.skeleton} style={{ height: '40px', width: '100%' }} /></div>)
+            ) : transactionsError ? (
+              <div className={styles.emptyState} style={{ color: 'var(--color-red)', fontSize: '0.8125rem' }}>
+                <p>{t('common.errorLoadFailed')}</p>
+                <button className={styles.btn} style={{ marginTop: '8px' }} onClick={() => refetchTransactions()}>{t('common.retry')}</button>
+              </div>
             ) : transactions?.length === 0 ? (
               <div className={styles.emptyState}>
                 <p className={styles.emptyText}>{t('manager.finance.noPayments')}</p>

@@ -101,10 +101,6 @@ function badgeClass(status: Session['status']): string {
   return styles.badgeScheduled
 }
 
-function statusLabel(s: string): string {
-  return s.charAt(0).toUpperCase() + s.slice(1)
-}
-
 // ─── Icons ────────────────────────────────────────────────────────────────────
 
 function PlusIcon() {
@@ -117,7 +113,7 @@ function PlusIcon() {
 
 function ChevronLeftIcon() {
   return (
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" data-rtl-flip="">
       <polyline points="15 18 9 12 15 6"/>
     </svg>
   )
@@ -125,7 +121,7 @@ function ChevronLeftIcon() {
 
 function ChevronRightIcon() {
   return (
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" data-rtl-flip="">
       <polyline points="9 18 15 12 9 6"/>
     </svg>
   )
@@ -221,36 +217,36 @@ function AddSessionPanel({ open, onClose, courses }: { open: boolean; onClose: (
     >
       <form className={styles.fieldGroup} onSubmit={handleSubmit}>
         <div className={styles.formRow}>
-          <label className={styles.label} htmlFor="sess-course">Course</label>
+          <label className={styles.label} htmlFor="sess-course">{t('teacher.schedule.courseLabel')}</label>
           <select id="sess-course" className={styles.soSelect} value={form.course_id} onChange={e => setForm(f => ({ ...f, course_id: e.target.value }))} required>
             <option value="">{t('teacher.schedule.selectCourse')}</option>
             {courses.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
           </select>
         </div>
         <div className={styles.formRow}>
-          <label className={styles.label} htmlFor="sess-title">Title</label>
+          <label className={styles.label} htmlFor="sess-title">{t('teacher.schedule.titleLabel')}</label>
           <input id="sess-title" className={styles.input} placeholder="e.g. Chapter 4 Discussion" value={form.title} onChange={e => setForm(f => ({ ...f, title: e.target.value }))} required />
         </div>
         <div className={styles.formRow}>
-          <label className={styles.label} htmlFor="sess-desc">Description</label>
-          <textarea id="sess-desc" className={styles.textarea} placeholder="Optional notes..." value={form.description} onChange={e => setForm(f => ({ ...f, description: e.target.value }))} />
+          <label className={styles.label} htmlFor="sess-desc">{t('teacher.schedule.descriptionLabel')}</label>
+          <textarea id="sess-desc" className={styles.textarea} placeholder={t('teacher.schedule.optionalNotes')} value={form.description} onChange={e => setForm(f => ({ ...f, description: e.target.value }))} />
         </div>
         <div className={styles.formRow}>
-          <label className={styles.label} htmlFor="sess-date">Date</label>
+          <label className={styles.label} htmlFor="sess-date">{t('teacher.schedule.dateLabel')}</label>
           <input id="sess-date" className={styles.input} type="date" value={form.date} onChange={e => setForm(f => ({ ...f, date: e.target.value }))} required />
         </div>
         <div className={styles.fieldRow2}>
           <div className={styles.formRow}>
-            <label className={styles.label} htmlFor="sess-start">Start Time</label>
+            <label className={styles.label} htmlFor="sess-start">{t('teacher.schedule.startTimeLabel')}</label>
             <input id="sess-start" className={styles.input} type="time" value={form.starts_at} onChange={e => setForm(f => ({ ...f, starts_at: e.target.value }))} required />
           </div>
           <div className={styles.formRow}>
-            <label className={styles.label} htmlFor="sess-end">End Time</label>
+            <label className={styles.label} htmlFor="sess-end">{t('teacher.schedule.endTimeLabel')}</label>
             <input id="sess-end" className={styles.input} type="time" value={form.ends_at} onChange={e => setForm(f => ({ ...f, ends_at: e.target.value }))} required />
           </div>
         </div>
         <div className={styles.formRow}>
-          <label className={styles.label} htmlFor="sess-type">Type</label>
+          <label className={styles.label} htmlFor="sess-type">{t('teacher.schedule.typeLabel')}</label>
           <select id="sess-type" className={styles.soSelect} value={form.type} onChange={e => setForm(f => ({ ...f, type: e.target.value as typeof form.type }))}>
             <option value="online">{t('teacher.schedule.sessionType.online')}</option>
             <option value="in_person">{t('teacher.schedule.sessionType.inPerson')}</option>
@@ -259,7 +255,7 @@ function AddSessionPanel({ open, onClose, courses }: { open: boolean; onClose: (
         </div>
         {jitsiUrl && (
           <div>
-            <div className={styles.label} style={{ marginBlockEnd: 6 }}>Jitsi Room (auto-generated)</div>
+            <div className={styles.label} style={{ marginBlockEnd: 6 }}>{t('teacher.schedule.jitsiRoomAutoGenerated')}</div>
             <div className={styles.jitsiPreview}>{jitsiUrl}</div>
           </div>
         )}
@@ -332,7 +328,7 @@ function AttendancePanel({ open, onClose, session }: { open: boolean; onClose: (
           <div className={styles.attendanceBulkRow}>
             <span style={{ fontSize: '0.8125rem', color: 'var(--text-muted)' }}>{attendees.length} students</span>
             <button type="button" className={`${styles.btn} ${styles.btnOutline} ${styles.btnSm}`} onClick={() => markAll('present')}>
-              Mark all present
+              {t('teacher.attendance.markAllPresent')}
             </button>
           </div>
           <ul className={styles.attendeeList} aria-label="Attendance list">
@@ -436,8 +432,8 @@ export default function TeacherSchedule() {
       <div className={styles.page}>
         <div className={styles.emptyState}>
           <div style={{ color: 'var(--color-amber)' }}><AlertIcon /></div>
-          <p className={styles.emptyTitle}>Failed to load schedule</p>
-          <button type="button" className={`${styles.btn} ${styles.btnOutline}`} onClick={() => refetch()}>Retry</button>
+          <p className={styles.emptyTitle}>{t('teacher.schedule.failedToLoadSchedule')}</p>
+          <button type="button" className={`${styles.btn} ${styles.btnOutline}`} onClick={() => refetch()}>{t('common.retry')}</button>
         </div>
       </div>
     )
@@ -447,7 +443,7 @@ export default function TeacherSchedule() {
     <div className={styles.page}>
       <header className={styles.pageHead}>
         <div>
-          <h1 className={styles.pageTitle}>Schedule</h1>
+          <h1 className={styles.pageTitle}>{t('teacher.schedule.schedule')}</h1>
           <p className={styles.pageSubtitle}>
             {!courseFilter
               ? t('teacher.schedule.selectCourse')
@@ -498,8 +494,8 @@ export default function TeacherSchedule() {
       {!courseFilter && (
         <div className={styles.emptyState}>
           <div style={{ color: 'oklch(44% 0.018 255)' }}><CalendarEmptyIcon /></div>
-          <p className={styles.emptyTitle}>Select a course</p>
-          <p className={styles.emptyText}>Choose a course above to view and manage its sessions.</p>
+          <p className={styles.emptyTitle}>{t('teacher.schedule.selectACourse')}</p>
+          <p className={styles.emptyText}>{t('teacher.schedule.chooseCourseToManage')}</p>
         </div>
       )}
 
@@ -512,7 +508,7 @@ export default function TeacherSchedule() {
         <button type="button" className={styles.weekNavBtn} onClick={() => goWeek(1)} aria-label="Next week">
           <ChevronRightIcon />
         </button>
-        <button type="button" className={styles.todayBtn} onClick={() => setAnchor(today)}>Today</button>
+        <button type="button" className={styles.todayBtn} onClick={() => setAnchor(today)}>{t('teacher.schedule.today')}</button>
       </div>}
 
       {/* Week grid view */}
@@ -576,8 +572,8 @@ export default function TeacherSchedule() {
         ) : filtered.length === 0 ? (
           <div className={styles.emptyState}>
             <div style={{ color: 'oklch(44% 0.018 255)' }}><CalendarEmptyIcon /></div>
-            <p className={styles.emptyTitle}>No sessions scheduled</p>
-            <p className={styles.emptyText}>Use "Add Session" to schedule your first class.</p>
+            <p className={styles.emptyTitle}>{t('teacher.schedule.noSessionsScheduledList')}</p>
+            <p className={styles.emptyText}>{t('teacher.schedule.addSessionToSchedule')}</p>
           </div>
         ) : (
           <div className={styles.listView}>
@@ -605,7 +601,7 @@ export default function TeacherSchedule() {
                       </div>
                     </div>
                     <div className={styles.listActions}>
-                      <span className={`${styles.badge} ${badgeClass(s.status)}`}>{statusLabel(s.status)}</span>
+                      <span className={`${styles.badge} ${badgeClass(s.status)}`}>{s.status === 'live' ? t('common.live') : s.status === 'completed' ? t('common.completed') : s.status === 'cancelled' ? t('common.cancelled') : t('common.scheduled')}</span>
                       {s.status === 'scheduled' && (
                         <button
                           type="button"

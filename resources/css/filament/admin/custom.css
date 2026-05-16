@@ -1,0 +1,644 @@
+@import "tailwindcss";
+@import "../../../../vendor/filament/filament/resources/css/base.css";
+
+/* Content sources — tells Tailwind v4 which files to scan for class usage */
+@source "../../../views/**/*.blade.php";
+@source "../../../../app/Filament/**/*.php";
+@source "../../../../vendor/filament/**/*.blade.php";
+
+/* ═══════════════════════════════════════════════════════════════════
+   EduPulse Admin — Tailwind v4 Design System
+   (Replaces tailwind.config.js — Tailwind v4 uses @theme in CSS)
+   Dark-first · @apply throughout · CSS vars for dynamic theming
+   ═══════════════════════════════════════════════════════════════════ */
+
+/* ── Keyframe definitions ───────────────────────────────────── */
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+}
+
+@keyframes slideUp {
+    from { opacity: 0; transform: translateY(8px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes slideDown {
+    from { opacity: 0; transform: translateY(-8px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ── @theme — Tailwind v4 design token registry ─────────────── */
+/* These become Tailwind utility classes: bg-edupulse-*, text-edupulse-* etc. */
+
+@theme {
+    /* Typography */
+    --font-sans: "Plus Jakarta Sans", ui-sans-serif, system-ui, -apple-system, sans-serif;
+
+    /* Dark palette */
+    --color-edupulse-dark-base:     oklch(13% 0.022 255);
+    --color-edupulse-dark-sidebar:  oklch(10% 0.02 255);
+    --color-edupulse-dark-surface:  oklch(17% 0.022 255);
+    --color-edupulse-dark-elevated: oklch(22% 0.022 255);
+    --color-edupulse-dark-raised:   oklch(26% 0.022 255);
+    --color-edupulse-dark-border:   oklch(28% 0.02 255);
+    --color-edupulse-dark-border-strong: oklch(36% 0.02 255);
+    --color-edupulse-dark-text:     oklch(96% 0.005 255);
+    --color-edupulse-dark-text-2:   oklch(72% 0.015 255);
+    --color-edupulse-dark-muted:    oklch(52% 0.015 255);
+    --color-edupulse-dark-accent:   oklch(62% 0.26 255);
+
+    /* Light palette */
+    --color-edupulse-light-base:     oklch(97% 0.005 255);
+    --color-edupulse-light-sidebar:  oklch(100% 0 0);
+    --color-edupulse-light-surface:  oklch(100% 0 0);
+    --color-edupulse-light-elevated: oklch(96% 0.006 255);
+    --color-edupulse-light-raised:   oklch(93% 0.008 255);
+    --color-edupulse-light-border:   oklch(88% 0.01 255);
+    --color-edupulse-light-border-strong: oklch(78% 0.012 255);
+    --color-edupulse-light-text:     oklch(14% 0.025 255);
+    --color-edupulse-light-text-2:   oklch(38% 0.02 255);
+    --color-edupulse-light-muted:    oklch(55% 0.018 255);
+    --color-edupulse-light-accent:   oklch(52% 0.26 255);
+
+    /* Animations (Tailwind v4 syntax) */
+    --animate-fade-in:   fadeIn   200ms ease-out;
+    --animate-slide-up:  slideUp  220ms ease-out;
+    --animate-slide-down: slideDown 180ms ease-out;
+
+    /* Border radius */
+    --radius-ep: 0.75rem;
+}
+
+/* ── CSS variables for dynamic dark/light switching ─────────── */
+/* Semantic aliases that change with the active color scheme.    */
+/* @apply uses static @theme tokens; CSS vars drive theming.     */
+
+:root,
+html.dark {
+    --ep-bg:           var(--color-edupulse-dark-base);
+    --ep-sidebar:      var(--color-edupulse-dark-sidebar);
+    --ep-surface:      var(--color-edupulse-dark-surface);
+    --ep-elevated:     var(--color-edupulse-dark-elevated);
+    --ep-raised:       var(--color-edupulse-dark-raised);
+    --ep-border:       var(--color-edupulse-dark-border);
+    --ep-border-strong: var(--color-edupulse-dark-border-strong);
+    --ep-text:         var(--color-edupulse-dark-text);
+    --ep-text-2:       var(--color-edupulse-dark-text-2);
+    --ep-muted:        var(--color-edupulse-dark-muted);
+    --ep-accent:       var(--color-edupulse-dark-accent);
+    --ep-accent-hover: oklch(68% 0.26 255);
+    --ep-accent-dim:   oklch(62% 0.26 255 / 0.15);
+    --ep-accent-glow:  oklch(62% 0.26 255 / 0.30);
+    --ep-danger:       oklch(62% 0.22 27);
+    --ep-success:      oklch(68% 0.18 145);
+    --ep-warning:      oklch(78% 0.18 80);
+    --ep-shadow-sm:    0 1px 3px oklch(5% 0 0 / 0.45), 0 1px 2px oklch(5% 0 0 / 0.3);
+    --ep-shadow-md:    0 4px 12px oklch(5% 0 0 / 0.45), 0 2px 4px oklch(5% 0 0 / 0.25);
+    --ep-shadow-lg:    0 12px 32px oklch(5% 0 0 / 0.55), 0 4px 8px oklch(5% 0 0 / 0.3);
+}
+
+html:not(.dark),
+html.light {
+    --ep-bg:           var(--color-edupulse-light-base);
+    --ep-sidebar:      var(--color-edupulse-light-sidebar);
+    --ep-surface:      var(--color-edupulse-light-surface);
+    --ep-elevated:     var(--color-edupulse-light-elevated);
+    --ep-raised:       var(--color-edupulse-light-raised);
+    --ep-border:       var(--color-edupulse-light-border);
+    --ep-border-strong: var(--color-edupulse-light-border-strong);
+    --ep-text:         var(--color-edupulse-light-text);
+    --ep-text-2:       var(--color-edupulse-light-text-2);
+    --ep-muted:        var(--color-edupulse-light-muted);
+    --ep-accent:       var(--color-edupulse-light-accent);
+    --ep-accent-hover: oklch(48% 0.26 255);
+    --ep-accent-dim:   oklch(52% 0.26 255 / 0.10);
+    --ep-accent-glow:  oklch(52% 0.26 255 / 0.20);
+    --ep-danger:       oklch(52% 0.22 27);
+    --ep-success:      oklch(52% 0.18 145);
+    --ep-warning:      oklch(58% 0.18 80);
+    --ep-shadow-sm:    0 1px 3px oklch(60% 0 0 / 0.10), 0 1px 2px oklch(60% 0 0 / 0.08);
+    --ep-shadow-md:    0 4px 12px oklch(60% 0 0 / 0.10), 0 2px 4px oklch(60% 0 0 / 0.08);
+    --ep-shadow-lg:    0 12px 32px oklch(60% 0 0 / 0.12), 0 4px 8px oklch(60% 0 0 / 0.08);
+}
+
+/* ═══════════════════════════════════════════════════
+   COMPONENT STYLES — using @apply for Tailwind utils
+   and CSS vars for dynamic color values
+   ═══════════════════════════════════════════════════ */
+
+/* ── Global base ────────────────────────────────────── */
+
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+}
+
+html {
+    @apply antialiased;
+    font-family: var(--font-sans);
+}
+
+body {
+    @apply font-sans antialiased;
+    background-color: var(--ep-bg);
+    color: var(--ep-text);
+}
+
+/* ── Sidebar ────────────────────────────────────────── */
+
+.fi-sidebar {
+    @apply border-e;
+    background-color: var(--ep-sidebar);
+    border-inline-end-color: var(--ep-border);
+}
+
+.fi-sidebar-header {
+    @apply px-5 py-4 border-b;
+    border-bottom-color: var(--ep-border);
+}
+
+.fi-sidebar-nav {
+    @apply py-3 px-3;
+}
+
+.fi-sidebar-group-label {
+    @apply text-xs font-bold uppercase tracking-widest px-3 py-1 mt-3 block;
+    letter-spacing: 0.08em;
+    color: var(--ep-muted);
+}
+
+/* Nav items */
+.fi-sidebar-item-button {
+    @apply flex items-center gap-2.5 w-full py-2 px-3 rounded-lg text-sm font-medium;
+    @apply transition-colors duration-150;
+    color: var(--ep-text-2);
+}
+
+.fi-sidebar-item-button:hover {
+    @apply font-medium;
+    background-color: var(--ep-elevated);
+    color: var(--ep-text);
+}
+
+/* Active item — inline-start border via box-shadow (RTL-safe) */
+.fi-sidebar-item.fi-active .fi-sidebar-item-button {
+    @apply font-semibold;
+    background-color: var(--ep-accent-dim);
+    color: var(--ep-text);
+    box-shadow: inset 3px 0 0 var(--ep-accent);
+}
+
+[dir="rtl"] .fi-sidebar-item.fi-active .fi-sidebar-item-button {
+    box-shadow: inset -3px 0 0 var(--ep-accent);
+}
+
+.fi-sidebar-item.fi-active .fi-sidebar-item-icon {
+    color: var(--ep-accent) !important;
+}
+
+.fi-sidebar-item-icon {
+    @apply shrink-0 transition-colors duration-150;
+}
+
+/* ── Topbar ──────────────────────────────────────────── */
+
+.fi-topbar {
+    @apply border-b animate-slide-down;
+    background-color: var(--ep-surface);
+    border-bottom-color: var(--ep-border);
+}
+
+/* ── Main content ─────────────────────────────────────── */
+
+.fi-main {
+    background-color: var(--ep-bg);
+}
+
+.fi-main-ctn {
+    @apply p-6 animate-fade-in;
+}
+
+/* ── Page header ──────────────────────────────────────── */
+
+.fi-page-header {
+    @apply mb-6 animate-slide-down;
+}
+
+.fi-page-header-heading {
+    @apply text-2xl font-bold tracking-tight;
+    color: var(--ep-text);
+}
+
+.fi-page-header-subheading {
+    @apply text-sm mt-1;
+    color: var(--ep-muted);
+}
+
+/* ── Section / card surface ───────────────────────────── */
+
+.fi-section {
+    @apply rounded-xl border animate-slide-up;
+    background-color: var(--ep-surface);
+    border-color: var(--ep-border);
+    box-shadow: var(--ep-shadow-sm);
+}
+
+.fi-section-header {
+    @apply px-5 py-4 border-b;
+    border-bottom-color: var(--ep-border);
+}
+
+.fi-section-header-heading {
+    @apply text-sm font-semibold;
+    color: var(--ep-text);
+}
+
+.fi-section-content {
+    @apply px-5 py-4;
+}
+
+/* ── Stats overview widget ────────────────────────────── */
+
+.fi-wi-stats-overview-stat {
+    @apply rounded-xl border p-5 transition-shadow duration-150;
+    background-color: var(--ep-surface);
+    border-color: var(--ep-border);
+    box-shadow: var(--ep-shadow-sm);
+}
+
+.fi-wi-stats-overview-stat:hover {
+    border-color: var(--ep-border-strong);
+    box-shadow: var(--ep-shadow-md);
+}
+
+.fi-wi-stats-overview-stat-value {
+    @apply text-3xl font-bold tracking-tighter;
+    color: var(--ep-text);
+}
+
+.fi-wi-stats-overview-stat-label {
+    @apply text-xs font-bold uppercase tracking-widest;
+    color: var(--ep-muted);
+}
+
+.fi-wi-stats-overview-stat-description {
+    @apply text-sm mt-1;
+    color: var(--ep-text-2);
+}
+
+/* ── Tables ───────────────────────────────────────────── */
+
+.fi-ta-content {
+    @apply rounded-xl border overflow-hidden animate-slide-up;
+    background-color: var(--ep-surface);
+    border-color: var(--ep-border);
+    box-shadow: var(--ep-shadow-sm);
+}
+
+.fi-ta-header-cell {
+    @apply border-b py-3 px-4;
+    background-color: var(--ep-elevated);
+    border-bottom-color: var(--ep-border);
+}
+
+.fi-ta-header-cell-label {
+    @apply text-xs font-bold uppercase tracking-widest;
+    color: var(--ep-muted);
+}
+
+.fi-ta-row {
+    @apply border-b transition-colors duration-150;
+    border-bottom-color: var(--ep-border);
+}
+
+.fi-ta-row:last-child {
+    @apply border-b-0;
+}
+
+.fi-ta-row:hover {
+    background-color: var(--ep-elevated);
+}
+
+.fi-ta-cell {
+    @apply py-3.5 px-4 text-sm;
+    color: var(--ep-text-2);
+}
+
+.fi-ta-pagination {
+    @apply flex items-center justify-between px-4 py-3 border-t;
+    border-top-color: var(--ep-border);
+}
+
+.fi-ta-empty-state {
+    @apply py-16 text-center;
+}
+
+.fi-ta-empty-state-label {
+    @apply text-base font-semibold mt-3;
+    color: var(--ep-text-2);
+}
+
+.fi-ta-empty-state-description {
+    @apply text-sm mt-1;
+    color: var(--ep-muted);
+}
+
+/* ── Buttons ──────────────────────────────────────────── */
+
+.fi-btn {
+    @apply font-sans font-semibold text-sm rounded-lg py-2 px-4;
+    @apply transition-all duration-150 cursor-pointer inline-flex items-center gap-1.5;
+}
+
+.fi-btn-color-primary {
+    @apply text-white;
+    background-color: var(--ep-accent);
+}
+
+.fi-btn-color-primary:hover {
+    background-color: var(--ep-accent-hover);
+    box-shadow: 0 0 16px var(--ep-accent-glow);
+}
+
+.fi-btn-color-gray {
+    @apply border;
+    background-color: var(--ep-elevated);
+    color: var(--ep-text-2);
+    border-color: var(--ep-border);
+}
+
+.fi-btn-color-gray:hover {
+    background-color: var(--ep-raised);
+    color: var(--ep-text);
+    border-color: var(--ep-border-strong);
+}
+
+.fi-btn-color-danger {
+    @apply border;
+    background-color: transparent;
+    color: var(--ep-danger);
+    border-color: var(--ep-danger);
+}
+
+.fi-btn-color-danger:hover {
+    @apply text-white;
+    background-color: var(--ep-danger);
+    box-shadow: none;
+}
+
+.fi-btn:disabled,
+.fi-btn[disabled] {
+    @apply opacity-40 cursor-not-allowed;
+}
+
+/* ── Forms ────────────────────────────────────────────── */
+
+.fi-input,
+.fi-select,
+.fi-textarea {
+    @apply font-sans text-sm rounded-lg border py-2 px-3;
+    @apply transition-colors duration-150 w-full;
+    background-color: var(--ep-elevated);
+    border-color: var(--ep-border);
+    color: var(--ep-text);
+}
+
+.fi-input::placeholder,
+.fi-textarea::placeholder {
+    color: var(--ep-muted);
+    @apply opacity-100;
+}
+
+.fi-input:focus,
+.fi-select:focus,
+.fi-textarea:focus,
+.fi-fo-wrp-input-txt:focus-within {
+    @apply outline-none;
+    border-color: var(--ep-accent);
+    box-shadow: 0 0 0 3px var(--ep-accent-dim);
+}
+
+.fi-fo-field-wrp-label {
+    @apply text-sm font-semibold block mb-1.5;
+    color: var(--ep-text-2);
+}
+
+.fi-fo-field-wrp-hint {
+    @apply text-xs mt-1;
+    color: var(--ep-muted);
+}
+
+.fi-fo-field-wrp-error-message {
+    @apply text-xs mt-1;
+    color: var(--ep-danger);
+}
+
+/* ── Modal ────────────────────────────────────────────── */
+
+.fi-modal-window {
+    @apply rounded-xl border animate-slide-up;
+    background-color: var(--ep-surface);
+    border-color: var(--ep-border-strong);
+    box-shadow: var(--ep-shadow-lg);
+}
+
+.fi-modal-header {
+    @apply flex items-center justify-between px-6 py-4 border-b;
+    border-bottom-color: var(--ep-border);
+}
+
+.fi-modal-heading {
+    @apply text-base font-bold;
+    color: var(--ep-text);
+}
+
+.fi-modal-overlay {
+    @apply backdrop-blur-sm;
+    background-color: oklch(5% 0 0 / 0.65);
+    animation: fadeIn 150ms ease-out;
+}
+
+/* ── Dropdowns ────────────────────────────────────────── */
+
+.fi-dropdown-panel {
+    @apply rounded-xl border py-1 animate-slide-down;
+    background-color: var(--ep-surface);
+    border-color: var(--ep-border-strong);
+    box-shadow: var(--ep-shadow-md);
+}
+
+.fi-dropdown-list-item-button {
+    @apply transition-colors duration-100;
+}
+
+.fi-dropdown-list-item-button:hover {
+    background-color: var(--ep-elevated);
+}
+
+.fi-dropdown-list-item-label {
+    @apply text-sm;
+    color: var(--ep-text-2);
+}
+
+/* ── Badges ───────────────────────────────────────────── */
+
+.fi-badge {
+    @apply text-xs font-semibold rounded-full px-2.5 py-0.5;
+}
+
+.fi-badge-color-primary {
+    background-color: var(--ep-accent-dim);
+    color: var(--ep-accent);
+}
+
+.fi-badge-color-success {
+    @apply bg-green-500/15 text-green-500;
+}
+
+.fi-badge-color-warning {
+    @apply bg-amber-500/15 text-amber-500;
+}
+
+.fi-badge-color-danger {
+    @apply bg-red-500/15 text-red-500;
+}
+
+.fi-badge-color-gray {
+    background-color: var(--ep-elevated);
+    color: var(--ep-text-2);
+}
+
+/* ── Notifications ────────────────────────────────────── */
+
+.fi-no-notification {
+    @apply rounded-xl border;
+    background-color: var(--ep-surface);
+    border-color: var(--ep-border-strong);
+    box-shadow: var(--ep-shadow-md);
+    animation: slideDown 200ms ease-out;
+}
+
+.fi-no-notification-title {
+    @apply font-semibold;
+    color: var(--ep-text);
+}
+
+.fi-no-notification-body {
+    @apply text-sm;
+    color: var(--ep-muted);
+}
+
+/* ── Tabs ─────────────────────────────────────────────── */
+
+.fi-tabs {
+    @apply border-b mb-5;
+    border-bottom-color: var(--ep-border);
+}
+
+.fi-tabs-tab {
+    @apply text-sm font-medium py-2.5 px-4 border-b-2 border-b-transparent;
+    @apply transition-colors duration-150;
+    color: var(--ep-muted);
+}
+
+.fi-tabs-tab:hover {
+    color: var(--ep-text);
+}
+
+.fi-tabs-tab[aria-selected="true"] {
+    @apply font-semibold border-b-2;
+    color: var(--ep-accent);
+    border-bottom-color: var(--ep-accent);
+}
+
+/* ── Pagination ───────────────────────────────────────── */
+
+.fi-pagination-item-btn {
+    @apply text-sm px-2 py-1 rounded transition-colors duration-150;
+    color: var(--ep-muted);
+}
+
+.fi-pagination-item-btn:hover {
+    background-color: var(--ep-elevated);
+    color: var(--ep-text);
+}
+
+.fi-pagination-item-btn.fi-active {
+    @apply font-semibold text-white;
+    background-color: var(--ep-accent);
+}
+
+.fi-pagination-previous-btn,
+.fi-pagination-next-btn {
+    @apply text-sm rounded-lg border px-3 py-1.5 transition-colors duration-150;
+    background-color: var(--ep-elevated);
+    border-color: var(--ep-border);
+    color: var(--ep-text-2);
+}
+
+.fi-pagination-previous-btn:hover,
+.fi-pagination-next-btn:hover {
+    background-color: var(--ep-raised);
+    border-color: var(--ep-border-strong);
+    color: var(--ep-text);
+}
+
+/* ── ThemeToggle component ────────────────────────────── */
+
+.ep-theme-toggle {
+    @apply flex items-center gap-1;
+}
+
+.ep-theme-toggle-btn {
+    @apply flex items-center justify-center w-8 h-8 rounded-lg border;
+    @apply transition-colors duration-150 cursor-pointer;
+    background-color: transparent;
+    border-color: var(--ep-border);
+    color: var(--ep-muted);
+}
+
+.ep-theme-toggle-btn:hover {
+    background-color: var(--ep-elevated);
+    border-color: var(--ep-border-strong);
+    color: var(--ep-text);
+}
+
+.ep-lang-btn {
+    @apply text-xs font-bold tracking-wide;
+    min-width: 2rem;
+}
+
+/* ── Alerts ───────────────────────────────────────────── */
+
+.fi-ac-modal-action-resolved-color-danger {
+    color: var(--ep-danger);
+}
+
+/* ── Focus rings ──────────────────────────────────────── */
+
+:focus-visible {
+    @apply outline-2 outline-offset-2;
+    outline-color: var(--ep-accent);
+}
+
+/* ── Scrollbars ───────────────────────────────────────── */
+
+::-webkit-scrollbar {
+    @apply w-1.5 h-1.5;
+}
+
+::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+    @apply rounded-full;
+    background: var(--ep-border-strong);
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: var(--ep-muted);
+}

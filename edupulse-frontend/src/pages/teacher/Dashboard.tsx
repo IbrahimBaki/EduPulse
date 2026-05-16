@@ -249,7 +249,7 @@ function TodaySessions({ sessions, loading, error, refetch }: {
   return (
     <div className={styles.panel}>
       <div className={styles.panelHead}>
-        <h2 className={styles.panelTitle}>Today's sessions</h2>
+        <h2 className={styles.panelTitle}>{t('teacher.dashboard.todaySessions')}</h2>
         {!loading && !error && (
           <span className={styles.panelCount}>{sessions?.length ?? 0}</span>
         )}
@@ -271,8 +271,8 @@ function TodaySessions({ sessions, loading, error, refetch }: {
       ) : error ? (
         <div className={styles.errorInline} role="alert">
           <AlertIcon />
-          <span>Failed to load sessions</span>
-          <button type="button" onClick={refetch} className={styles.retryBtnSmall}>Retry</button>
+          <span>{t('teacher.dashboard.failedSessions')}</span>
+          <button type="button" onClick={refetch} className={styles.retryBtnSmall}>{t('common.retry')}</button>
         </div>
       ) : !sessions?.length ? (
         <EmptyState icon={<CalendarEmptyIcon />} message={t('teacher.dashboard.noSessionsToday')} />
@@ -352,9 +352,9 @@ function AtRiskStudents({ students, loading, error, refetch }: {
   return (
     <div className={styles.panel}>
       <div className={styles.panelHead}>
-        <h2 className={styles.panelTitle}>At-risk students</h2>
+        <h2 className={styles.panelTitle}>{t('teacher.dashboard.atRiskStudents')}</h2>
         {!loading && !error && !!students?.length && (
-          <span className={styles.panelCount}>{students.length} flagged</span>
+          <span className={styles.panelCount}>{students.length} {t('teacher.dashboard.flagged')}</span>
         )}
       </div>
 
@@ -375,8 +375,8 @@ function AtRiskStudents({ students, loading, error, refetch }: {
       ) : error ? (
         <div className={styles.errorInline} role="alert">
           <AlertIcon />
-          <span>Failed to load</span>
-          <button type="button" onClick={refetch} className={styles.retryBtnSmall}>Retry</button>
+          <span>{t('teacher.dashboard.failedStudents')}</span>
+          <button type="button" onClick={refetch} className={styles.retryBtnSmall}>{t('common.retry')}</button>
         </div>
       ) : !students?.length ? (
         <div className={styles.allGoodRow} role="status">
@@ -408,7 +408,7 @@ function AtRiskStudents({ students, loading, error, refetch }: {
                 className={styles.viewLink}
                 aria-label={`View ${s.name}'s profile`}
               >
-                View
+                {t('teacher.dashboard.view')}
               </Link>
             </li>
           ))}
@@ -430,9 +430,9 @@ function RecentQuizActivity({ activity, loading, error, refetch }: {
   return (
     <div className={styles.panel}>
       <div className={styles.panelHead}>
-        <h2 className={styles.panelTitle}>Recent quiz activity</h2>
+        <h2 className={styles.panelTitle}>{t('teacher.dashboard.recentQuizActivity')}</h2>
         {!loading && !error && !!activity?.length && (
-          <span className={styles.panelCount}>{Math.min(activity.length, 8)} attempts</span>
+          <span className={styles.panelCount}>{Math.min(activity.length, 8)} {t('teacher.dashboard.attempts')}</span>
         )}
       </div>
 
@@ -454,8 +454,8 @@ function RecentQuizActivity({ activity, loading, error, refetch }: {
       ) : error ? (
         <div className={styles.errorInline} role="alert">
           <AlertIcon />
-          <span>Failed to load</span>
-          <button type="button" onClick={refetch} className={styles.retryBtnSmall}>Retry</button>
+          <span>{t('teacher.dashboard.failedToLoad')}</span>
+          <button type="button" onClick={refetch} className={styles.retryBtnSmall}>{t('common.retry')}</button>
         </div>
       ) : !activity?.length ? (
         <EmptyState icon={<QuizEmptyIcon />} message={t('teacher.dashboard.noQuizAttempts')} />
@@ -510,7 +510,7 @@ function TopicPerformance({ topics, loading, error, refetch }: {
   return (
     <div className={styles.panel}>
       <div className={styles.panelHead}>
-        <h2 className={styles.panelTitle}>Topic performance</h2>
+        <h2 className={styles.panelTitle}>{t('teacher.dashboard.topicPerformance')}</h2>
         <span className={styles.panelCount}>{t('teacher.dashboard.avgScore')}</span>
       </div>
 
@@ -527,8 +527,8 @@ function TopicPerformance({ topics, loading, error, refetch }: {
       ) : error ? (
         <div className={styles.errorInline} role="alert">
           <AlertIcon />
-          <span>Failed to load</span>
-          <button type="button" onClick={refetch} className={styles.retryBtnSmall}>Retry</button>
+          <span>{t('teacher.dashboard.failedToLoad')}</span>
+          <button type="button" onClick={refetch} className={styles.retryBtnSmall}>{t('common.retry')}</button>
         </div>
       ) : !topics?.length ? (
         <EmptyState icon={<BarEmptyIcon />} message={t('teacher.dashboard.noTopicData')} />
@@ -567,7 +567,7 @@ function TopicPerformance({ topics, loading, error, refetch }: {
                   boxShadow: 'none',
                 }}
                 cursor={{ fill: 'oklch(62% 0.02 255 / 0.06)' }}
-                formatter={(value) => [`${value ?? 0}%`, 'Avg Score']}
+                formatter={(value) => [`${value ?? 0}%`, t('teacher.dashboard.avgScore')]}
               />
               <Bar
                 dataKey="avg_score"
@@ -617,7 +617,7 @@ export default function TeacherDashboard() {
 
       <header className={styles.pageHead}>
         <h1 className={styles.greeting}>
-          {user?.name ? getGreeting(user.name, t) : 'Teacher Dashboard'}
+          {user?.name ? getGreeting(user.name, t) : t('teacher.dashboard.teacherDashboard')}
         </h1>
         <p className={styles.greetingDate}>{formatDate()}</p>
       </header>
@@ -625,8 +625,8 @@ export default function TeacherDashboard() {
       {hasError && (
         <div className={styles.errorBanner} role="alert">
           <AlertIcon />
-          <span>Dashboard failed to load.</span>
-          <button type="button" onClick={doRefetch} className={styles.retryBtn}>Retry</button>
+          <span>{t('teacher.dashboard.dashboardFailedToLoad')}</span>
+          <button type="button" onClick={doRefetch} className={styles.retryBtn}>{t('common.retry')}</button>
         </div>
       )}
 
@@ -649,7 +649,7 @@ export default function TeacherDashboard() {
         <StatCard
           label={t('teacher.dashboard.atRisk')}
           value={dash?.stats?.at_risk_count ?? 0}
-          sub="score below 60%"
+          sub={t('teacher.dashboard.scoreBelowSixty')}
           loading={loading}
           amber
         />

@@ -3,6 +3,7 @@ import { useSearchParams } from 'react-router-dom'
 import { useQuery, useMutation } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
 import { motion, AnimatePresence } from 'framer-motion'
+import DOMPurify from 'dompurify'
 import api from '../../lib/axios'
 import styles from './AiTutor.module.css'
 
@@ -778,7 +779,7 @@ export default function StudentAiTutor() {
                     ) : (
                       <div
                         className={styles.aiBubble}
-                        dangerouslySetInnerHTML={{ __html: renderMarkdown(m.content) }}
+                        dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(renderMarkdown(m.content)) }}
                       />
                     )}
                   </motion.div>

@@ -1,6 +1,7 @@
 import { useState, useCallback, useRef } from 'react'
 import { useParams, Link } from 'react-router-dom'
 import { useQuery, useMutation, useQueryClient, type QueryClient } from '@tanstack/react-query'
+import { useTranslation } from 'react-i18next'
 import api from '../../lib/axios'
 import { SlideOver } from '../../components/SlideOver'
 import styles from './CourseDetail.module.css'
@@ -95,10 +96,6 @@ function statusBadgeClass(status: string): string {
   return styles.badgeDraft
 }
 
-function statusLabel(s: string): string {
-  return s.charAt(0).toUpperCase() + s.slice(1)
-}
-
 function generateJitsiUrl(title: string, courseId: string): string {
   const slug = `edupulse-${courseId}-${title.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '').slice(0, 40)}`
   return `https://meet.jit.si/${slug}`
@@ -128,7 +125,7 @@ function normalizeArray<T>(data: unknown): T[] {
 
 function BackIcon() {
   return (
-    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" data-rtl-flip="">
       <line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/>
     </svg>
   )
@@ -257,6 +254,7 @@ function HeaderSkeleton() {
 // ─── Lessons tab ──────────────────────────────────────────────────────────────
 
 function LessonsTab({ courseId }: { courseId: string }) {
+  const { t } = useTranslation()
   const qc = useQueryClient()
   const [showForm, setShowForm] = useState(false)
   const [form, setForm] = useState({ title: '', description: '' })
@@ -340,8 +338,8 @@ if (isLoading) {
     return (
       <div className={styles.emptyState}>
         <div style={{ color: 'var(--color-amber)' }}><AlertIcon /></div>
-        <p className={styles.emptyTitle}>Failed to load lessons</p>
-        <button type="button" className={`${styles.btn} ${styles.btnOutline}`} onClick={() => refetch()}>Retry</button>
+        <p className={styles.emptyTitle}>{t('teacher.courseDetail.lessons.failedToLoad')}</p>
+        <button type="button" className={`${styles.btn} ${styles.btnOutline}`} onClick={() => refetch()}>{t('common.retry')}</button>
       </div>
     )
   }
@@ -351,11 +349,11 @@ if (isLoading) {
       {showForm && (
         <form className={styles.addLessonForm} onSubmit={handleSubmit} aria-label="Add lesson form">
           <div className={styles.formRow}>
-            <label className={styles.label} htmlFor="lesson-title">Title</label>
+            <label className={styles.label} htmlFor="lesson-title">{t('teacher.courseDetail.lessons.title')}</label>
             <input
               id="lesson-title"
               className={styles.input}
-              placeholder="Lesson title..."
+              placeholder={t('teacher.courseDetail.lessons.titlePlaceholder')}
               value={form.title}
               onChange={e => setForm(f => ({ ...f, title: e.target.value }))}
               required
@@ -363,19 +361,19 @@ if (isLoading) {
             />
           </div>
           <div className={styles.formRow}>
-            <label className={styles.label} htmlFor="lesson-desc">Description (optional)</label>
+            <label className={styles.label} htmlFor="lesson-desc">{t('teacher.courseDetail.lessons.descriptionOptional')}</label>
             <textarea
               id="lesson-desc"
               className={styles.textarea}
-              placeholder="Brief description..."
+              placeholder={t('teacher.courseDetail.lessons.descPlaceholder')}
               value={form.description}
               onChange={e => setForm(f => ({ ...f, description: e.target.value }))}
             />
           </div>
           <div className={styles.formFooter}>
-            <button type="button" className={`${styles.btn} ${styles.btnOutline}`} onClick={() => setShowForm(false)}>Cancel</button>
+            <button type="button" className={`${styles.btn} ${styles.btnOutline}`} onClick={() => setShowForm(false)}>{t('common.cancel')}</button>
             <button type="submit" className={`${styles.btn} ${styles.btnPrimary}`} disabled={addMutation.isPending || !form.title.trim()}>
-              {addMutation.isPending ? 'Saving...' : 'Add Lesson'}
+              {addMutation.isPending ? t('teacher.courseDetail.lessons.saving') : t('teacher.courseDetail.lessons.addLesson')}
             </button>
           </div>
         </form>
@@ -384,10 +382,10 @@ if (isLoading) {
       {lessons.length === 0 && !showForm ? (
         <div className={styles.emptyState}>
           <div style={{ color: 'oklch(44% 0.018 255)' }}><BookIcon /></div>
-          <p className={styles.emptyTitle}>No lessons yet</p>
-          <p className={styles.emptyText}>Add the first lesson to get started.</p>
+          <p className={styles.emptyTitle}>{t('teacher.courseDetail.lessons.noLessons')}</p>
+          <p className={styles.emptyText}>{t('teacher.courseDetail.lessons.addFirstLesson')}</p>
           <button type="button" className={`${styles.btn} ${styles.btnPrimary}`} onClick={() => setShowForm(true)}>
-            <PlusIcon /> Add Lesson
+            <PlusIcon /> {t('teacher.courseDetail.lessons.addLesson')}
           </button>
         </div>
       ) : (
@@ -402,7 +400,7 @@ if (isLoading) {
                 <span className={styles.lessonTitle}>{lesson.title}</span>
                 <div className={styles.lessonBadges}>
                   <span className={`${styles.badge} ${lesson.is_published ? styles.badgePublished : styles.badgeUnpublished}`}>
-                    {lesson.is_published ? 'Published' : 'Draft'}
+                    {lesson.is_published ? t('teacher.courseDetail.lessons.published') : t('teacher.courseDetail.lessons.draft')}
                   </span>
                   {lesson.pdf_processed && (
                     <span className={`${styles.badge} ${styles.badgePdf}`}>PDF</span>
@@ -432,7 +430,7 @@ if (isLoading) {
                     disabled={publishMutation.isPending}
                     aria-label={lesson.is_published ? `Unpublish ${lesson.title}` : `Publish ${lesson.title}`}
                   >
-                    {lesson.is_published ? 'Unpublish' : 'Publish'}
+                    {lesson.is_published ? t('teacher.courseDetail.lessons.unpublish') : t('teacher.courseDetail.lessons.publish')}
                   </button>
                 </div>
               </li>
@@ -444,7 +442,7 @@ if (isLoading) {
           {!showForm && (
             <div className={styles.btnRow}>
               <button type="button" className={`${styles.btn} ${styles.btnOutline}`} onClick={() => setShowForm(true)}>
-                <PlusIcon /> Add Lesson
+                <PlusIcon /> {t('teacher.courseDetail.lessons.addLesson')}
               </button>
             </div>
           )}
@@ -466,6 +464,7 @@ if (isLoading) {
 // ─── Students tab ──────────────────────────────────────────────────────────────
 
 function StudentsTab({ courseId }: { courseId: string }) {
+  const { t } = useTranslation()
   const { data: students = [], isLoading, isError, refetch } = useQuery<Student[]>({
     queryKey: ['teacher-course-students', courseId],
     queryFn: () => api.get(`/teacher/courses/${courseId}/students`).then(r => normalizeArray<Student>(r.data.data ?? r.data)),
@@ -477,7 +476,11 @@ function StudentsTab({ courseId }: { courseId: string }) {
       <table className={styles.studentsTable} aria-label="Students loading">
         <thead>
           <tr>
-            <th>Student</th><th>Attendance</th><th>Avg Score</th><th>Weak Topics</th><th>Status</th>
+            <th>{t('teacher.courseDetail.students.student')}</th>
+            <th>{t('teacher.courseDetail.students.attendance')}</th>
+            <th>{t('teacher.courseDetail.students.avgScore')}</th>
+            <th>{t('teacher.courseDetail.students.weakTopics')}</th>
+            <th>{t('teacher.courseDetail.students.status')}</th>
           </tr>
         </thead>
         <tbody>
@@ -491,8 +494,8 @@ function StudentsTab({ courseId }: { courseId: string }) {
     return (
       <div className={styles.emptyState}>
         <div style={{ color: 'var(--color-amber)' }}><AlertIcon /></div>
-        <p className={styles.emptyTitle}>Failed to load students</p>
-        <button type="button" className={`${styles.btn} ${styles.btnOutline}`} onClick={() => refetch()}>Retry</button>
+        <p className={styles.emptyTitle}>{t('teacher.courseDetail.students.failedToLoad')}</p>
+        <button type="button" className={`${styles.btn} ${styles.btnOutline}`} onClick={() => refetch()}>{t('common.retry')}</button>
       </div>
     )
   }
@@ -501,8 +504,8 @@ function StudentsTab({ courseId }: { courseId: string }) {
     return (
       <div className={styles.emptyState}>
         <div style={{ color: 'oklch(44% 0.018 255)' }}><UsersIcon /></div>
-        <p className={styles.emptyTitle}>No students enrolled</p>
-        <p className={styles.emptyText}>Students enrolled in this course will appear here.</p>
+        <p className={styles.emptyTitle}>{t('teacher.courseDetail.students.noStudents')}</p>
+        <p className={styles.emptyText}>{t('teacher.courseDetail.students.noStudentsText')}</p>
       </div>
     )
   }
@@ -511,11 +514,11 @@ function StudentsTab({ courseId }: { courseId: string }) {
     <table className={styles.studentsTable} aria-label="Enrolled students">
       <thead>
         <tr>
-          <th>Student</th>
-          <th>Attendance</th>
-          <th>Avg Score</th>
-          <th>Weak Topics</th>
-          <th>Status</th>
+          <th>{t('teacher.courseDetail.students.student')}</th>
+          <th>{t('teacher.courseDetail.students.attendance')}</th>
+          <th>{t('teacher.courseDetail.students.avgScore')}</th>
+          <th>{t('teacher.courseDetail.students.weakTopics')}</th>
+          <th>{t('teacher.courseDetail.students.status')}</th>
         </tr>
       </thead>
       <tbody>
@@ -545,8 +548,8 @@ function StudentsTab({ courseId }: { courseId: string }) {
               </td>
               <td>
                 {atRisk && (
-                  <span className={styles.atRiskBadge} aria-label="At risk student">
-                    <AlertIcon /> At Risk
+                  <span className={styles.atRiskBadge} aria-label={t('teacher.courseDetail.students.atRisk')}>
+                    <AlertIcon /> {t('teacher.courseDetail.students.atRisk')}
                   </span>
                 )}
               </td>
@@ -561,6 +564,7 @@ function StudentsTab({ courseId }: { courseId: string }) {
 // ─── Schedule tab ─────────────────────────────────────────────────────────────
 
 function ScheduleTab({ courseId }: { courseId: string }) {
+  const { t } = useTranslation()
   const qc = useQueryClient()
   const [showAdd, setShowAdd] = useState(false)
   const [form, setForm] = useState({ title: '', description: '', date: '', starts_at: '', ends_at: '', type: 'online' as 'online' | 'in_person' | 'recorded' })
@@ -624,8 +628,8 @@ function ScheduleTab({ courseId }: { courseId: string }) {
     return (
       <div className={styles.emptyState}>
         <div style={{ color: 'var(--color-amber)' }}><AlertIcon /></div>
-        <p className={styles.emptyTitle}>Failed to load sessions</p>
-        <button type="button" className={`${styles.btn} ${styles.btnOutline}`} onClick={() => refetch()}>Retry</button>
+        <p className={styles.emptyTitle}>{t('teacher.courseDetail.schedule.failedToLoad')}</p>
+        <button type="button" className={`${styles.btn} ${styles.btnOutline}`} onClick={() => refetch()}>{t('common.retry')}</button>
       </div>
     )
   }
@@ -634,15 +638,15 @@ function ScheduleTab({ courseId }: { courseId: string }) {
     <>
       <div className={styles.btnRow}>
         <button type="button" className={`${styles.btn} ${styles.btnPrimary}`} onClick={() => setShowAdd(true)}>
-          <PlusIcon /> Add Session
+          <PlusIcon /> {t('teacher.courseDetail.schedule.addSession')}
         </button>
       </div>
 
       {sessions.length === 0 ? (
         <div className={styles.emptyState}>
           <div style={{ color: 'oklch(44% 0.018 255)' }}><CalendarIcon /></div>
-          <p className={styles.emptyTitle}>No sessions scheduled</p>
-          <p className={styles.emptyText}>Upcoming sessions for this course will appear here.</p>
+          <p className={styles.emptyTitle}>{t('teacher.courseDetail.schedule.noSessions')}</p>
+          <p className={styles.emptyText}>{t('teacher.courseDetail.schedule.noSessionsText')}</p>
         </div>
       ) : (
         <ul className={styles.sessionsList} aria-label="Course sessions">
@@ -653,11 +657,11 @@ function ScheduleTab({ courseId }: { courseId: string }) {
                 <div className={styles.sessionDate}>{formatDateTime(s.starts_at)}</div>
               </div>
               <span className={`${styles.badge} ${s.status === 'live' ? styles.badgeActive : s.status === 'scheduled' ? styles.badgeDraft : styles.badgeArchived}`}>
-                {statusLabel(s.status)}
+                {s.status === 'live' ? t('common.live') : s.status === 'completed' ? t('common.completed') : s.status === 'cancelled' ? t('common.cancelled') : t('common.scheduled')}
               </span>
               {s.jitsi_url && (
                 <a href={s.jitsi_url} target="_blank" rel="noopener noreferrer" className={`${styles.btn} ${styles.btnOutline}`} style={{ height: 28, fontSize: '0.75rem', paddingInline: 10 }}>
-                  Join
+                  {t('teacher.courseDetail.schedule.join')}
                 </a>
               )}
             </li>
@@ -668,52 +672,52 @@ function ScheduleTab({ courseId }: { courseId: string }) {
       <SlideOver
         open={showAdd}
         onClose={() => setShowAdd(false)}
-        title="Add Session"
-        description="Schedule a new session for this course"
+        title={t('teacher.courseDetail.schedule.title')}
+        description={t('teacher.courseDetail.schedule.description')}
         footer={
           <>
-            <button type="button" className={`${styles.btn} ${styles.btnOutline}`} onClick={() => setShowAdd(false)}>Cancel</button>
+            <button type="button" className={`${styles.btn} ${styles.btnOutline}`} onClick={() => setShowAdd(false)}>{t('common.cancel')}</button>
             <button
               type="button"
               className={`${styles.btn} ${styles.btnPrimary}`}
               disabled={addMutation.isPending || !form.title.trim() || !form.date || !form.starts_at || !form.ends_at}
               onClick={e => handleSubmit(e as unknown as React.FormEvent)}
             >
-              {addMutation.isPending ? 'Saving...' : 'Save Session'}
+              {addMutation.isPending ? t('teacher.courseDetail.schedule.saving') : t('teacher.courseDetail.schedule.saveSession')}
             </button>
           </>
         }
       >
         <form className={styles.fieldGroup} onSubmit={handleSubmit}>
-          {field('Title', 'sched-title',
-            <input id="sched-title" className={styles.input} placeholder="e.g. Chapter 3 Review" value={form.title} onChange={e => setForm(f => ({ ...f, title: e.target.value }))} required />
+          {field(t('teacher.courseDetail.schedule.titleField'), 'sched-title',
+            <input id="sched-title" className={styles.input} placeholder={t('teacher.courseDetail.schedule.titlePlaceholder')} value={form.title} onChange={e => setForm(f => ({ ...f, title: e.target.value }))} required />
           )}
-          {field('Description', 'sched-desc',
-            <textarea id="sched-desc" className={styles.textarea} placeholder="Optional notes..." value={form.description} onChange={e => setForm(f => ({ ...f, description: e.target.value }))} />
+          {field(t('teacher.courseDetail.schedule.descriptionField'), 'sched-desc',
+            <textarea id="sched-desc" className={styles.textarea} placeholder={t('teacher.courseDetail.schedule.optionalNotes')} value={form.description} onChange={e => setForm(f => ({ ...f, description: e.target.value }))} />
           )}
-          {field('Date', 'sched-date',
+          {field(t('teacher.courseDetail.schedule.dateField'), 'sched-date',
             <input id="sched-date" className={styles.input} type="date" value={form.date} onChange={e => setForm(f => ({ ...f, date: e.target.value }))} required />
           )}
           <div className={styles.fieldRow2}>
             <div className={styles.formRow}>
-              <label className={styles.label} htmlFor="sched-start">Start Time</label>
+              <label className={styles.label} htmlFor="sched-start">{t('teacher.courseDetail.schedule.startTime')}</label>
               <input id="sched-start" className={styles.input} type="time" value={form.starts_at} onChange={e => setForm(f => ({ ...f, starts_at: e.target.value }))} required />
             </div>
             <div className={styles.formRow}>
-              <label className={styles.label} htmlFor="sched-end">End Time</label>
+              <label className={styles.label} htmlFor="sched-end">{t('teacher.courseDetail.schedule.endTime')}</label>
               <input id="sched-end" className={styles.input} type="time" value={form.ends_at} onChange={e => setForm(f => ({ ...f, ends_at: e.target.value }))} required />
             </div>
           </div>
-          {field('Type', 'sched-type',
+          {field(t('teacher.courseDetail.schedule.typeField'), 'sched-type',
             <select id="sched-type" className={styles.select} value={form.type} onChange={e => setForm(f => ({ ...f, type: e.target.value as typeof form.type }))}>
-              <option value="online">Online</option>
-              <option value="in_person">In Person</option>
-              <option value="recorded">Recorded</option>
+              <option value="online">{t('teacher.courseDetail.schedule.online')}</option>
+              <option value="in_person">{t('teacher.courseDetail.schedule.inPerson')}</option>
+              <option value="recorded">{t('teacher.courseDetail.schedule.recorded')}</option>
             </select>
           )}
           {jitsiUrl && (
             <div>
-              <div className={styles.label} style={{ marginBlockEnd: 6 }}>Jitsi Room (auto-generated)</div>
+              <div className={styles.label} style={{ marginBlockEnd: 6 }}>{t('teacher.courseDetail.schedule.jitsiRoomAutoGenerated')}</div>
               <div className={styles.jitsiPreview}>{jitsiUrl}</div>
             </div>
           )}
@@ -725,11 +729,13 @@ function ScheduleTab({ courseId }: { courseId: string }) {
 
 // ─── Main page ────────────────────────────────────────────────────────────────
 
-const TABS: { key: TabKey; label: string }[] = [
-  { key: 'lessons', label: 'Lessons' },
-  { key: 'students', label: 'Students' },
-  { key: 'schedule', label: 'Schedule' },
-]
+function getTabs(t: (key: string) => string): { key: TabKey; label: string }[] {
+  return [
+    { key: 'lessons',  label: t('teacher.courseDetail.tabs.lessons')  },
+    { key: 'students', label: t('teacher.courseDetail.tabs.students') },
+    { key: 'schedule', label: t('teacher.courseDetail.tabs.schedule') },
+  ]
+}
 
 function getCourseFromCache(qc: QueryClient, courseId: string): Course | undefined {
   const list = qc.getQueryData<Course[]>(['teacher-courses'])
@@ -737,21 +743,30 @@ function getCourseFromCache(qc: QueryClient, courseId: string): Course | undefin
 }
 
 export default function CourseDetail() {
+  const { t } = useTranslation()
   const { courseId = '' } = useParams<{ courseId: string }>()
   const qc = useQueryClient()
   const [activeTab, setActiveTab] = useState<TabKey>('lessons')
+  const TABS = getTabs(t)
 
-  const course = getCourseFromCache(qc, courseId)
+  const cached = getCourseFromCache(qc, courseId)
+  const { data: fetched, isLoading: courseLoading } = useQuery<Course>({
+    queryKey: ['teacher-course', courseId],
+    queryFn: () => api.get(`/teacher/courses/${courseId}`).then(r => (r.data.data ?? r.data) as Course),
+    enabled: !cached && !!courseId,
+    staleTime: 5 * 60 * 1000,
+  })
+  const course = cached ?? fetched
 
-  if (!course) return <HeaderSkeleton />
+  if (courseLoading || !course) return <HeaderSkeleton />
 
   const accentColor = course ? subjectColor(course.subject) : 'var(--color-blue)'
 
   return (
     <div className={styles.page}>
       <div className={styles.courseHeader}>
-        <Link to="/teacher/courses" className={styles.backLink} aria-label="Back to courses">
-          <BackIcon /> My Courses
+        <Link to="/teacher/courses" className={styles.backLink} aria-label={t('teacher.courseDetail.backToCourses')}>
+          <BackIcon /> {t('teacher.courseDetail.backToCourses')}
         </Link>
 
         {course && (
@@ -763,7 +778,7 @@ export default function CourseDetail() {
                 <div className={styles.headerMeta}>
                   <span className={`${styles.badge} ${styles.badgeGrade}`}>{str(course.grade_level)}</span>
                   <span className={`${styles.badge} ${styles.badgeSubject}`}>{str(course.subject)}</span>
-                  <span className={`${styles.badge} ${statusBadgeClass(course.status)}`}>{statusLabel(course.status)}</span>
+                  <span className={`${styles.badge} ${statusBadgeClass(course.status)}`}>{course.status === 'draft' ? t('common.draft') : course.status === 'active' ? t('common.active') : t('common.archived')}</span>
                   {course.teacher && (
                     <>
                       <div className={styles.metaDot} aria-hidden="true" />

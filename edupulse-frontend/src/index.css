@@ -122,6 +122,10 @@ body {
   font-family: var(--font-arabic);
 }
 
+[dir='rtl'] [data-rtl-flip] {
+  transform: scaleX(-1);
+}
+
 #root {
   min-height: 100svh;
 }

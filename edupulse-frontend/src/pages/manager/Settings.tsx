@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect, type KeyboardEvent } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import { useTranslation } from 'react-i18next'
 import api from '../../lib/axios'
 import styles from './Settings.module.css'
 
@@ -68,6 +69,7 @@ function Toggle({ checked, disabled, onChange, label }: {
 function DeleteConfirmRow({ name, onConfirm, onCancel }: {
   name: string; onConfirm: () => void; onCancel: () => void
 }) {
+  const { t } = useTranslation()
   const [busy, setBusy] = useState(false)
 
   const confirm = async () => {
@@ -79,15 +81,15 @@ function DeleteConfirmRow({ name, onConfirm, onCancel }: {
   return (
     <div className={styles.deleteRow}>
       <span className={styles.deleteMsg}>
-        Delete <strong>{name}</strong>?
+        {t('common.delete')} <strong>{name}</strong>?
       </span>
       <div className={styles.deleteRowActions}>
         <button type="button" className={styles.deleteConfirmBtn}
           onClick={confirm} disabled={busy}>
-          {busy ? 'Deleting…' : 'Delete'}
+          {busy ? t('manager.settings.deleting') : t('manager.settings.delete')}
         </button>
         <button type="button" className={styles.deleteCancelBtn}
-          onClick={onCancel} disabled={busy}>Cancel</button>
+          onClick={onCancel} disabled={busy}>{t('manager.settings.cancel')}</button>
       </div>
     </div>
   )
@@ -120,6 +122,7 @@ function AddGradeLevelRow({ onSave, onCancel }: {
   onSave: (p: { name: string; level: number; description: string }) => Promise<void>
   onCancel: () => void
 }) {
+  const { t } = useTranslation()
   const [name, setName]   = useState('')
   const [level, setLevel] = useState('')
   const [desc, setDesc]   = useState('')
@@ -162,31 +165,31 @@ function AddGradeLevelRow({ onSave, onCancel }: {
       {msg && <p className={styles.rowMsg} role="alert">{msg}</p>}
       <div className={styles.addFields}>
         <div className={`${styles.addGroup} ${styles.addGroupFlex}`}>
-          <input ref={nameRef} type="text" placeholder="Grade name"
+          <input ref={nameRef} type="text" placeholder={t('manager.settings.gradeName')}
             className={`${styles.addInput}${errs.name ? ' ' + styles.inputErr : ''}`}
             value={name} onChange={e => { setName(e.target.value); setErrs(v => ({ ...v, name: '' })) }}
             onKeyDown={onKey} disabled={busy} />
           {errs.name && <span className={styles.fieldErr}>{errs.name}</span>}
         </div>
         <div className={styles.addGroup} style={{ width: 90 }}>
-          <input type="number" placeholder="Level" min={1} max={20}
+          <input type="number" placeholder={t('manager.settings.level')} min={1} max={20}
             className={`${styles.addInput}${errs.level ? ' ' + styles.inputErr : ''}`}
             value={level} onChange={e => { setLevel(e.target.value); setErrs(v => ({ ...v, level: '' })) }}
             onKeyDown={onKey} disabled={busy} />
           {errs.level && <span className={styles.fieldErr}>{errs.level}</span>}
         </div>
         <div className={`${styles.addGroup} ${styles.addGroupFlex} ${styles.addGroupDesc}`}>
-          <input type="text" placeholder="Description (optional)"
+          <input type="text" placeholder={t('manager.settings.descriptionOptional')}
             className={styles.addInput}
             value={desc} onChange={e => setDesc(e.target.value)}
             onKeyDown={onKey} disabled={busy} />
         </div>
         <div className={styles.addRowBtns}>
           <button type="button" className={styles.saveBtn} onClick={submit} disabled={busy}>
-            {busy ? 'Saving…' : 'Save'}
+            {busy ? t('manager.settings.saving') : t('manager.settings.save')}
           </button>
           <button type="button" className={styles.cancelBtn} onClick={onCancel} disabled={busy}>
-            Cancel
+            {t('manager.settings.cancel')}
           </button>
         </div>
       </div>
@@ -199,6 +202,7 @@ function EditGradeLevelRow({ item, onSave, onCancel }: {
   onSave: (p: Partial<GradeLevel>) => Promise<void>
   onCancel: () => void
 }) {
+  const { t } = useTranslation()
   const [name, setName]   = useState(item.name)
   const [level, setLevel] = useState(String(item.level))
   const [desc, setDesc]   = useState(item.description ?? '')
@@ -254,17 +258,17 @@ function EditGradeLevelRow({ item, onSave, onCancel }: {
           {errs.level && <span className={styles.fieldErr}>{errs.level}</span>}
         </div>
         <div className={`${styles.addGroup} ${styles.addGroupFlex} ${styles.addGroupDesc}`}>
-          <input type="text" placeholder="Description (optional)"
+          <input type="text" placeholder={t('manager.settings.descriptionOptional')}
             className={styles.addInput} value={desc}
             onChange={e => setDesc(e.target.value)}
             onKeyDown={onKey} disabled={busy} />
         </div>
         <div className={styles.addRowBtns}>
           <button type="button" className={styles.saveBtn} onClick={submit} disabled={busy}>
-            {busy ? 'Saving…' : 'Save'}
+            {busy ? t('manager.settings.saving') : t('manager.settings.save')}
           </button>
           <button type="button" className={styles.cancelBtn} onClick={onCancel} disabled={busy}>
-            Cancel
+            {t('manager.settings.cancel')}
           </button>
         </div>
       </div>
@@ -319,6 +323,7 @@ function GradeLevelItem({ item, isToggling, deleteError, onEdit, onDelete, onTog
 }
 
 function GradeLevelsSection() {
+  const { t } = useTranslation()
   const qc = useQueryClient()
   const [isAdding, setIsAdding]   = useState(false)
   const [editId, setEditId]       = useState<number | null>(null)
@@ -374,7 +379,7 @@ function GradeLevelsSection() {
     <section className={styles.section}>
       <div className={styles.sectionHead}>
         <div className={styles.sectionHeadLeft}>
-          <h2 className={styles.sectionTitle}>Grade Levels</h2>
+          <h2 className={styles.sectionTitle}>{t('manager.settings.gradeLevels')}</h2>
           {!isLoading && !isError && (
             <span className={styles.countBadge}>{items.length}</span>
           )}
@@ -384,7 +389,7 @@ function GradeLevelsSection() {
           <svg width="11" height="11" viewBox="0 0 11 11" fill="none">
             <path d="M5.5 1v9M1 5.5h9" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round"/>
           </svg>
-          Add
+          {t('manager.settings.add')}
         </button>
       </div>
 
@@ -393,9 +398,9 @@ function GradeLevelsSection() {
 
         {isError && (
           <div className={styles.sectionError}>
-            Failed to load grade levels.
+            {t('manager.settings.failedLoadGradeLevels')}
             <button type="button" className={styles.retryLink} onClick={() => refetch()}>
-              Try again
+              {t('manager.settings.tryAgain')}
             </button>
           </div>
         )}
@@ -411,12 +416,12 @@ function GradeLevelsSection() {
 
             {items.length === 0 && !isAdding && (
               <div className={styles.emptyState}>
-                <p className={styles.emptyTitle}>No grade levels yet</p>
+                <p className={styles.emptyTitle}>{t('manager.settings.noGradeLevels')}</p>
                 <p className={styles.emptyHint}>
-                  Grade levels group students by year or class. You need at least one before students can enroll.
+                  {t('manager.settings.noGradeLevelsHint')}
                 </p>
                 <button type="button" className={styles.emptyCta} onClick={openAdd}>
-                  Add first grade level
+                  {t('manager.settings.addFirstGradeLevel')}
                 </button>
               </div>
             )}
@@ -457,6 +462,7 @@ function AddSubjectRow({ onSave, onCancel }: {
   onSave: (p: { name: string; description: string }) => Promise<void>
   onCancel: () => void
 }) {
+  const { t } = useTranslation()
   const [name, setName] = useState('')
   const [desc, setDesc] = useState('')
   const [errs, setErrs] = useState<FErr>({})
@@ -495,24 +501,24 @@ function AddSubjectRow({ onSave, onCancel }: {
       {msg && <p className={styles.rowMsg} role="alert">{msg}</p>}
       <div className={styles.addFields}>
         <div className={`${styles.addGroup} ${styles.addGroupFlex}`}>
-          <input ref={nameRef} type="text" placeholder="Subject name"
+          <input ref={nameRef} type="text" placeholder={t('manager.settings.subjectName')}
             className={`${styles.addInput}${errs.name ? ' ' + styles.inputErr : ''}`}
             value={name} onChange={e => { setName(e.target.value); setErrs(v => ({ ...v, name: '' })) }}
             onKeyDown={onKey} disabled={busy} />
           {errs.name && <span className={styles.fieldErr}>{errs.name}</span>}
         </div>
         <div className={`${styles.addGroup} ${styles.addGroupFlex} ${styles.addGroupDesc}`}>
-          <input type="text" placeholder="Description (optional)"
+          <input type="text" placeholder={t('manager.settings.descriptionOptional')}
             className={styles.addInput} value={desc}
             onChange={e => setDesc(e.target.value)}
             onKeyDown={onKey} disabled={busy} />
         </div>
         <div className={styles.addRowBtns}>
           <button type="button" className={styles.saveBtn} onClick={submit} disabled={busy}>
-            {busy ? 'Saving…' : 'Save'}
+            {busy ? t('manager.settings.saving') : t('manager.settings.save')}
           </button>
           <button type="button" className={styles.cancelBtn} onClick={onCancel} disabled={busy}>
-            Cancel
+            {t('manager.settings.cancel')}
           </button>
         </div>
       </div>
@@ -525,6 +531,7 @@ function EditSubjectRow({ item, onSave, onCancel }: {
   onSave: (p: Partial<Subject>) => Promise<void>
   onCancel: () => void
 }) {
+  const { t } = useTranslation()
   const [name, setName] = useState(item.name)
   const [desc, setDesc] = useState(item.description ?? '')
   const [errs, setErrs] = useState<FErr>({})
@@ -570,17 +577,17 @@ function EditSubjectRow({ item, onSave, onCancel }: {
           {errs.name && <span className={styles.fieldErr}>{errs.name}</span>}
         </div>
         <div className={`${styles.addGroup} ${styles.addGroupFlex} ${styles.addGroupDesc}`}>
-          <input type="text" placeholder="Description (optional)"
+          <input type="text" placeholder={t('manager.settings.descriptionOptional')}
             className={styles.addInput} value={desc}
             onChange={e => setDesc(e.target.value)}
             onKeyDown={onKey} disabled={busy} />
         </div>
         <div className={styles.addRowBtns}>
           <button type="button" className={styles.saveBtn} onClick={submit} disabled={busy}>
-            {busy ? 'Saving…' : 'Save'}
+            {busy ? t('manager.settings.saving') : t('manager.settings.save')}
           </button>
           <button type="button" className={styles.cancelBtn} onClick={onCancel} disabled={busy}>
-            Cancel
+            {t('manager.settings.cancel')}
           </button>
         </div>
       </div>
@@ -636,6 +643,7 @@ function SubjectItem({ item, isToggling, deleteError, onEdit, onDelete, onToggle
 }
 
 function SubjectsSection() {
+  const { t } = useTranslation()
   const qc = useQueryClient()
   const [isAdding, setIsAdding]    = useState(false)
   const [editId, setEditId]        = useState<number | null>(null)
@@ -691,7 +699,7 @@ function SubjectsSection() {
     <section className={styles.section}>
       <div className={styles.sectionHead}>
         <div className={styles.sectionHeadLeft}>
-          <h2 className={styles.sectionTitle}>Subjects</h2>
+          <h2 className={styles.sectionTitle}>{t('manager.settings.subjects')}</h2>
           {!isLoading && !isError && (
             <span className={styles.countBadge}>{items.length}</span>
           )}
@@ -701,7 +709,7 @@ function SubjectsSection() {
           <svg width="11" height="11" viewBox="0 0 11 11" fill="none">
             <path d="M5.5 1v9M1 5.5h9" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round"/>
           </svg>
-          Add
+          {t('manager.settings.add')}
         </button>
       </div>
 
@@ -710,9 +718,9 @@ function SubjectsSection() {
 
         {isError && (
           <div className={styles.sectionError}>
-            Failed to load subjects.
+            {t('manager.settings.failedLoadSubjects')}
             <button type="button" className={styles.retryLink} onClick={() => refetch()}>
-              Try again
+              {t('manager.settings.tryAgain')}
             </button>
           </div>
         )}
@@ -728,12 +736,12 @@ function SubjectsSection() {
 
             {items.length === 0 && !isAdding && (
               <div className={styles.emptyState}>
-                <p className={styles.emptyTitle}>No subjects yet</p>
+                <p className={styles.emptyTitle}>{t('manager.settings.noSubjects')}</p>
                 <p className={styles.emptyHint}>
-                  Subjects define what courses students can enroll in. Add a few to get started.
+                  {t('manager.settings.noSubjectsHint')}
                 </p>
                 <button type="button" className={styles.emptyCta} onClick={openAdd}>
-                  Add first subject
+                  {t('manager.settings.addFirstSubject')}
                 </button>
               </div>
             )}
@@ -769,12 +777,13 @@ function SubjectsSection() {
 // ─── SettingsPage ─────────────────────────────────────────────────────────────
 
 export default function SettingsPage() {
+  const { t } = useTranslation()
   return (
     <div className={styles.page}>
       <div className={styles.pageHead}>
-        <h1 className={styles.pageTitle}>Settings</h1>
+        <h1 className={styles.pageTitle}>{t('manager.settings.title')}</h1>
         <p className={styles.pageSubtitle}>
-          Configure grade levels and subjects used across your school.
+          {t('manager.settings.subtitle')}
         </p>
       </div>
       <div className={styles.sections}>
