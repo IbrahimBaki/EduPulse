@@ -1,4 +1,4 @@
-import { useState, useCallback, useRef } from 'react'
+import { useState, useEffect, useCallback, useRef } from 'react'
 import { useParams, Link } from 'react-router-dom'
 import { useQuery, useMutation, useQueryClient, type QueryClient } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
@@ -251,6 +251,72 @@ function HeaderSkeleton() {
   )
 }
 
+// ─── PDF Viewer icons ─────────────────────────────────────────────────────────
+
+function CloseIcon() {
+  return (
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+    </svg>
+  )
+}
+
+function FileIcon() {
+  return (
+    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/>
+    </svg>
+  )
+}
+
+// ─── PDF Viewer modal ─────────────────────────────────────────────────────────
+
+function PdfViewer({ courseId, lessonId, title, onClose }: { courseId: string; lessonId: number; title: string; onClose: () => void }) {
+  const [blobUrl, setBlobUrl] = useState<string | null>(null)
+  const [error, setError]     = useState(false)
+  const urlRef = useRef<string | null>(null)
+
+  useEffect(() => {
+    api.get(`/teacher/courses/${courseId}/lessons/${lessonId}/pdf`, { responseType: 'blob' })
+      .then(res => {
+        const url = URL.createObjectURL(new Blob([res.data], { type: 'application/pdf' }))
+        urlRef.current = url
+        setBlobUrl(url)
+      })
+      .catch(() => setError(true))
+
+    return () => { if (urlRef.current) URL.revokeObjectURL(urlRef.current) }
+  }, [courseId, lessonId])
+
+  return (
+    <div className={styles.pdfOverlay} onClick={onClose}>
+      <div className={styles.pdfModal} onClick={e => e.stopPropagation()}>
+        <div className={styles.pdfHeader}>
+          <span className={styles.pdfTitle}>{title}</span>
+          <button type="button" className={styles.pdfCloseBtn} onClick={onClose} aria-label="Close PDF viewer"><CloseIcon /></button>
+        </div>
+        <div className={styles.pdfBody}>
+          {error ? (
+            <p className={styles.pdfError}>Failed to load PDF. Please try again.</p>
+          ) : !blobUrl ? (
+            <div className={styles.pdfLoading}>
+              <span className={styles.pdfSpinner} />
+              <p>Loading PDF…</p>
+            </div>
+          ) : (
+            <iframe
+              src={blobUrl}
+              title={title}
+              className={styles.pdfFrame}
+              aria-label={`PDF: ${title}`}
+            />
+          )}
+        </div>
+      </div>
+    </div>
+  )
+}
+
 // ─── Lessons tab ──────────────────────────────────────────────────────────────
 
 function LessonsTab({ courseId }: { courseId: string }) {
@@ -262,6 +328,7 @@ function LessonsTab({ courseId }: { courseId: string }) {
   const [pendingLessonId, setPendingLessonId] = useState<number | null>(null)
   const [queuedIds, setQueuedIds]             = useState<Set<number>>(new Set())
   const [uploadError, setUploadError]         = useState<string | null>(null)
+  const [pdfLesson, setPdfLesson]             = useState<{ id: number; title: string } | null>(null)
 
   const { data: lessons = [], isLoading, isError, refetch } = useQuery<Lesson[]>({
     queryKey: ['teacher-lessons', courseId],
@@ -390,6 +457,14 @@ if (isLoading) {
         </div>
       ) : (
         <>
+          {pdfLesson && (
+            <PdfViewer
+              courseId={courseId}
+              lessonId={pdfLesson.id}
+              title={pdfLesson.title}
+              onClose={() => setPdfLesson(null)}
+            />
+          )}
           <ol className={styles.lessonsList} aria-label="Lessons">
             {lessons.map((lesson, idx) => (
               <li key={lesson.id} className={styles.lessonRow}>
@@ -413,6 +488,17 @@ if (isLoading) {
                   )}
                 </div>
                 <div className={styles.lessonActions}>
+                  {lesson.pdf_processed && (
+                    <button
+                      type="button"
+                      className={styles.pdfBtn}
+                      onClick={() => setPdfLesson({ id: lesson.id, title: lesson.title })}
+                      aria-label={`View PDF for ${lesson.title}`}
+                      title="View PDF"
+                    >
+                      <FileIcon /> View PDF
+                    </button>
+                  )}
                   <button
                     type="button"
                     className={`${styles.uploadPdfBtn} ${lesson.pdf_processed ? styles.uploadPdfBtnDone : ''}`}

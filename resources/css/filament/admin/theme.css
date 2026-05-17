@@ -790,7 +790,7 @@ body {
     outline-offset: 2px !important;
 }
 
-/* ── Topbar theme + lang toggle ──────────────────────────────── */
+/* ── Topbar theme toggle ──────────────────────────────── */
 
 .ep-tlt {
     display: flex;
@@ -798,19 +798,14 @@ body {
     gap: 0.25rem;
 }
 
-/* ── RTL adjustments ─────────────────────────────────────────── */
-
-[dir='rtl'] .fi-sidebar-group-label {
-    letter-spacing: 0;
-}
-
-[dir='rtl'] .fi-topbar-breadcrumbs {
-    direction: rtl;
-}
-
 /* ── Dark mode specific overrides for Filament's own theming ─── */
 
-html.dark .fi-color-custom {
+html.dark .fi-cohtml:not(.dark) .fi-color-custom {
+    --c-50: var(--ep-surface);
+    --c-400: var(--ep-accent-dim);
+    --c-600: var(--ep-accent);
+}
+html:not(.dark) .fi-color-custom {
     --c-50: var(--ep-surface);
     --c-400: var(--ep-accent-dim);
     --c-600: var(--ep-accent);

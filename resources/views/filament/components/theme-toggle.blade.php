@@ -2,10 +2,8 @@
     class="ep-theme-toggle"
     x-data="{
         theme: localStorage.getItem('ep-theme') || 'dark',
-        lang: localStorage.getItem('ep-lang') || document.documentElement.lang || 'en',
         init() {
             this.applyTheme(this.theme);
-            this.applyLang(this.lang);
         },
         applyTheme(t) {
             document.documentElement.classList.toggle('dark', t === 'dark');
@@ -13,17 +11,8 @@
             localStorage.setItem('ep-theme', t);
             this.theme = t;
         },
-        applyLang(l) {
-            document.documentElement.lang = l;
-            document.documentElement.dir = l === 'ar' ? 'rtl' : 'ltr';
-            localStorage.setItem('ep-lang', l);
-            this.lang = l;
-        },
         toggleTheme() {
             this.applyTheme(this.theme === 'dark' ? 'light' : 'dark');
-        },
-        toggleLang() {
-            this.applyLang(this.lang === 'en' ? 'ar' : 'en');
         }
     }"
 >
@@ -55,16 +44,5 @@
                 <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
             </svg>
         </template>
-    </button>
-
-    {{-- Language toggle --}}
-    <button
-        type="button"
-        class="ep-theme-toggle-btn ep-lang-btn"
-        @click="toggleLang()"
-        :title="lang === 'en' ? 'Switch to Arabic' : 'Switch to English'"
-        :aria-label="lang === 'en' ? 'Switch to Arabic' : 'Switch to English'"
-    >
-        <span x-text="lang === 'en' ? 'ع' : 'EN'"></span>
     </button>
 </div>

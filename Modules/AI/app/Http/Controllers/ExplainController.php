@@ -27,8 +27,9 @@ class ExplainController extends Controller
         // Chunks are not needed here — PDF is sent directly or no content is attached
         $systemPrompt = app(SystemPromptBuilder::class)->build($student->id);
 
-        $session = isset($data['session_id'])
-            ? ChatSession::findOrFail($data['session_id'])
+        $isNew = !isset($data['session_id']);
+        $session = !$isNew
+            ? ChatSession::where('student_id', $student->id)->findOrFail($data['session_id'])
             : ChatSession::create([
                 'student_id' => $student->id,
                 'lesson_id'  => $data['lesson_id'] ?? null,
@@ -63,10 +64,14 @@ class ExplainController extends Controller
             }
         }
 
-        $gemini = app(GeminiService::class);
-        $reply  = $pdfPath
-            ? $gemini->chatWithPdf($systemPrompt, $history, $pdfPath)
-            : $gemini->chat($systemPrompt, $history);
+        try {
+            $gemini = app(GeminiService::class);
+            $reply  = $pdfPath
+                ? $gemini->chatWithPdf($systemPrompt, $history, $pdfPath)
+                : $gemini->chat($systemPrompt, $history);
+        } catch (\RuntimeException $e) {
+            return $this->ReturnFailed($e->getMessage(), 502);
+        }
 
         ChatMessage::create([
             'session_id' => $session->id,
@@ -75,8 +80,10 @@ class ExplainController extends Controller
         ]);
 
         return $this->ReturnSuccess([
-            'session_id' => $session->id,
-            'reply'      => $reply,
+            'session_id'     => $session->id,
+            'session_title'  => $session->topic,
+            'is_new_session' => $isNew,
+            'reply'          => $reply,
         ], 'Explanation generated');
     }
 }

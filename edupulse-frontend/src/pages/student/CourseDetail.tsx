@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
@@ -193,7 +193,7 @@ function PdfViewer({ lessonId, title, onClose }: { lessonId: number; title: stri
   const [error, setError]     = useState(false)
   const urlRef = useRef<string | null>(null)
 
-  useState(() => {
+  useEffect(() => {
     api.get(`/student/lessons/${lessonId}/pdf`, { responseType: 'blob' })
       .then(res => {
         const url = URL.createObjectURL(new Blob([res.data], { type: 'application/pdf' }))
@@ -203,7 +203,7 @@ function PdfViewer({ lessonId, title, onClose }: { lessonId: number; title: stri
       .catch(() => setError(true))
 
     return () => { if (urlRef.current) URL.revokeObjectURL(urlRef.current) }
-  })
+  }, [lessonId])
 
   return (
     <div className={styles.pdfOverlay} onClick={onClose}>

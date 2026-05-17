@@ -4,8 +4,12 @@ import { useQuery, useMutation } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
 import { motion, AnimatePresence } from 'framer-motion'
 import DOMPurify from 'dompurify'
+import { marked } from 'marked'
+import mermaid from 'mermaid'
 import api from '../../lib/axios'
 import styles from './AiTutor.module.css'
+
+mermaid.initialize({ startOnLoad: false, theme: 'neutral', securityLevel: 'loose' })
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -18,6 +22,7 @@ interface Message {
 interface ChatSession {
   id: number
   topic: string
+  lesson_id?: number
   lesson_name?: string
   created_at: string
   messages?: Message[]
@@ -26,6 +31,10 @@ interface ChatSession {
 interface WeakTopic {
   topic: string
   score: number
+  max_score?: number
+  attempts?: number
+  source?: string
+  last_attempted_at?: string
 }
 
 interface QuizQuestion {
@@ -80,20 +89,20 @@ function formatDate(iso: string): string {
   return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
 }
 
-// ─── Basic markdown renderer ──────────────────────────────────────────────────
+// ─── Markdown renderer (marked + DOMPurify, with mermaid passthrough) ────────
+
+marked.setOptions({ breaks: true, gfm: true })
 
 function renderMarkdown(text: string): string {
-  return text
-    .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
-    .replace(/```([\s\S]*?)```/g, '<pre><code>$1</code></pre>')
-    .replace(/`([^`]+)`/g, '<code>$1</code>')
-    .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
-    .replace(/\*(.+?)\*/g, '<em>$1</em>')
-    .replace(/^- (.+)/gm, '<li>$1</li>')
-    .replace(/(<li>[\s\S]+<\/li>)/g, '<ul>$1</ul>')
-    .replace(/\n\n/g, '</p><p>')
-    .replace(/\n/g, '<br>')
-    .replace(/^(?!<)(.+)$/gm, (m, p1) => p1 ? `<p>${p1}</p>` : m)
+  // Replace ```mermaid blocks with a placeholder div so DOMPurify won't strip them.
+  // mermaid.run() will pick them up by class after render.
+  const withMermaid = text.replace(
+    /```mermaid\n?([\s\S]*?)```/g,
+    (_match, code) =>
+      `<div class="mermaid">${code.trim()}</div>`,
+  )
+  const html = marked.parse(withMermaid) as string
+  return DOMPurify.sanitize(html, { ADD_TAGS: ['div'], ADD_ATTR: ['class'] })
 }
 
 // ─── Typing indicator ─────────────────────────────────────────────────────────
@@ -497,6 +506,7 @@ export default function StudentAiTutor() {
   const [messages, setMessages] = useState<Message[]>([])
   const [input, setInput] = useState('')
   const [currentTopic, setCurrentTopic] = useState(initLesson ?? '')
+  const [currentLesson, setCurrentLesson] = useState(initLesson ?? '')
   const [lessonId, setLessonId] = useState<number | undefined>(initLessonId)
   const [sessionId, setSessionId] = useState<number | undefined>(undefined)
   const [isLoading, setIsLoading] = useState(false)
@@ -540,9 +550,17 @@ export default function StudentAiTutor() {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
   }, [messages, isLoading])
 
+  useEffect(() => {
+    const diagrams = document.querySelectorAll('.mermaid:not([data-processed])')
+    if (diagrams.length > 0) {
+      mermaid.run({ nodes: diagrams as NodeListOf<HTMLElement> }).catch(() => {/* ignore render errors */})
+    }
+  }, [messages])
+
   const startNewSession = () => {
     setMessages([])
     setCurrentTopic('')
+    setCurrentLesson('')
     setLessonId(undefined)
     setSessionId(undefined)
     setSelectedCourse(null)
@@ -554,6 +572,8 @@ export default function StudentAiTutor() {
   const loadSession = (session: ChatSession) => {
     setCurrentTopic(session.topic)
     setSessionId(session.id)
+    setLessonId(session.lesson_id || undefined)
+    setCurrentLesson(session.lesson_name || '')
     const msgs: Message[] = Array.isArray(session.messages)
       ? session.messages.map(m => ({ ...m, id: String(m.id ?? uid()) }))
       : []
@@ -610,12 +630,10 @@ export default function StudentAiTutor() {
   }
 
   const startTopicChat = (topic: string) => {
-    setMessages([{
-      id: uid(),
-      role: 'assistant',
-      content: `Let's work on **${topic}**. What would you like to understand better?`
-    }])
+    setMessages([])
     setCurrentTopic(topic)
+    setCurrentLesson('')
+    setLessonId(undefined)
     setSessionId(undefined)
     setInput('')
     setSelectionPhase('chat')
@@ -657,16 +675,16 @@ export default function StudentAiTutor() {
           <section className={styles.weakSection}>
             <h3 className={styles.sidebarLabel}>{t('student.aiTutor.weakTopics')}</h3>
             <div className={styles.weakList}>
-              {weakTopics.map(t => (
+              {weakTopics.map(wt => (
                 <button
-                  key={t.topic}
+                  key={wt.topic}
                   type="button"
                   className={styles.weakPill}
-                  onClick={() => startTopicChat(t.topic)}
-                  style={{ borderColor: `${weakScore(t.score)}30`, color: weakScore(t.score) }}
+                  onClick={() => startTopicChat(wt.topic)}
+                  style={{ borderColor: `${weakScore(wt.score)}30`, color: weakScore(wt.score) }}
                 >
-                  <span className={styles.weakName}>{t.topic}</span>
-                  <span className={styles.weakScore}>{t.score}%</span>
+                  <span className={styles.weakName}>{wt.topic}</span>
+                  <span className={styles.weakScore}>{wt.score}%</span>
                 </button>
               ))}
             </div>
@@ -697,8 +715,8 @@ export default function StudentAiTutor() {
             ) : (
               <span className={styles.topBarTitle}>{t('student.aiTutor.title')}</span>
             )}
-            {lessonId && initLesson && (
-              <span className={styles.lessonChip}>{initLesson}</span>
+            {lessonId && currentLesson && (
+              <span className={styles.lessonChip}>{currentLesson}</span>
             )}
           </div>
           <button
@@ -725,7 +743,7 @@ export default function StudentAiTutor() {
             lessons={courseLessons}
             loading={lessonsLoading}
             onBack={() => setSelectionPhase('course')}
-            onSelect={lesson => { setLessonId(lesson.id); setCurrentTopic(lesson.title); setSelectionPhase('chat') }}
+            onSelect={lesson => { setLessonId(lesson.id); setCurrentTopic(lesson.title); setCurrentLesson(lesson.title); setSelectionPhase('chat') }}
           />
         )}
 
@@ -744,14 +762,14 @@ export default function StudentAiTutor() {
                 <div className={styles.welcomeTopics}>
                   <p className={styles.welcomeTopicsLabel}>{t('student.aiTutor.yourWeakTopics')}</p>
                   <div className={styles.welcomeTopicPills}>
-                    {weakTopics.slice(0, 4).map(t => (
+                    {weakTopics.slice(0, 4).map(wt => (
                       <button
-                        key={t.topic}
+                        key={wt.topic}
                         type="button"
                         className={styles.welcomeTopicBtn}
-                        onClick={() => startTopicChat(t.topic)}
+                        onClick={() => startTopicChat(wt.topic)}
                       >
-                        {t.topic}
+                        {wt.topic}
                       </button>
                     ))}
                   </div>
@@ -779,7 +797,8 @@ export default function StudentAiTutor() {
                     ) : (
                       <div
                         className={styles.aiBubble}
-                        dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(renderMarkdown(m.content)) }}
+                        dir="auto"
+                        dangerouslySetInnerHTML={{ __html: renderMarkdown(m.content) }}
                       />
                     )}
                   </motion.div>

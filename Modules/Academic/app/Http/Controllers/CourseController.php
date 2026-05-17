@@ -95,10 +95,29 @@ class CourseController extends Controller
     public function myCourses()
     {
         $courses = Course::where('teacher_id', auth()->id())
-            ->with('subject', 'gradeLevel')
+            ->with('subject', 'gradeLevel', 'teacher')
+            ->withCount([
+                'enrollments as enrolled_count',
+                'lessons as lessons_count',
+                'lessons as published_lessons_count' => fn($q) => $q->where('is_published', true),
+            ])
             ->paginate(15);
 
         return $this->ReturnSuccess($courses, 'My courses retrieved');
+    }
+
+    public function myCourseDetail($id)
+    {
+        $course = Course::where('teacher_id', auth()->id())
+            ->with('subject', 'gradeLevel', 'teacher')
+            ->withCount([
+                'enrollments as enrolled_count',
+                'lessons as lessons_count',
+                'lessons as published_lessons_count' => fn($q) => $q->where('is_published', true),
+            ])
+            ->findOrFail($id);
+
+        return $this->ReturnSuccess($course, 'Course retrieved');
     }
 
     public function students($id)
@@ -131,6 +150,34 @@ class CourseController extends Controller
         });
 
         return $this->ReturnSuccess($data, 'Students retrieved');
+    }
+
+    public function allStudents()
+    {
+        $teacherCourseIds = Course::where('teacher_id', auth()->id())->pluck('id');
+
+        if ($courseId = request('course_id')) {
+            if (!$teacherCourseIds->contains((int) $courseId)) {
+                return $this->ReturnFailed('Unauthorized', 403);
+            }
+            $teacherCourseIds = collect([(int) $courseId]);
+        }
+
+        $enrollments = \Modules\Academic\Models\Enrollment::whereIn('course_id', $teacherCourseIds)
+            ->with(['student.studentProfile', 'course:id,name'])
+            ->get();
+
+        $students = $enrollments->groupBy('student_id')->map(function ($grouped) {
+            $student = $grouped->first()->student;
+            $data = $student->toArray();
+            $data['enrolled_courses'] = $grouped->map(fn($e) => [
+                'id'   => $e->course->id,
+                'name' => $e->course->name,
+            ])->values();
+            return $data;
+        })->values();
+
+        return $this->ReturnSuccess($students, 'Students retrieved');
     }
 
     public function enrolledCourses()

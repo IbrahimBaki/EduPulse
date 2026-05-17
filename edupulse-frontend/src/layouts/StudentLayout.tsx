@@ -78,6 +78,15 @@ function CreditCardIcon() {
   )
 }
 
+function ClipboardIcon() {
+  return (
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/>
+      <rect x="8" y="2" width="8" height="4" rx="1" ry="1"/>
+    </svg>
+  )
+}
+
 function BellIcon() {
   return (
     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
@@ -105,6 +114,7 @@ const NAV_ITEMS: NavItem[] = [
   { to: '/student/dashboard',     tKey: 'nav.dashboard',     Icon: HomeIcon },
   { to: '/student/courses',       tKey: 'nav.courses',       Icon: BookOpenIcon },
   { to: '/student/ai-tutor',      tKey: 'nav.aiTutor',       Icon: SparklesIcon },
+  { to: '/student/exams',         tKey: 'nav.exams',         Icon: ClipboardIcon },
   { to: '/student/schedule',      tKey: 'nav.schedule',      Icon: CalendarIcon },
   { to: '/student/announcements', tKey: 'nav.announcements', Icon: FileTextIcon, notif: true },
   { to: '/student/fees',          tKey: 'nav.fees',          Icon: CreditCardIcon },

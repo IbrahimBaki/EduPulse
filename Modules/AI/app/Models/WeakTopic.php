@@ -13,7 +13,7 @@ class WeakTopic extends Model
 
     protected $fillable = [
         'tenant_id', 'student_id', 'topic',
-        'score', 'attempts', 'source', 'last_attempted_at',
+        'score', 'max_score', 'attempts', 'source', 'last_attempted_at',
     ];
 
     protected $casts = ['last_attempted_at' => 'datetime'];

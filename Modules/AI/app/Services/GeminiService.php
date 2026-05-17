@@ -31,7 +31,16 @@ class GeminiService
                 'generationConfig'   => ['temperature' => 0.7, 'maxOutputTokens' => 2048],
             ]);
 
-        return $response->json('candidates.0.content.parts.0.text', '');
+        if (!$response->successful()) {
+            throw new \RuntimeException('Gemini API error: ' . $response->status());
+        }
+
+        $text = $response->json('candidates.0.content.parts.0.text', '');
+        if ($text === '') {
+            throw new \RuntimeException('Gemini returned an empty response.');
+        }
+
+        return $text;
     }
 
     public function chatWithPdf(string $systemPrompt, array $messages, string $pdfPath): string
@@ -74,7 +83,16 @@ class GeminiService
                 'generationConfig'   => ['temperature' => 0.7, 'maxOutputTokens' => 2048],
             ]);
 
-        return $response->json('candidates.0.content.parts.0.text', '');
+        if (!$response->successful()) {
+            throw new \RuntimeException('Gemini API error: ' . $response->status());
+        }
+
+        $text = $response->json('candidates.0.content.parts.0.text', '');
+        if ($text === '') {
+            throw new \RuntimeException('Gemini returned an empty response.');
+        }
+
+        return $text;
     }
 
     public function generateQuiz(string $systemPrompt, string $topic, int $level): array
@@ -119,5 +137,32 @@ class GeminiService
         $clean = trim(preg_replace('/^```(?:json)?\s*|\s*```$/m', '', $raw));
 
         return json_decode($clean, true) ?? [];
+    }
+
+    public function generateExamFromPdfs(string $prompt, array $pdfPaths): string
+    {
+        $parts = [];
+
+        foreach ($pdfPaths as $path) {
+            if (file_exists($path)) {
+                $parts[] = [
+                    'inline_data' => [
+                        'mime_type' => 'application/pdf',
+                        'data'      => base64_encode(file_get_contents($path)),
+                    ],
+                ];
+            }
+        }
+
+        $parts[] = ['text' => $prompt];
+
+        $response = Http::timeout(120)
+            ->withQueryParameters(['key' => $this->key])
+            ->post($this->url, [
+                'contents'        => [['role' => 'user', 'parts' => $parts]],
+                'generationConfig' => ['temperature' => 0.4, 'maxOutputTokens' => 8192],
+            ]);
+
+        return $response->json('candidates.0.content.parts.0.text', '');
     }
 }

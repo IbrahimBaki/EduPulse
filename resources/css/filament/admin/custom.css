@@ -183,16 +183,12 @@ body {
     color: var(--ep-text);
 }
 
-/* Active item — inline-start border via box-shadow (RTL-safe) */
+/* Active item — inline-start border via box-shadow */
 .fi-sidebar-item.fi-active .fi-sidebar-item-button {
     @apply font-semibold;
     background-color: var(--ep-accent-dim);
     color: var(--ep-text);
     box-shadow: inset 3px 0 0 var(--ep-accent);
-}
-
-[dir="rtl"] .fi-sidebar-item.fi-active .fi-sidebar-item-button {
-    box-shadow: inset -3px 0 0 var(--ep-accent);
 }
 
 .fi-sidebar-item.fi-active .fi-sidebar-item-icon {
@@ -495,15 +491,18 @@ body {
 }
 
 .fi-badge-color-success {
-    @apply bg-green-500/15 text-green-500;
+    background-color: oklch(68% 0.18 145 / 0.15);
+    color: var(--ep-success);
 }
 
 .fi-badge-color-warning {
-    @apply bg-amber-500/15 text-amber-500;
+    background-color: oklch(78% 0.18 80 / 0.15);
+    color: var(--ep-warning);
 }
 
 .fi-badge-color-danger {
-    @apply bg-red-500/15 text-red-500;
+    background-color: oklch(62% 0.22 27 / 0.15);
+    color: var(--ep-danger);
 }
 
 .fi-badge-color-gray {
@@ -641,4 +640,180 @@ body {
 
 ::-webkit-scrollbar-thumb:hover {
     background: var(--ep-muted);
+}
+
+/* ── Table — first cell ───────────────────────────────────── */
+
+.fi-ta-cell:first-child {
+    @apply font-medium;
+    color: var(--ep-text);
+}
+
+/* ── Table filters ────────────────────────────────────────── */
+
+.fi-ta-filters {
+    @apply px-4 py-3 border-b;
+    background-color: var(--ep-surface);
+    border-bottom-color: var(--ep-border);
+}
+
+/* ── Form section card ────────────────────────────────────── */
+
+.fi-fo-section {
+    @apply rounded-xl border;
+    background-color: var(--ep-surface);
+    border-color: var(--ep-border);
+}
+
+/* ── Modal footer + close button ─────────────────────────── */
+
+.fi-modal-footer {
+    @apply flex items-center justify-end gap-3 px-6 py-4 border-t;
+    border-top-color: var(--ep-border);
+}
+
+.fi-modal-close-btn {
+    @apply transition-colors duration-150;
+    color: var(--ep-muted);
+}
+
+.fi-modal-close-btn:hover {
+    color: var(--ep-text);
+}
+
+/* ── User menu trigger (topbar avatar) ───────────────────── */
+
+.fi-user-menu-trigger {
+    @apply rounded-lg p-1.5 transition-colors duration-150;
+}
+
+.fi-user-menu-trigger:hover {
+    background-color: var(--ep-elevated);
+}
+
+/* ── Loading indicator ────────────────────────────────────── */
+
+.fi-loading-indicator {
+    color: var(--ep-accent);
+}
+
+/* ── Toggle / checkbox / radio labels ────────────────────── */
+
+.fi-checkbox-label,
+.fi-radio-label {
+    @apply text-sm;
+    color: var(--ep-text-2);
+}
+
+/* ── Breadcrumbs ──────────────────────────────────────────── */
+
+.fi-topbar-breadcrumbs {
+    @apply text-sm;
+    color: var(--ep-muted);
+}
+
+.fi-breadcrumb-item {
+    @apply transition-colors duration-150;
+    color: var(--ep-muted);
+}
+
+.fi-breadcrumb-item:last-child {
+    color: var(--ep-text);
+}
+
+/* ── Success button ───────────────────────────────────────── */
+
+.fi-btn-color-success {
+    background-color: var(--ep-success);
+    color: oklch(14% 0.025 255);
+}
+
+.fi-btn-color-success:hover {
+    filter: brightness(1.1);
+}
+
+/* ── Info badge ───────────────────────────────────────────── */
+
+.fi-badge-color-info {
+    background-color: var(--ep-accent-dim);
+    color: var(--ep-accent);
+}
+
+/* ── Sidebar active — aria-current fallback ───────────────── */
+
+.fi-sidebar-item-button[aria-current] {
+    @apply font-semibold;
+    background-color: var(--ep-accent-dim);
+    color: var(--ep-text);
+    box-shadow: inset 3px 0 0 var(--ep-accent);
+}
+
+/* ── Dark Mode Fixes ────────────────────────────────────────── */
+/* These override Filament's built-in Tailwind utilities that    */
+/* generate hardcoded colors and don't pick up our CSS vars.     */
+
+.dark .fi-sidebar {
+    background-color: var(--ep-sidebar);
+    border-color: var(--ep-border);
+}
+
+.dark .fi-body,
+.dark .fi-main {
+    background-color: var(--ep-bg);
+}
+
+.dark .fi-card,
+.dark .fi-section {
+    background-color: var(--ep-surface);
+    border-color: var(--ep-border);
+}
+
+.dark .fi-table,
+.dark .fi-ta-content {
+    background-color: var(--ep-surface);
+}
+
+.dark .fi-table thead,
+.dark .fi-ta-header-cell {
+    background-color: var(--ep-elevated);
+}
+
+.dark .fi-table tbody tr:hover,
+.dark .fi-ta-row:hover {
+    background-color: var(--ep-elevated);
+}
+
+.dark .fi-input,
+.dark .fi-textarea,
+.dark .fi-select {
+    background-color: var(--ep-elevated);
+    border-color: var(--ep-border);
+    color: var(--ep-text);
+}
+
+.dark .fi-modal,
+.dark .fi-modal-window {
+    background-color: var(--ep-surface);
+    border-color: var(--ep-border-strong);
+}
+
+.dark .fi-dropdown-panel {
+    background-color: var(--ep-surface);
+    border-color: var(--ep-border-strong);
+}
+
+.dark .fi-dropdown-list-item-button:hover {
+    background-color: var(--ep-elevated);
+}
+
+.dark .fi-pagination-previous-btn,
+.dark .fi-pagination-next-btn {
+    background-color: var(--ep-elevated);
+    border-color: var(--ep-border);
+    color: var(--ep-text-2);
+}
+
+.dark .fi-no-notification {
+    background-color: var(--ep-surface);
+    border-color: var(--ep-border-strong);
 }

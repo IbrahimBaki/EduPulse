@@ -10,7 +10,11 @@
     "announcements": "الإعلانات",
     "settings": "الإعدادات",
     "aiTutor": "المعلم الذكي",
-    "fees": "الرسوم الدراسية"
+    "exams": "الاختبارات",
+    "fees": "الرسوم الدراسية",
+    "myChildren": "أبنائي",
+    "attendance": "الحضور",
+    "examsResults": "الاختبارات والنتائج"
   },
   "roles": {
     "manager": "مدير",

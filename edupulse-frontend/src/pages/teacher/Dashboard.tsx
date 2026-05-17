@@ -64,14 +64,14 @@ interface TopicPerformance {
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
-function nameInitials(name: string): string {
-  return name.trim().split(/\s+/).filter(Boolean).slice(0, 2).map(w => w[0]).join('').toUpperCase()
+function nameInitials(name: string | null | undefined): string {
+  return (name ?? '').trim().split(/\s+/).filter(Boolean).slice(0, 2).map(w => w[0]).join('').toUpperCase()
 }
 
-function getGreeting(name: string, t: (key: string) => string): string {
+function getGreeting(name: string | null | undefined, t: (key: string) => string): string {
   const hour = new Date().getHours()
   const salutation = hour < 12 ? t('teacher.dashboard.goodMorning') : hour < 17 ? t('teacher.dashboard.goodAfternoon') : t('teacher.dashboard.goodEvening')
-  return `${salutation}, ${name.trim().split(/\s+/)[0]}`
+  return `${salutation}, ${(name ?? '').trim().split(/\s+/)[0]}`
 }
 
 function formatDate(): string {

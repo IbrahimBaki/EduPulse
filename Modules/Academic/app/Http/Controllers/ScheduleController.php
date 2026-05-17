@@ -119,17 +119,38 @@ class ScheduleController extends Controller
         return $this->ReturnSuccess(null, 'Schedule deleted');
     }
 
+    public function teacherAllSchedules()
+    {
+        $teacherCourseIds = Course::where('teacher_id', auth()->id())->pluck('id');
+
+        if ($courseId = request('course_id')) {
+            if (!$teacherCourseIds->contains((int) $courseId)) {
+                return $this->ReturnFailed('Unauthorized', 403);
+            }
+            $teacherCourseIds = collect([(int) $courseId]);
+        }
+
+        $schedules = Schedule::whereIn('course_id', $teacherCourseIds)
+            ->with(['course:id,name,subject_id', 'course.subject:id,name'])
+            ->orderByDesc('starts_at')
+            ->paginate(20);
+
+        return $this->ReturnSuccess($schedules, 'Schedules retrieved');
+    }
+
     public function upcomingSchedules()
     {
-        $schedules = Schedule::whereHas('course', function ($q) {
+        $query = Schedule::whereHas('course', function ($q) {
             $q->whereHas('enrollments', fn($e) => $e->where('student_id', auth()->id()));
-        })
-            ->where('status', 'scheduled')
-            ->where('starts_at', '>', now())
-            ->orderBy('starts_at')
-            ->paginate(15);
+        })->with(['course:id,name,subject_id', 'course.subject:id,name']);
 
-        return $this->ReturnSuccess($schedules, 'Upcoming schedules retrieved');
+        if ($courseId = request('course_id')) {
+            $query->where('course_id', $courseId);
+        }
+
+        $schedules = $query->orderByDesc('starts_at')->paginate(20);
+
+        return $this->ReturnSuccess($schedules, 'Schedules retrieved');
     }
 
     public function studentCourseSchedules($courseId)

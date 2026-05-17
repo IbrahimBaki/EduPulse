@@ -1,0 +1,231 @@
+.page {
+  padding: 40px 48px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  min-height: 100%;
+}
+
+.pageTitle {
+  font-size: 1.625rem;
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  color: var(--text-primary);
+  margin: 0 0 4px;
+}
+
+.childList {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* ─── Child row ───────────────────────────────────────────────────────────────── */
+
+.childRow {
+  display: flex;
+  align-items: flex-start;
+  gap: 20px;
+  padding: 24px;
+  border: 1px solid var(--neutral-border);
+  border-radius: 12px;
+  background: var(--surface-1);
+  transition: box-shadow 150ms ease-out;
+}
+
+.childRow:hover {
+  box-shadow: 0 6px 24px oklch(0% 0 0 / 18%);
+}
+
+.childAvatar {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: oklch(98% 0.005 255);
+  flex-shrink: 0;
+}
+
+.childInfo {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+}
+
+.childNameRow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.childName {
+  font-size: 1.125rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin: 0;
+  letter-spacing: -0.02em;
+}
+
+.gradeBadge {
+  font-size: 0.6875rem;
+  font-weight: 600;
+  padding: 3px 8px;
+  border-radius: 4px;
+  background: color-mix(in oklch, var(--color-blue) 12%, transparent);
+  color: var(--color-blue);
+}
+
+.studentCode {
+  font-size: 0.8125rem;
+  color: var(--text-muted);
+  margin: 0;
+}
+
+/* ─── Stats pills ─────────────────────────────────────────────────────────────── */
+
+.statsRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-block: 2px;
+}
+
+.statPill {
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 4px 10px;
+  border-radius: 20px;
+  background: var(--surface-2);
+  color: var(--text-muted);
+  border: 1px solid var(--neutral-border);
+}
+
+.statGreen {
+  background: color-mix(in oklch, var(--color-green) 12%, transparent);
+  color: var(--color-green);
+  border-color: color-mix(in oklch, var(--color-green) 25%, transparent);
+}
+
+.statAmber {
+  background: color-mix(in oklch, var(--color-amber) 12%, transparent);
+  color: var(--color-amber);
+  border-color: color-mix(in oklch, var(--color-amber) 25%, transparent);
+}
+
+.statRed {
+  background: color-mix(in oklch, var(--color-red) 10%, transparent);
+  color: var(--color-red);
+  border-color: color-mix(in oklch, var(--color-red) 25%, transparent);
+}
+
+/* ─── Actions ─────────────────────────────────────────────────────────────────── */
+
+.actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-block-start: 4px;
+}
+
+.primaryBtn {
+  padding: 7px 16px;
+  border-radius: var(--radius-md, 6px);
+  background: var(--color-blue);
+  color: oklch(98% 0.005 255);
+  border: none;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: filter 150ms ease-out;
+}
+
+.primaryBtn:hover { filter: brightness(1.08); }
+.primaryBtn:focus-visible { outline: 2px solid var(--color-blue); outline-offset: 2px; }
+
+.ghostBtn {
+  padding: 7px 14px;
+  border-radius: var(--radius-md, 6px);
+  background: transparent;
+  color: var(--text-muted);
+  border: 1px solid var(--neutral-border);
+  font-size: 0.8125rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 120ms, color 120ms;
+}
+
+.ghostBtn:hover { background: var(--surface-2); color: var(--text-primary); }
+.ghostBtn:focus-visible { outline: 2px solid var(--color-blue); outline-offset: 2px; }
+
+/* ─── States ─────────────────────────────────────────────────────────────────── */
+
+.emptyState {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  padding: 60px 24px;
+  color: var(--text-muted);
+  text-align: center;
+  border: 1px dashed var(--neutral-border);
+  border-radius: 12px;
+}
+
+.emptyTitle { font-size: 1rem; font-weight: 600; color: var(--text-primary); margin: 0; }
+.emptyText  { font-size: 0.875rem; color: var(--text-muted); margin: 0; max-width: 40ch; }
+
+.errorState {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding: 48px;
+  color: var(--text-muted);
+  text-align: center;
+}
+
+.errorState p { margin: 0; font-size: 0.9375rem; }
+
+.retryBtn {
+  padding: 8px 20px;
+  border-radius: var(--radius-md, 6px);
+  border: 1px solid var(--neutral-border);
+  background: transparent;
+  color: var(--text-primary);
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.retryBtn:hover { background: var(--surface-2); }
+
+.skeleton {
+  display: block;
+  background: linear-gradient(90deg, var(--surface-2) 25%, var(--surface-1) 50%, var(--surface-2) 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.4s ease-in-out infinite;
+  border-radius: 4px;
+}
+
+@keyframes shimmer {
+  0%   { background-position: 200% center; }
+  100% { background-position: -200% center; }
+}
+
+@media (max-width: 640px) {
+  .page { padding: 24px 16px; }
+  .childRow { flex-direction: column; gap: 16px; }
+  .childAvatar { width: 48px; height: 48px; font-size: 1rem; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .skeleton { animation: none; background: var(--surface-2); }
+  .childRow, .primaryBtn, .ghostBtn { transition: none; }
+}

@@ -1,0 +1,270 @@
+.page {
+  padding: 40px 48px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  min-height: 100%;
+}
+
+.pageTitle {
+  font-size: 1.625rem;
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  color: var(--text-primary);
+  margin: 0;
+}
+
+/* ─── Child selector ─────────────────────────────────────────────────────────── */
+
+.selectLabel {
+  display: block;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--text-muted);
+  margin-block-end: 6px;
+}
+
+.childSelect {
+  padding: 8px 14px;
+  border-radius: var(--radius-md, 6px);
+  border: 1px solid var(--neutral-border);
+  background: var(--surface-1);
+  color: var(--text-primary);
+  font-size: 0.9375rem;
+  font-weight: 500;
+  cursor: pointer;
+  min-width: 220px;
+}
+
+.childSelect:focus { outline: 2px solid var(--color-blue); outline-offset: 2px; }
+
+/* ─── Main content ────────────────────────────────────────────────────────────── */
+
+.main {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+/* ─── Month nav ───────────────────────────────────────────────────────────────── */
+
+.monthNav {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  justify-content: center;
+}
+
+.monthNavBtn {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: 1px solid var(--neutral-border);
+  background: var(--surface-1);
+  color: var(--text-primary);
+  font-size: 1.25rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 120ms;
+}
+
+.monthNavBtn:hover { background: var(--surface-2); }
+.monthNavBtn:focus-visible { outline: 2px solid var(--color-blue); outline-offset: 2px; }
+
+.monthLabel {
+  font-size: 1.125rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  min-width: 180px;
+  text-align: center;
+}
+
+/* ─── Calendar ────────────────────────────────────────────────────────────────── */
+
+.calendar {
+  border: 1px solid var(--neutral-border);
+  border-radius: 12px;
+  padding: 20px;
+  background: var(--surface-1);
+}
+
+.calGrid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 6px;
+}
+
+.calHeader {
+  font-size: 0.6875rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--text-muted);
+  text-align: center;
+  padding: 4px 0 10px;
+}
+
+.calDay {
+  aspect-ratio: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.875rem;
+  font-weight: 500;
+  border-radius: 50%;
+  cursor: default;
+  max-width: 40px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.dayPresent { background: color-mix(in oklch, var(--color-green) 18%, transparent); color: var(--color-green); font-weight: 700; }
+.dayAbsent  { background: color-mix(in oklch, var(--color-red) 14%, transparent);   color: var(--color-red);   font-weight: 700; }
+.dayLate    { background: color-mix(in oklch, var(--color-amber) 14%, transparent); color: var(--color-amber); font-weight: 700; }
+.dayNone    { color: var(--text-muted); }
+
+/* ─── Legend ──────────────────────────────────────────────────────────────────── */
+
+.attLegend {
+  display: flex;
+  gap: 20px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.legendItem {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.8125rem;
+  color: var(--text-muted);
+}
+
+.legendDot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+}
+
+.dotPresent { background: var(--color-green); }
+.dotAbsent  { background: var(--color-red); }
+.dotLate    { background: var(--color-amber); }
+.dotNone    { background: var(--neutral-border); }
+
+/* ─── Stats ───────────────────────────────────────────────────────────────────── */
+
+.attStats {
+  display: flex;
+  border: 1px solid var(--neutral-border);
+  border-radius: 12px;
+  overflow: hidden;
+  background: var(--surface-1);
+}
+
+.attStat {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 20px 12px;
+  border-inline-end: 1px solid var(--neutral-border);
+}
+
+.attStat:last-child { border-inline-end: none; }
+
+.attStatVal {
+  font-size: 1.625rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: var(--text-primary);
+  line-height: 1;
+}
+
+.attStatLabel {
+  font-size: 0.6875rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--text-muted);
+  text-align: center;
+}
+
+/* ─── Trend ───────────────────────────────────────────────────────────────────── */
+
+.trendSection {
+  border: 1px solid var(--neutral-border);
+  border-radius: 12px;
+  padding: 20px;
+  background: var(--surface-1);
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.sectionTitle {
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin: 0;
+}
+
+/* ─── States ──────────────────────────────────────────────────────────────────── */
+
+.errorState {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding: 48px;
+  color: var(--text-muted);
+  text-align: center;
+}
+
+.errorState p { margin: 0; font-size: 0.9375rem; }
+
+.retryBtn {
+  padding: 8px 20px;
+  border-radius: var(--radius-md, 6px);
+  border: 1px solid var(--neutral-border);
+  background: transparent;
+  color: var(--text-primary);
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.retryBtn:hover { background: var(--surface-2); }
+
+.skeleton {
+  display: block;
+  background: linear-gradient(90deg, var(--surface-2) 25%, var(--surface-1) 50%, var(--surface-2) 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.4s ease-in-out infinite;
+  border-radius: 4px;
+}
+
+@keyframes shimmer {
+  0%   { background-position: 200% center; }
+  100% { background-position: -200% center; }
+}
+
+/* ─── Responsive ──────────────────────────────────────────────────────────────── */
+
+@media (max-width: 640px) {
+  .page { padding: 24px 16px; }
+  .attStats { flex-direction: column; }
+  .attStat { border-inline-end: none; border-block-end: 1px solid var(--neutral-border); flex-direction: row; justify-content: space-between; padding: 14px 16px; }
+  .attStat:last-child { border-block-end: none; }
+  .attStatVal { font-size: 1.25rem; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .skeleton { animation: none; background: var(--surface-2); }
+}

@@ -15,6 +15,9 @@ import StudentAiTutor        from '../pages/student/AiTutor'
 import StudentSchedule       from '../pages/student/Schedule'
 import StudentAnnouncements  from '../pages/student/Announcements'
 import StudentFees           from '../pages/student/Fees'
+import StudentExams          from '../pages/student/Exams'
+import StudentExamTaking     from '../pages/student/ExamTaking'
+import StudentExamResult     from '../pages/student/ExamResult'
 import ManagerDashboard from '../pages/manager/Dashboard'
 import ManagerStudents  from '../pages/manager/Students'
 import ManagerTeachers  from '../pages/manager/Teachers'
@@ -29,7 +32,17 @@ import TeacherCourseDetail    from '../pages/teacher/CourseDetail'
 import TeacherSchedule        from '../pages/teacher/Schedule'
 import TeacherStudents        from '../pages/teacher/Students'
 import TeacherAnnouncements   from '../pages/teacher/Announcements'
-import ParentDashboard  from '../pages/parent/Dashboard'
+import TeacherExams           from '../pages/teacher/Exams'
+import TeacherExamGenerator   from '../pages/teacher/ExamGenerator'
+import TeacherExamPreview     from '../pages/teacher/ExamPreview'
+import TeacherExamResults     from '../pages/teacher/ExamResults'
+import ParentDashboard    from '../pages/parent/Dashboard'
+import ParentChildren    from '../pages/parent/Children'
+import ParentChildDetail from '../pages/parent/ChildDetail'
+import ParentAttendance  from '../pages/parent/Attendance'
+import ParentExams       from '../pages/parent/Exams'
+import ParentFees        from '../pages/parent/Fees'
+import ParentAnnouncements from '../pages/parent/Announcements'
 
 function Placeholder({ title }: { title: string }) {
   return (
@@ -55,6 +68,9 @@ const router = createBrowserRouter([
       { path: 'courses',               element: <StudentCourses /> },
       { path: 'courses/:courseId',     element: <StudentCourseDetail /> },
       { path: 'ai-tutor',              element: <StudentAiTutor /> },
+      { path: 'exams',                 element: <StudentExams /> },
+      { path: 'exams/:examId/take',    element: <StudentExamTaking /> },
+      { path: 'exams/:examId/result',  element: <StudentExamResult /> },
       { path: 'schedule',              element: <StudentSchedule /> },
       { path: 'announcements',         element: <StudentAnnouncements /> },
       { path: 'fees',                  element: <StudentFees /> },
@@ -83,13 +99,17 @@ const router = createBrowserRouter([
     path: '/teacher',
     element: <TeacherLayout />,
     children: [
-      { index: true,              element: <Navigate to="dashboard" replace /> },
-      { path: 'dashboard',        element: <TeacherDashboard /> },
-      { path: 'courses',          element: <TeacherCourses /> },
-      { path: 'courses/:courseId', element: <TeacherCourseDetail /> },
-      { path: 'schedule',         element: <TeacherSchedule /> },
-      { path: 'students',         element: <TeacherStudents /> },
-      { path: 'announcements',    element: <TeacherAnnouncements /> },
+      { index: true,                    element: <Navigate to="dashboard" replace /> },
+      { path: 'dashboard',              element: <TeacherDashboard /> },
+      { path: 'courses',                element: <TeacherCourses /> },
+      { path: 'courses/:courseId',      element: <TeacherCourseDetail /> },
+      { path: 'schedule',               element: <TeacherSchedule /> },
+      { path: 'students',               element: <TeacherStudents /> },
+      { path: 'exams',                  element: <TeacherExams /> },
+      { path: 'exams/generate',         element: <TeacherExamGenerator /> },
+      { path: 'exams/:examId',          element: <TeacherExamPreview /> },
+      { path: 'exams/:examId/results',  element: <TeacherExamResults /> },
+      { path: 'announcements',          element: <TeacherAnnouncements /> },
     ],
   },
 
@@ -98,11 +118,14 @@ const router = createBrowserRouter([
     path: '/parent',
     element: <ParentLayout />,
     children: [
-      { index: true,             element: <Navigate to="dashboard" replace /> },
-      { path: 'dashboard',       element: <ParentDashboard /> },
-      { path: 'children',        element: <Placeholder title="Children" /> },
-      { path: 'fees',            element: <Placeholder title="Fees" /> },
-      { path: 'announcements',   element: <Placeholder title="Announcements" /> },
+      { index: true,                    element: <Navigate to="dashboard" replace /> },
+      { path: 'dashboard',             element: <ParentDashboard /> },
+      { path: 'children',              element: <ParentChildren /> },
+      { path: 'children/:childId',     element: <ParentChildDetail /> },
+      { path: 'attendance',            element: <ParentAttendance /> },
+      { path: 'exams',                 element: <ParentExams /> },
+      { path: 'fees',                  element: <ParentFees /> },
+      { path: 'announcements',         element: <ParentAnnouncements /> },
     ],
   },
 

@@ -115,4 +115,26 @@ class LessonController extends Controller
             'Content-Disposition' => 'inline; filename="' . addslashes($filename) . '"',
         ]);
     }
+
+    public function teacherServePdf($courseId, $id)
+    {
+        $course = Course::findOrFail($courseId);
+        $lesson = $course->lessons()->findOrFail($id);
+
+        if (auth()->user()->hasRole('teacher') && $course->teacher_id !== auth()->id()) {
+            abort(403, 'You do not teach this course');
+        }
+
+        if (!$lesson->pdf_path || !Storage::disk('local')->exists($lesson->pdf_path)) {
+            abort(404, 'PDF not found');
+        }
+
+        $absolutePath = Storage::disk('local')->path($lesson->pdf_path);
+        $filename     = $lesson->title . '.pdf';
+
+        return response()->file($absolutePath, [
+            'Content-Type'        => 'application/pdf',
+            'Content-Disposition' => 'inline; filename="' . addslashes($filename) . '"',
+        ]);
+    }
 }

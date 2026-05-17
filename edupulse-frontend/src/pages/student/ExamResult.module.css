@@ -1,0 +1,469 @@
+/* ─── Page ──────────────────────────────────────────────────────────────────── */
+
+.page {
+  padding: 40px 48px;
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+  min-height: 100%;
+  max-width: 860px;
+}
+
+/* ─── Back button ────────────────────────────────────────────────────────────── */
+
+.backBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0;
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: color 120ms ease-out;
+  align-self: flex-start;
+}
+
+.backBtn:hover {
+  color: var(--text-primary);
+}
+
+.backBtn:focus-visible {
+  outline: 2px solid var(--color-blue);
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+
+/* ─── Summary card ───────────────────────────────────────────────────────────── */
+
+.summaryCard {
+  background: var(--surface-2);
+  border: 1px solid var(--neutral-border);
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.resultHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  padding: 24px 28px;
+  border-block-end: 1px solid var(--neutral-border);
+  flex-wrap: wrap;
+}
+
+.examMeta {
+  min-width: 0;
+}
+
+.examTitle {
+  font-size: 1.25rem;
+  font-weight: 700;
+  letter-spacing: -0.025em;
+  color: var(--text-primary);
+  margin: 0 0 4px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.passMark {
+  font-size: 0.8125rem;
+  color: var(--text-muted);
+  margin: 0;
+}
+
+/* ─── Verdict block ──────────────────────────────────────────────────────────── */
+
+.resultVerdict {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 14px 24px;
+  border-radius: 8px;
+  min-width: 120px;
+  flex-shrink: 0;
+}
+
+.verdictPass {
+  background: color-mix(in oklch, var(--color-green) 12%, transparent);
+}
+
+.verdictFail {
+  background: color-mix(in oklch, var(--color-red) 10%, transparent);
+}
+
+.verdictPct {
+  font-size: 2rem;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.04em;
+  line-height: 1;
+}
+
+.verdictPass .verdictPct {
+  color: var(--color-green);
+}
+
+.verdictFail .verdictPct {
+  color: var(--color-red);
+}
+
+.verdictLabel {
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  margin-block-start: 4px;
+}
+
+.verdictPass .verdictLabel {
+  color: var(--color-green);
+}
+
+.verdictFail .verdictLabel {
+  color: var(--color-red);
+}
+
+/* ─── Stats row ──────────────────────────────────────────────────────────────── */
+
+.statsRow {
+  display: flex;
+  align-items: center;
+  padding: 0 28px;
+}
+
+.statItem {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 18px 24px;
+  gap: 4px;
+  flex: 1;
+}
+
+.statValue {
+  font-size: 1.25rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: var(--text-primary);
+  letter-spacing: -0.02em;
+  line-height: 1.1;
+}
+
+.statLabel {
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.statDivider {
+  width: 1px;
+  height: 36px;
+  background: var(--neutral-border);
+  flex-shrink: 0;
+}
+
+/* ─── Section heading ────────────────────────────────────────────────────────── */
+
+.sectionHeading {
+  font-size: 0.8125rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin: 0 0 12px;
+}
+
+/* ─── Accordion ──────────────────────────────────────────────────────────────── */
+
+.accordion {
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--neutral-border);
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.accordionItem {
+  border-block-end: 1px solid var(--neutral-border);
+}
+
+.accordionItem:last-child {
+  border-block-end: none;
+}
+
+.aCorrect {
+  border-inline-start: none;
+}
+
+.accordionTrigger {
+  width: 100%;
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 14px 16px;
+  background: var(--surface-1);
+  border: none;
+  cursor: pointer;
+  text-align: start;
+  transition: background 120ms ease-out;
+}
+
+.accordionTrigger:hover {
+  background: var(--surface-2);
+}
+
+.accordionTrigger:focus-visible {
+  outline: 2px solid var(--color-blue);
+  outline-offset: -2px;
+}
+
+.statusIcon {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  margin-block-start: 1px;
+}
+
+.iconCorrect {
+  background: color-mix(in oklch, var(--color-green) 15%, transparent);
+  color: var(--color-green);
+}
+
+.iconWrong {
+  background: color-mix(in oklch, var(--color-red) 12%, transparent);
+  color: var(--color-red);
+}
+
+.iconPartial {
+  background: color-mix(in oklch, var(--color-amber) 15%, transparent);
+  color: var(--color-amber);
+}
+
+.accordionQ {
+  flex: 1;
+  font-size: 0.9375rem;
+  color: var(--text-primary);
+  line-height: 1.5;
+  text-align: start;
+}
+
+.qNum {
+  font-weight: 600;
+  margin-inline-end: 6px;
+  color: var(--text-muted);
+}
+
+.accordionScore {
+  font-size: 0.8125rem;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  color: var(--text-muted);
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.chevron {
+  flex-shrink: 0;
+  color: var(--text-muted);
+  transition: transform 200ms ease-out;
+  margin-block-start: 3px;
+}
+
+.chevronOpen {
+  transform: rotate(180deg);
+}
+
+/* ─── Accordion body ─────────────────────────────────────────────────────────── */
+
+.accordionBody {
+  padding: 16px 20px 16px 48px;
+  background: var(--surface-2);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  border-block-start: 1px solid var(--neutral-border);
+  animation: expandIn 150ms ease-out;
+}
+
+@keyframes expandIn {
+  from { opacity: 0; transform: translateY(-4px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.answerRow {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+}
+
+.answerLabel {
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  white-space: nowrap;
+  min-width: 110px;
+  flex-shrink: 0;
+  padding-block-start: 2px;
+}
+
+.answerVal {
+  font-size: 0.9375rem;
+  color: var(--text-primary);
+  line-height: 1.5;
+}
+
+.answerValCorrect {
+  color: var(--color-green);
+  font-weight: 500;
+}
+
+.answerValWrong {
+  color: var(--color-red);
+  text-decoration: line-through;
+  text-decoration-color: color-mix(in oklch, var(--color-red) 50%, transparent);
+}
+
+.noAnswer {
+  color: var(--text-muted);
+  font-style: italic;
+}
+
+/* ─── AI feedback ────────────────────────────────────────────────────────────── */
+
+.aiFeedbackBox {
+  background: color-mix(in oklch, var(--color-blue) 6%, transparent);
+  border: 1px solid color-mix(in oklch, var(--color-blue) 20%, transparent);
+  border-radius: 6px;
+  padding: 10px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.aiFeedbackIcon {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 0.6875rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--color-blue);
+}
+
+.aiFeedbackText {
+  font-size: 0.875rem;
+  color: var(--text-primary);
+  line-height: 1.55;
+  margin: 0;
+  max-width: 65ch;
+}
+
+/* ─── States ─────────────────────────────────────────────────────────────────── */
+
+.errorState {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding: 48px;
+  color: var(--text-muted);
+  text-align: center;
+}
+
+.errorState p {
+  margin: 0;
+  font-size: 0.9375rem;
+}
+
+.retryBtn {
+  padding: 8px 20px;
+  border-radius: var(--radius-md, 6px);
+  border: 1px solid var(--neutral-border);
+  background: transparent;
+  color: var(--text-primary);
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 120ms ease-out;
+}
+
+.retryBtn:hover {
+  background: var(--surface-2);
+}
+
+/* ─── Skeleton ───────────────────────────────────────────────────────────────── */
+
+.skeleton {
+  display: block;
+  background: linear-gradient(90deg, var(--surface-2) 25%, var(--surface-1) 50%, var(--surface-2) 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.4s ease-in-out infinite;
+  border-radius: 4px;
+}
+
+.summary {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+@keyframes shimmer {
+  0% { background-position: 200% center; }
+  100% { background-position: -200% center; }
+}
+
+/* ─── Responsive ─────────────────────────────────────────────────────────────── */
+
+@media (max-width: 640px) {
+  .page {
+    padding: 24px 16px;
+  }
+
+  .resultHeader {
+    padding: 20px;
+  }
+
+  .statsRow {
+    padding: 0 16px;
+    flex-wrap: wrap;
+  }
+
+  .statItem {
+    padding: 12px 16px;
+    min-width: 50%;
+  }
+
+  .statDivider:nth-child(4) {
+    display: none;
+  }
+
+  .accordionBody {
+    padding-inline-start: 20px;
+  }
+
+  .answerRow {
+    flex-direction: column;
+    gap: 4px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .skeleton { animation: none; background: var(--surface-2); }
+  .chevron { transition: none; }
+  .accordionBody { animation: none; }
+  .backBtn { transition: none; }
+}

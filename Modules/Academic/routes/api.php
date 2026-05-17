@@ -51,7 +51,10 @@ Route::prefix('v1/{tenant_code}')->middleware(['tenant', 'auth:sanctum'])->group
 
     // Teacher routes
     Route::middleware('role:teacher')->prefix('teacher')->group(function () {
+        Route::get('schedules', [ScheduleController::class, 'teacherAllSchedules']);
+        Route::get('students', [CourseController::class, 'allStudents']);
         Route::get('courses', [CourseController::class, 'myCourses']);
+        Route::get('courses/{id}', [CourseController::class, 'myCourseDetail']);
         Route::get('courses/{id}/students', [CourseController::class, 'students']);
 
         // Lessons
@@ -60,6 +63,7 @@ Route::prefix('v1/{tenant_code}')->middleware(['tenant', 'auth:sanctum'])->group
         Route::put('courses/{courseId}/lessons/{id}', [LessonController::class, 'update']);
         Route::patch('courses/{courseId}/lessons/{id}/publish', [LessonController::class, 'publish']);
         Route::delete('courses/{courseId}/lessons/{id}', [LessonController::class, 'destroy']);
+        Route::get('courses/{courseId}/lessons/{id}/pdf', [LessonController::class, 'teacherServePdf']);
 
         // Schedules (teacher)
         Route::get('courses/{courseId}/schedules', [ScheduleController::class, 'index']);

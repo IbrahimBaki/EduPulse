@@ -40,7 +40,10 @@ class LessonResource extends Resource
                     ->numeric()
                     ->default(0),
                 Forms\Components\TextInput::make('pdf_path')
-                    ->maxLength(255),
+                    ->maxLength(255)
+                    ->disabled()
+                    ->dehydrated(false)
+                    ->helperText('Managed by the AI upload endpoint — do not edit manually.'),
                 Forms\Components\Toggle::make('pdf_processed')
                     ->required(),
                 Forms\Components\TextInput::make('pdf_chunks_count')

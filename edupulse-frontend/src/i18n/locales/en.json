@@ -10,7 +10,11 @@
     "announcements": "Announcements",
     "settings": "Settings",
     "aiTutor": "AI Tutor",
-    "fees": "Fees"
+    "exams": "Exams",
+    "fees": "Fees",
+    "myChildren": "My Children",
+    "attendance": "Attendance",
+    "examsResults": "Exams & Results"
   },
   "roles": {
     "manager": "Manager",
