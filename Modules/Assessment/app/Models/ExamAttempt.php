@@ -16,6 +16,7 @@ class ExamAttempt extends Model
         'started_at', 'submitted_at', 'total_score', 'percentage',
         'is_passed', 'graded_by', 'graded_at',
         'teacher_approved_at', 'approved_by',
+        'violations_count', 'violation_log',
     ];
 
     protected $casts = [
@@ -25,6 +26,7 @@ class ExamAttempt extends Model
         'teacher_approved_at' => 'datetime',
         'is_passed'           => 'boolean',
         'percentage'          => 'float',
+        'violation_log'       => 'array',
     ];
 
     public function exam()

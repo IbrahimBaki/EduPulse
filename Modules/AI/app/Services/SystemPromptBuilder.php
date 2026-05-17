@@ -13,7 +13,7 @@ class SystemPromptBuilder
      * Pass $lessonId when chunks should be embedded in the prompt (quiz generation).
      * Omit $lessonId when the PDF is sent directly to the model (explain endpoint).
      */
-    public function build(int $studentId, ?int $lessonId = null, ?string $studentMessage = null): string
+    public function build(int $studentId, ?int $lessonId = null, ?string $studentMessage = null, string $mode = 'chat'): string
     {
         $weakTopics = WeakTopic::where('student_id', $studentId)
             ->where('score', '<', 60)
@@ -23,6 +23,19 @@ class SystemPromptBuilder
 
         $tenantName = app()->bound('tenant') ? app('tenant')->name : 'EduPulse';
         $weakList   = $weakTopics ? implode(', ', $weakTopics) : 'none identified';
+
+        if ($mode === 'quiz') {
+            $base = "You are an educational quiz generator for {$tenantName}.\n"
+                  . "Student weak areas: {$weakList}.\n"
+                  . "CRITICAL RULE: Generate questions in the SAME language as the topic.\n"
+                  . "- English grammar/language topic → questions and options in English\n"
+                  . "- Arabic topic → questions and options in Arabic\n"
+                  . "- Math/Science → use the appropriate notation\n"
+                  . "Explanations in the 'explanation' field can be in Arabic (Egyptian dialect) to help the student understand.\n"
+                  . "Questions must be practical fill-in-the-blank or multiple-choice, not translations.";
+
+            return $base;
+        }
 
         $base = "أنت مساعد تعليمي ذكي اسمك \"بلس\" بتشتغل على منصة {$tenantName}.\n"
               . "**اللغة:** اتكلم دايما بالعربي المصري العامية الواضحة والبسيطة.\n"

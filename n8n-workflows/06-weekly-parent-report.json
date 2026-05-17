@@ -1,0 +1,122 @@
+{
+  "name": "EduPulse - 06 Weekly Parent Report",
+  "nodes": [
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "cfg-app-url",
+              "name": "APP_URL",
+              "value": "https://edupulse.localhost",
+              "type": "string"
+            },
+            {
+              "id": "cfg-tenant",
+              "name": "TENANT_CODE",
+              "value": "demo",
+              "type": "string"
+            },
+            {
+              "id": "cfg-secret",
+              "name": "N8N_INCOMING_SECRET",
+              "value": "edupulse_n8n_secret_2026",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "06-node-config",
+      "name": "⚙️ Config",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [460, 300]
+    },
+
+    {
+      "parameters": {
+        "path": "weekly_parent_report",
+        "options": {}
+      },
+      "id": "06-wh-weekly-report",
+      "name": "weekly_parent_report",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [240, 300],
+      "webhookId": "edupulse-weekly-parent-report"
+    },
+
+    {
+      "parameters": {
+        "jsCode": "const data = $input.item.json;\nconst children = data.children || [];\n\nif (children.length === 0) {\n  return [{ json: { parent_id: data.parent_id, parent_name: data.parent_name, summary: 'No children data available.', has_alerts: false } }];\n}\n\nconst alerts = children.flatMap(child => {\n  return (child.recent_scores || []).filter(s => s.score < 50).map(s => ({\n    student: child.student_name,\n    topic: s.topic,\n    score: s.score,\n    date: s.date,\n  }));\n});\n\nconst weakTopicLines = children.flatMap(child =>\n  (child.weak_topics || []).map(t => `• ${child.student_name}: ${t.topic || t}`)\n);\n\nconst summaryLines = [\n  `Weekly Report for ${data.parent_name}`,\n  '',\n  'Children: ' + children.map(c => c.student_name).join(', '),\n  '',\n  weakTopicLines.length > 0 ? 'Topics needing attention:\\n' + weakTopicLines.join('\\n') : 'All topics are on track this week!',\n  '',\n  alerts.length > 0 ? `Low scores this week: ${alerts.length} alert(s) — please review with your children.` : 'No low scores this week.',\n];\n\nreturn [{\n  json: {\n    parent_id: data.parent_id,\n    parent_name: data.parent_name,\n    tenant_code: data.tenant_code,\n    summary: summaryLines.join('\\n'),\n    has_alerts: alerts.length > 0,\n    alert_count: alerts.length,\n    children_count: children.length,\n  }\n}];"
+      },
+      "id": "06-code-format-report",
+      "name": "Format Weekly Report",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [680, 300]
+    },
+
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $('⚙️ Config').item.json.APP_URL }}/api/v1/{{ $('⚙️ Config').item.json.TENANT_CODE }}/webhooks/n8n/notify",
+        "sendBody": true,
+        "contentType": "json",
+        "body": "={\n  \"secret\": \"{{ $('⚙️ Config').item.json.N8N_INCOMING_SECRET }}\",\n  \"type\": \"weekly_parent_report\",\n  \"user_ids\": [{{ $json.parent_id }}],\n  \"title\": \"{{ $json.has_alerts ? '⚠️ Weekly Report — Action Needed' : '✅ Weekly Progress Report' }}\",\n  \"body\": \"{{ $json.summary }}\",\n  \"data\": {\n    \"children_count\": {{ $json.children_count }},\n    \"alert_count\": {{ $json.alert_count }},\n    \"has_alerts\": {{ $json.has_alerts }}\n  }\n}",
+        "options": {}
+      },
+      "id": "06-notify-parent",
+      "name": "Notify: Send Weekly Report",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [900, 300]
+    }
+  ],
+  "connections": {
+    "weekly_parent_report": {
+      "main": [
+        [
+          {
+            "node": "⚙️ Config",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "⚙️ Config": {
+      "main": [
+        [
+          {
+            "node": "Format Weekly Report",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Format Weekly Report": {
+      "main": [
+        [
+          {
+            "node": "Notify: Send Weekly Report",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "id": "edupulse-wf-06",
+  "tags": [
+    { "name": "edupulse" },
+    { "name": "parents" },
+    { "name": "reports" }
+  ]
+}

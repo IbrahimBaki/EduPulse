@@ -3,6 +3,7 @@
 namespace Modules\Academic\Http\Controllers;
 
 use App\Http\Controllers\Controller;
+use App\Models\User;
 use App\Traits\ApiResponser;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
@@ -20,34 +21,82 @@ class TeacherDashboardController extends Controller
         $userId = auth()->id();
 
         $data = Cache::remember("dashboard:teacher:{$userId}", 300, function () use ($userId) {
-            $myCourses = Course::where('teacher_id', $userId)->count();
+            $myCourseIds  = Course::where('teacher_id', $userId)->pluck('id');
+            $myStudentIds = Enrollment::whereIn('course_id', $myCourseIds)->distinct()->pluck('student_id');
 
-            $totalStudents = Enrollment::whereHas('course', fn($q) => $q->where('teacher_id', $userId))
-                ->distinct('student_id')
-                ->count();
+            $myCourses     = $myCourseIds->count();
+            $totalStudents = $myStudentIds->count();
 
-            $upcomingSessions = Schedule::with('course')
+            // Today's sessions (the panel label is "Today's Sessions")
+            $todaySessions = Schedule::with(['course:id,name,grade_level_id', 'course.gradeLevel:id,name'])
                 ->where('teacher_id', $userId)
-                ->where('status', 'scheduled')
-                ->where('starts_at', '>', now())
+                ->whereDate('starts_at', today())
                 ->orderBy('starts_at')
-                ->take(3)
-                ->get();
+                ->get()
+                ->map(fn($s) => [
+                    'id'          => $s->id,
+                    'course_name' => $s->course?->name ?? '',
+                    'grade_level' => $s->course?->gradeLevel?->name ?? '',
+                    'type'        => $s->type,
+                    'starts_at'   => $s->starts_at,
+                    'ends_at'     => $s->ends_at,
+                    'jitsi_url'   => $s->jitsi_url,
+                ])
+                ->values();
 
-            $myCourseIds = Course::where('teacher_id', $userId)->pluck('id');
-            $myStudentIds = Enrollment::whereIn('course_id', $myCourseIds)->pluck('student_id');
-
-            $atRiskCount = DB::table('quiz_attempts')
+            // At-risk students: avg score < 60, returned as objects with weakest topic
+            $atRiskAvg = DB::table('quiz_attempts')
                 ->whereIn('student_id', $myStudentIds)
                 ->selectRaw('student_id, AVG(score) as avg_score')
                 ->groupBy('student_id')
                 ->havingRaw('AVG(score) < 60')
-                ->count();
+                ->get();
 
-            $recentQuizActivity = QuizAttempt::whereIn('student_id', $myStudentIds)
+            $atRiskIds = $atRiskAvg->pluck('student_id');
+
+            $studentNames = User::whereIn('id', $atRiskIds)->pluck('name', 'id');
+
+            $enrollmentByCourse = Enrollment::whereIn('student_id', $atRiskIds)
+                ->whereIn('course_id', $myCourseIds)
+                ->with('course:id,name')
+                ->get()
+                ->groupBy('student_id');
+
+            // Weakest topic per at-risk student: lowest-scored quiz
+            $weakestTopics = DB::table('quiz_attempts')
+                ->whereIn('student_id', $atRiskIds)
+                ->select('student_id', 'topic', 'score')
+                ->orderBy('score', 'asc')
+                ->get()
+                ->groupBy('student_id')
+                ->map(fn($rows) => $rows->first());
+
+            $atRiskStudents = $atRiskAvg->map(function ($row) use ($studentNames, $enrollmentByCourse, $weakestTopics) {
+                $weakest = $weakestTopics[$row->student_id] ?? null;
+                $course  = $enrollmentByCourse[$row->student_id]?->first()?->course;
+                return [
+                    'id'            => $row->student_id,
+                    'name'          => $studentNames[$row->student_id] ?? 'Unknown',
+                    'course_name'   => $course?->name ?? '',
+                    'weakest_topic' => $weakest?->topic ?? '',
+                    'weakest_score' => (float) ($weakest?->score ?? 0),
+                ];
+            })->values();
+
+            // Recent quiz activity with student name and grade level
+            $recentQuizActivity = QuizAttempt::with(['student:id,name', 'student.studentProfile.gradeLevel:id,name'])
+                ->whereIn('student_id', $myStudentIds)
                 ->latest()
                 ->take(10)
-                ->get();
+                ->get()
+                ->map(fn($a) => [
+                    'id'           => $a->id,
+                    'student_name' => $a->student?->name ?? 'Unknown',
+                    'topic'        => $a->topic,
+                    'score'        => $a->score,
+                    'grade_level'  => $a->student?->studentProfile?->gradeLevel?->name ?? '',
+                    'submitted_at' => $a->created_at,
+                ]);
 
             $topicPerformance = DB::table('quiz_attempts')
                 ->whereIn('student_id', $myStudentIds)
@@ -57,12 +106,16 @@ class TeacherDashboardController extends Controller
                 ->get();
 
             return [
-                'my_courses'          => $myCourses,
-                'total_students'      => $totalStudents,
-                'upcoming_sessions'   => $upcomingSessions,
-                'at_risk_students'    => $atRiskCount,
+                'stats' => [
+                    'my_courses'     => $myCourses,
+                    'total_students' => $totalStudents,
+                    'sessions_today' => $todaySessions->count(),
+                    'at_risk_count'  => $atRiskStudents->count(),
+                ],
+                'sessions_today'       => $todaySessions,
+                'at_risk_students'     => $atRiskStudents,
                 'recent_quiz_activity' => $recentQuizActivity,
-                'topic_performance'   => $topicPerformance,
+                'topic_performance'    => $topicPerformance,
             ];
         });
 

@@ -102,6 +102,7 @@ Route::prefix('v1/{tenant_code}')->middleware(['tenant', 'auth:sanctum'])->group
     Route::middleware('role:manager')->prefix('manager')->group(function () {
         Route::get('dashboard', [ManagerDashboardController::class, 'dashboard']);
         Route::get('reports/students', [ManagerDashboardController::class, 'studentsReport']);
+        Route::get('reports/at-risk-students', [ManagerDashboardController::class, 'atRiskStudents']);
         Route::get('reports/attendance', [ManagerDashboardController::class, 'attendanceReport']);
         Route::get('reports/academic-performance', [ManagerDashboardController::class, 'academicPerformanceReport']);
     });

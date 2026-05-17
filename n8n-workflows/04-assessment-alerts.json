@@ -1,0 +1,176 @@
+{
+  "name": "EduPulse - 04 Assessment Alerts",
+  "nodes": [
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "cfg-app-url",
+              "name": "APP_URL",
+              "value": "https://edupulse.localhost",
+              "type": "string"
+            },
+            {
+              "id": "cfg-tenant",
+              "name": "TENANT_CODE",
+              "value": "demo",
+              "type": "string"
+            },
+            {
+              "id": "cfg-secret",
+              "name": "N8N_INCOMING_SECRET",
+              "value": "edupulse_n8n_secret_2026",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "04-node-config",
+      "name": "⚙️ Config",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [900, 80]
+    },
+
+    {
+      "parameters": {
+        "path": "exam_published",
+        "options": {}
+      },
+      "id": "04-wh-exam-published",
+      "name": "exam_published",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [240, 160],
+      "webhookId": "edupulse-exam-published"
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={ \"received\": true, \"exam\": \"{{ $('exam_published').item.json.exam_title }}\", \"course\": \"{{ $('exam_published').item.json.course_name }}\", \"teacher\": \"{{ $('exam_published').item.json.teacher_name }}\" }",
+        "options": {}
+      },
+      "id": "04-log-exam-published",
+      "name": "Log: Exam Published",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [1120, 160]
+    },
+
+    {
+      "parameters": {
+        "path": "exam_scheduled",
+        "options": {}
+      },
+      "id": "04-wh-exam-scheduled",
+      "name": "exam_scheduled",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [240, 300],
+      "webhookId": "edupulse-exam-scheduled"
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={ \"received\": true, \"exam\": \"{{ $('exam_scheduled').item.json.exam_title }}\", \"course\": \"{{ $('exam_scheduled').item.json.course_name }}\", \"scheduled_at\": \"{{ $('exam_scheduled').item.json.scheduled_at }}\", \"duration\": {{ $('exam_scheduled').item.json.duration }} }",
+        "options": {}
+      },
+      "id": "04-log-exam-scheduled",
+      "name": "Log: Exam Scheduled",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [1120, 300]
+    },
+
+    {
+      "parameters": {
+        "path": "score_alert",
+        "options": {}
+      },
+      "id": "04-wh-score-alert",
+      "name": "score_alert",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [240, 440],
+      "webhookId": "edupulse-score-alert"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $('⚙️ Config').item.json.APP_URL }}/api/v1/{{ $('⚙️ Config').item.json.TENANT_CODE }}/webhooks/n8n/notify",
+        "sendBody": true,
+        "contentType": "json",
+        "body": "={\n  \"secret\": \"{{ $('⚙️ Config').item.json.N8N_INCOMING_SECRET }}\",\n  \"type\": \"score_alert\",\n  \"user_ids\": [{{ $('score_alert').item.json.student_id }}],\n  \"title\": \"Low Quiz Score Alert\",\n  \"body\": \"Hello {{ $('score_alert').item.json.student_name }}, you scored {{ $('score_alert').item.json.score }}% on the quiz about \\\"{{ $('score_alert').item.json.topic }}\\\". Consider reviewing this topic again.\",\n  \"data\": {\n    \"topic\": \"{{ $('score_alert').item.json.topic }}\",\n    \"score\": {{ $('score_alert').item.json.score }},\n    \"lesson_id\": {{ $('score_alert').item.json.lesson_id }}\n  }\n}",
+        "options": {}
+      },
+      "id": "04-notify-score-alert",
+      "name": "Notify: Low Quiz Score",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1120, 440]
+    },
+
+    {
+      "parameters": {
+        "path": "exam_score_alert",
+        "options": {}
+      },
+      "id": "04-wh-exam-score-alert",
+      "name": "exam_score_alert",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [240, 580],
+      "webhookId": "edupulse-exam-score-alert"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $('⚙️ Config').item.json.APP_URL }}/api/v1/{{ $('⚙️ Config').item.json.TENANT_CODE }}/webhooks/n8n/notify",
+        "sendBody": true,
+        "contentType": "json",
+        "body": "={\n  \"secret\": \"{{ $('⚙️ Config').item.json.N8N_INCOMING_SECRET }}\",\n  \"type\": \"exam_score_alert\",\n  \"user_ids\": [{{ $('exam_score_alert').item.json.student_id }}],\n  \"title\": \"Low Exam Score Alert\",\n  \"body\": \"Hello {{ $('exam_score_alert').item.json.student_name }}, you scored {{ $('exam_score_alert').item.json.percentage }}% on the exam \\\"{{ $('exam_score_alert').item.json.exam_title }}\\\" in {{ $('exam_score_alert').item.json.course_name }}. Please review the material and reach out to your teacher.\",\n  \"data\": {\n    \"exam_title\": \"{{ $('exam_score_alert').item.json.exam_title }}\",\n    \"course_name\": \"{{ $('exam_score_alert').item.json.course_name }}\",\n    \"score\": {{ $('exam_score_alert').item.json.score }},\n    \"percentage\": {{ $('exam_score_alert').item.json.percentage }}\n  }\n}",
+        "options": {}
+      },
+      "id": "04-notify-exam-score-alert",
+      "name": "Notify: Low Exam Score",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1120, 580]
+    }
+  ],
+  "connections": {
+    "exam_published": {
+      "main": [[{ "node": "⚙️ Config", "type": "main", "index": 0 }]]
+    },
+    "exam_scheduled": {
+      "main": [[{ "node": "⚙️ Config", "type": "main", "index": 0 }]]
+    },
+    "score_alert": {
+      "main": [[{ "node": "⚙️ Config", "type": "main", "index": 0 }]]
+    },
+    "exam_score_alert": {
+      "main": [[{ "node": "⚙️ Config", "type": "main", "index": 0 }]]
+    },
+    "⚙️ Config": {
+      "main": [
+        [
+          { "node": "Log: Exam Published", "type": "main", "index": 0 },
+          { "node": "Log: Exam Scheduled", "type": "main", "index": 0 },
+          { "node": "Notify: Low Quiz Score", "type": "main", "index": 0 },
+          { "node": "Notify: Low Exam Score", "type": "main", "index": 0 }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "id": "edupulse-wf-04",
+  "tags": [
+    { "name": "edupulse" },
+    { "name": "assessment" }
+  ]
+}

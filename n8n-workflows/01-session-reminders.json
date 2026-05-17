@@ -1,0 +1,155 @@
+{
+  "name": "EduPulse - 01 Session Reminders",
+  "nodes": [
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "cfg-app-url",
+              "name": "APP_URL",
+              "value": "https://edupulse.localhost",
+              "type": "string"
+            },
+            {
+              "id": "cfg-tenant",
+              "name": "TENANT_CODE",
+              "value": "demo",
+              "type": "string"
+            },
+            {
+              "id": "cfg-secret",
+              "name": "N8N_INCOMING_SECRET",
+              "value": "edupulse_n8n_secret_2026",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "01-node-config",
+      "name": "⚙️ Config",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [240, 300]
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "minutes",
+              "minutesInterval": 30
+            }
+          ]
+        }
+      },
+      "id": "01-node-cron",
+      "name": "Every 30 Minutes",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.1,
+      "position": [240, 160]
+    },
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "={{ $('⚙️ Config').item.json.APP_URL }}/api/v1/{{ $('⚙️ Config').item.json.TENANT_CODE }}/internal/upcoming-sessions",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "X-N8n-Secret",
+              "value": "={{ $('⚙️ Config').item.json.N8N_INCOMING_SECRET }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "01-node-fetch-sessions",
+      "name": "Get Upcoming Sessions",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [460, 300]
+    },
+    {
+      "parameters": {
+        "jsCode": "const response = $input.item.json;\nconst schedules = response.data || [];\n\nif (!Array.isArray(schedules) || schedules.length === 0) {\n  return [];\n}\n\nreturn schedules.map(schedule => ({\n  json: {\n    schedule_id: schedule.id,\n    course_id: schedule.course_id,\n    course_name: schedule.course?.name ?? 'your course',\n    teacher_id: schedule.teacher_id,\n    starts_at: schedule.starts_at,\n  }\n}));"
+      },
+      "id": "01-node-extract",
+      "name": "Extract Schedules",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [680, 300]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $('⚙️ Config').item.json.APP_URL }}/api/v1/{{ $('⚙️ Config').item.json.TENANT_CODE }}/webhooks/n8n/notify",
+        "sendBody": true,
+        "contentType": "json",
+        "body": "={\n  \"secret\": \"{{ $('⚙️ Config').item.json.N8N_INCOMING_SECRET }}\",\n  \"type\": \"session_reminder\",\n  \"user_ids\": [{{ $json.teacher_id }}],\n  \"title\": \"Session Starting Soon\",\n  \"body\": \"Your session for {{ $json.course_name }} starts in 30 minutes.\",\n  \"data\": {\n    \"schedule_id\": {{ $json.schedule_id }},\n    \"course_id\": {{ $json.course_id }},\n    \"starts_at\": \"{{ $json.starts_at }}\"\n  }\n}",
+        "options": {}
+      },
+      "id": "01-node-notify",
+      "name": "Notify Teacher",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [900, 300]
+    }
+  ],
+  "connections": {
+    "Every 30 Minutes": {
+      "main": [
+        [
+          {
+            "node": "⚙️ Config",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "⚙️ Config": {
+      "main": [
+        [
+          {
+            "node": "Get Upcoming Sessions",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Upcoming Sessions": {
+      "main": [
+        [
+          {
+            "node": "Extract Schedules",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract Schedules": {
+      "main": [
+        [
+          {
+            "node": "Notify Teacher",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "id": "edupulse-wf-01",
+  "tags": [
+    { "name": "edupulse" },
+    { "name": "reminders" }
+  ]
+}

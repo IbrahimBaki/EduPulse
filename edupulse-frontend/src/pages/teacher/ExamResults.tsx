@@ -17,6 +17,11 @@ interface AnswerDetail {
   ai_feedback: string | null
 }
 
+interface ViolationEntry {
+  type: 'tab_switch' | 'fullscreen_exit' | 'copy_attempt'
+  at: string
+}
+
 interface StudentAttempt {
   id: number
   status: string
@@ -26,6 +31,7 @@ interface StudentAttempt {
   started_at: string | null
   submitted_at: string | null
   teacher_approved_at: string | null
+  violations_count: number
   student: { id: number; name: string; email: string }
 }
 
@@ -131,6 +137,7 @@ function AttemptRow({
 }) {
   const [expanded, setExpanded]         = useState(false)
   const [answers, setAnswers]           = useState<AnswerDetail[] | null>(null)
+  const [violationLog, setViolationLog] = useState<ViolationEntry[] | null>(null)
   const [loadingAnswers, setLoadingAnswers] = useState(false)
   const [approved, setApproved]         = useState(!!attempt.teacher_approved_at)
   const [approving, setApproving]       = useState(false)
@@ -143,8 +150,10 @@ function AttemptRow({
       try {
         const r = await api.get(`/teacher/exams/${examId}/results/${attempt.student.id}`)
         setAnswers(r.data.data.answers ?? [])
+        setViolationLog(r.data.data.attempt?.violation_log ?? [])
       } catch {
         setAnswers([])
+        setViolationLog([])
       } finally {
         setLoadingAnswers(false)
       }
@@ -188,6 +197,11 @@ function AttemptRow({
               <span className={styles.studentName}>{attempt.student.name}</span>
               <span className={styles.studentEmail}>{attempt.student.email}</span>
             </div>
+            {attempt.violations_count > 0 && (
+              <span className={styles.violationBadge} title={`${attempt.violations_count} violation(s) recorded`}>
+                ⚠ {attempt.violations_count}
+              </span>
+            )}
           </div>
         </td>
         <td className={styles.numCell}>
@@ -230,10 +244,23 @@ function AttemptRow({
           <td colSpan={8}>
             {loadingAnswers ? (
               <div className={styles.loadingAnswers}>Loading answers…</div>
-            ) : answers && answers.length > 0 ? (
+            ) : answers !== null ? (
               <div className={styles.answerBreakdown}>
-                <p className={styles.breakdownTitle}>Answer Breakdown</p>
-                {answers.map((a, i) => (
+                {violationLog && violationLog.length > 0 && (
+                  <div className={styles.violationLog}>
+                    <p className={styles.breakdownTitle}>Violations ({violationLog.length})</p>
+                    <div className={styles.violationList}>
+                      {violationLog.map((v, i) => (
+                        <div key={i} className={styles.violationEntry}>
+                          <span className={styles.violationTypeBadge}>{v.type.replace('_', ' ')}</span>
+                          <span className={styles.violationTime}>{new Date(v.at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+                {answers.length > 0 && <p className={styles.breakdownTitle}>Answer Breakdown</p>}
+                {answers.length > 0 && answers.map((a, i) => (
                   <div key={i} className={`${styles.answerItem} ${a.is_correct ? styles.answerCorrect : a.is_correct === false ? styles.answerWrong : ''}`}>
                     <p className={styles.answerQ}>{i + 1}. {a.question_text}</p>
                     <div className={styles.answerMeta}>
@@ -246,10 +273,11 @@ function AttemptRow({
                     )}
                   </div>
                 ))}
+                {answers.length === 0 && (!violationLog || violationLog.length === 0) && (
+                  <p style={{ color: 'var(--text-muted)', fontSize: '0.875rem' }}>No answers or violations recorded.</p>
+                )}
               </div>
-            ) : (
-              <div className={styles.loadingAnswers}>No answers recorded for this student.</div>
-            )}
+            ) : null}
           </td>
         </tr>
       )}

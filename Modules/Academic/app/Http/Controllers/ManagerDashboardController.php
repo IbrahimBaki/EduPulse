@@ -13,6 +13,7 @@ use Modules\Academic\Models\Enrollment;
 use Modules\Academic\Models\Schedule;
 use Modules\AI\Models\QuizAttempt;
 use Modules\Commerce\Models\StudentFee;
+use Modules\IAM\Models\StudentProfile;
 
 class ManagerDashboardController extends Controller
 {
@@ -87,11 +88,99 @@ class ManagerDashboardController extends Controller
 
     public function studentsReport()
     {
-        $students = User::role('student')
-            ->with('studentProfile.gradeLevel')
-            ->paginate(15);
+        $query = User::role('student')->with('studentProfile.gradeLevel');
+
+        if (request('date_from')) {
+            $query->whereDate('created_at', '>=', request('date_from'));
+        }
+        if (request('date_to')) {
+            $query->whereDate('created_at', '<=', request('date_to'));
+        }
+
+        $perPage  = (int) request('per_page', 15);
+        $students = $query->paginate($perPage);
+
+        // Flatten nested profile fields so the frontend can read them directly
+        $students->getCollection()->transform(function ($student) {
+            $student->student_code = $student->studentProfile?->student_code ?? null;
+            $student->grade_level  = $student->studentProfile?->gradeLevel?->name ?? null;
+            $student->parent_name  = null;
+            return $student;
+        });
 
         return $this->ReturnSuccess($students, 'Students report retrieved');
+    }
+
+    public function atRiskStudents()
+    {
+        $atRiskAvg = DB::table('quiz_attempts')
+            ->selectRaw('student_id, AVG(score) as avg_score')
+            ->groupBy('student_id')
+            ->havingRaw('AVG(score) < 60')
+            ->paginate((int) request('per_page', 15));
+
+        $studentIds = collect($atRiskAvg->items())->pluck('student_id');
+
+        $studentNames = User::whereIn('id', $studentIds)->pluck('name', 'id');
+        $studentCodes = StudentProfile::whereIn('student_id', $studentIds)
+            ->pluck('student_code', 'student_id');
+
+        $weakTopicsMap = DB::table('weak_topics')
+            ->whereIn('student_id', $studentIds)
+            ->select('student_id', 'topic')
+            ->get()
+            ->groupBy('student_id')
+            ->map(fn($rows) => $rows->pluck('topic')->toArray());
+
+        $attendanceMap = DB::table('attendances')
+            ->whereIn('student_id', $studentIds)
+            ->selectRaw('student_id, COUNT(*) as total, SUM(CASE WHEN status = "present" THEN 1 ELSE 0 END) as present_count')
+            ->groupBy('student_id')
+            ->get()
+            ->keyBy('student_id');
+
+        $feeStatusMap = DB::table('student_fees')
+            ->whereIn('student_id', $studentIds)
+            ->orderByRaw("FIELD(status, 'overdue', 'pending', 'paid')")
+            ->select('student_id', 'status')
+            ->get()
+            ->groupBy('student_id')
+            ->map(fn($rows) => $rows->first()->status ?? 'none');
+
+        $enrollCountMap = DB::table('enrollments')
+            ->whereIn('student_id', $studentIds)
+            ->selectRaw('student_id, COUNT(*) as count')
+            ->groupBy('student_id')
+            ->pluck('count', 'student_id');
+
+        $items = collect($atRiskAvg->items())->map(function ($row) use (
+            $studentNames, $studentCodes, $weakTopicsMap,
+            $attendanceMap, $feeStatusMap, $enrollCountMap
+        ) {
+            $att   = $attendanceMap[$row->student_id] ?? null;
+            $total = $att?->total ?? 0;
+            $rate  = $total > 0 ? round(($att->present_count / $total) * 100, 1) . '%' : '0%';
+
+            return [
+                'student'          => [
+                    'id'   => $row->student_id,
+                    'name' => $studentNames[$row->student_id] ?? 'Unknown',
+                    'code' => $studentCodes[$row->student_id] ?? null,
+                ],
+                'avg_quiz_score'   => round((float) $row->avg_score, 1),
+                'weak_topics'      => $weakTopicsMap[$row->student_id] ?? [],
+                'attendance_rate'  => $rate,
+                'fee_status'       => $feeStatusMap[$row->student_id] ?? 'none',
+                'enrolled_courses' => (int) ($enrollCountMap[$row->student_id] ?? 0),
+            ];
+        });
+
+        return $this->ReturnSuccess([
+            'data'         => $items,
+            'current_page' => $atRiskAvg->currentPage(),
+            'per_page'     => $atRiskAvg->perPage(),
+            'total'        => $atRiskAvg->total(),
+        ], 'At-risk students retrieved');
     }
 
     public function attendanceReport()

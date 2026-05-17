@@ -37,7 +37,18 @@ class StudentController extends Controller
             $query->where(fn($q) => $q->where('name', 'like', "%{$search}%")->orWhere('email', 'like', "%{$search}%"));
         }
 
-        return $this->ReturnSuccess($query->paginate(15), 'Students retrieved');
+        $perPage  = (int) request('per_page', 15);
+        $students = $query->paginate($perPage);
+
+        // Flatten nested profile fields for dashboard consumers
+        $students->getCollection()->transform(function ($student) {
+            $student->student_code = $student->studentProfile?->student_code ?? null;
+            $student->grade_level  = $student->studentProfile?->gradeLevel?->name ?? null;
+            $student->parent_name  = null;
+            return $student;
+        });
+
+        return $this->ReturnSuccess($students, 'Students retrieved');
     }
 
     public function store(StoreStudentRequest $request)

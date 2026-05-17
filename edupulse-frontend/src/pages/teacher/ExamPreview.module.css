@@ -646,3 +646,48 @@
   .examHeader { flex-direction: column; }
   .actionBar { width: 100%; justify-content: flex-end; }
 }
+
+/* ─── Security level selector ─────────────────────────────────────────────── */
+
+.securitySelector {
+  margin-block-start: 14px;
+  padding: 12px 16px;
+  border-radius: 8px;
+  border: 1px solid var(--neutral-border);
+  background: var(--surface-1);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-width: 480px;
+}
+
+.securityLabel {
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.securityRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.securitySelect {
+  flex: 1;
+  padding: 6px 10px;
+  border-radius: 6px;
+  border: 1px solid var(--neutral-border);
+  background: var(--surface-2);
+  color: var(--text-primary);
+  font-size: 0.875rem;
+  font-family: inherit;
+  cursor: pointer;
+}
+
+.securitySelect:focus {
+  outline: 2px solid var(--color-blue);
+  outline-offset: 1px;
+}

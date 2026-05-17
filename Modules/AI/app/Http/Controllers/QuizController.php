@@ -23,7 +23,7 @@ class QuizController extends Controller
         $level  = $data['level'] ?? 1;
         $student = $request->user();
 
-        $systemPrompt = app(SystemPromptBuilder::class)->build($student->id, $data['lesson_id'] ?? null);
+        $systemPrompt = app(SystemPromptBuilder::class)->build($student->id, $data['lesson_id'] ?? null, null, 'quiz');
         $quiz         = app(GeminiService::class)->generateQuiz($systemPrompt, $data['topic'], $level);
 
         return $this->ReturnSuccess([

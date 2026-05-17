@@ -1,0 +1,147 @@
+{
+  "name": "EduPulse - 05 Commerce Events",
+  "nodes": [
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "cfg-app-url",
+              "name": "APP_URL",
+              "value": "https://edupulse.localhost",
+              "type": "string"
+            },
+            {
+              "id": "cfg-tenant",
+              "name": "TENANT_CODE",
+              "value": "demo",
+              "type": "string"
+            },
+            {
+              "id": "cfg-secret",
+              "name": "N8N_INCOMING_SECRET",
+              "value": "edupulse_n8n_secret_2026",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "05-node-config",
+      "name": "⚙️ Config",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [900, 80]
+    },
+
+    {
+      "parameters": {
+        "path": "fees_assigned",
+        "options": {}
+      },
+      "id": "05-wh-fees-assigned",
+      "name": "fees_assigned",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [240, 160],
+      "webhookId": "edupulse-fees-assigned"
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={ \"received\": true, \"fee_structure_id\": {{ $('fees_assigned').item.json.fee_structure_id }}, \"target\": \"{{ $('fees_assigned').item.json.target }}\", \"target_id\": {{ $('fees_assigned').item.json.target_id }}, \"created_count\": {{ $('fees_assigned').item.json.created_count }} }",
+        "options": {}
+      },
+      "id": "05-log-fees-assigned",
+      "name": "Log: Fees Assigned",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [1120, 160]
+    },
+
+    {
+      "parameters": {
+        "path": "fee_paid",
+        "options": {}
+      },
+      "id": "05-wh-fee-paid",
+      "name": "fee_paid",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [240, 300],
+      "webhookId": "edupulse-fee-paid"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $('⚙️ Config').item.json.APP_URL }}/api/v1/{{ $('⚙️ Config').item.json.TENANT_CODE }}/webhooks/n8n/notify",
+        "sendBody": true,
+        "contentType": "json",
+        "body": "={\n  \"secret\": \"{{ $('⚙️ Config').item.json.N8N_INCOMING_SECRET }}\",\n  \"type\": \"fee_paid\",\n  \"user_ids\": [{{ $('fee_paid').item.json.student_id }}],\n  \"title\": \"Payment Confirmed\",\n  \"body\": \"Your payment of {{ $('fee_paid').item.json.amount }} has been received and confirmed. Thank you!\",\n  \"data\": {\n    \"fee_id\": {{ $('fee_paid').item.json.fee_id }},\n    \"amount\": {{ $('fee_paid').item.json.amount }}\n  }\n}",
+        "options": {}
+      },
+      "id": "05-notify-fee-paid",
+      "name": "Notify: Payment Confirmed",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1120, 300]
+    },
+
+    {
+      "parameters": {
+        "path": "fee_overdue",
+        "options": {}
+      },
+      "id": "05-wh-fee-overdue",
+      "name": "fee_overdue",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [240, 440],
+      "webhookId": "edupulse-fee-overdue"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $('⚙️ Config').item.json.APP_URL }}/api/v1/{{ $('⚙️ Config').item.json.TENANT_CODE }}/webhooks/n8n/notify",
+        "sendBody": true,
+        "contentType": "json",
+        "body": "={\n  \"secret\": \"{{ $('⚙️ Config').item.json.N8N_INCOMING_SECRET }}\",\n  \"type\": \"fee_overdue\",\n  \"user_ids\": [{{ $('fee_overdue').item.json.student_id }}],\n  \"title\": \"Payment Overdue\",\n  \"body\": \"Your payment of {{ $('fee_overdue').item.json.amount }} is now overdue. Please contact your administrator to settle the outstanding amount.\",\n  \"data\": {\n    \"fee_id\": {{ $('fee_overdue').item.json.fee_id }},\n    \"amount\": {{ $('fee_overdue').item.json.amount }}\n  }\n}",
+        "options": {}
+      },
+      "id": "05-notify-fee-overdue",
+      "name": "Notify: Payment Overdue",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1120, 440]
+    }
+  ],
+  "connections": {
+    "fees_assigned": {
+      "main": [[{ "node": "⚙️ Config", "type": "main", "index": 0 }]]
+    },
+    "fee_paid": {
+      "main": [[{ "node": "⚙️ Config", "type": "main", "index": 0 }]]
+    },
+    "fee_overdue": {
+      "main": [[{ "node": "⚙️ Config", "type": "main", "index": 0 }]]
+    },
+    "⚙️ Config": {
+      "main": [
+        [
+          { "node": "Log: Fees Assigned", "type": "main", "index": 0 },
+          { "node": "Notify: Payment Confirmed", "type": "main", "index": 0 },
+          { "node": "Notify: Payment Overdue", "type": "main", "index": 0 }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "id": "edupulse-wf-05",
+  "tags": [
+    { "name": "edupulse" },
+    { "name": "commerce" }
+  ]
+}

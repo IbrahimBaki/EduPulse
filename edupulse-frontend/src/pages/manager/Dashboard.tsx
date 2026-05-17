@@ -790,7 +790,7 @@ export default function ManagerDashboard() {
     queryKey: ['manager-at-risk'],
     queryFn: () =>
       api
-        .get('/manager/reports/students', { params: { per_page: 15, page: 1 } })
+        .get('/manager/reports/at-risk-students', { params: { per_page: 15, page: 1 } })
         .then(r => r.data.data),
     staleTime: 5 * 60 * 1000,
   })

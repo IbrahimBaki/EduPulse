@@ -2,6 +2,7 @@ import { useState, useEffect, useRef, useCallback } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { useMutation } from '@tanstack/react-query'
 import api from '../../lib/axios'
+import { useExamSecurity, type SecurityLevel, type ViolationType } from '../../hooks/useExamSecurity'
 import styles from './ExamTaking.module.css'
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -17,7 +18,7 @@ interface Question {
 
 interface StartData {
   attempt_id: number
-  exam: { title: string; duration_minutes: number }
+  exam: { title: string; duration_minutes: number; security_level: SecurityLevel }
   questions: Question[]
 }
 
@@ -37,6 +38,10 @@ function ClockIcon() {
 
 function AlertIcon() {
   return <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+}
+
+function ShieldIcon() {
+  return <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
 }
 
 // ─── Timer ────────────────────────────────────────────────────────────────────
@@ -133,6 +138,102 @@ function ConfirmModal({
   )
 }
 
+// ─── Violation modal ──────────────────────────────────────────────────────────
+
+const VIOLATION_MESSAGES: Record<ViolationType, { title: string; body: string }> = {
+  tab_switch: {
+    title: 'Tab Switch Detected',
+    body: 'You switched away from the exam. This has been logged and your teacher will be notified.',
+  },
+  fullscreen_exit: {
+    title: 'Fullscreen Exited',
+    body: 'You exited fullscreen mode. This has been logged. Please return to fullscreen to continue.',
+  },
+  copy_attempt: {
+    title: 'Copy Attempt Blocked',
+    body: 'Copying exam content is not allowed. This attempt has been logged.',
+  },
+}
+
+function ViolationModal({
+  violationType,
+  violationsCount,
+  onDismiss,
+  onEnterFullscreen,
+  securityLevel,
+}: {
+  violationType: ViolationType
+  violationsCount: number
+  onDismiss: () => void
+  onEnterFullscreen: () => void
+  securityLevel: SecurityLevel
+}) {
+  const msg = VIOLATION_MESSAGES[violationType]
+
+  return (
+    <div className={styles.modalOverlay} role="alertdialog" aria-modal="true" aria-labelledby="violation-title">
+      <div className={styles.modal}>
+        <div className={styles.violationHeader}>
+          <AlertIcon />
+          <h2 className={styles.modalTitle} id="violation-title">{msg.title}</h2>
+        </div>
+        <p className={styles.modalBody}>{msg.body}</p>
+        <p className={styles.violationCount}>
+          Total violations recorded: <strong>{violationsCount}</strong>
+        </p>
+        <div className={styles.modalActions}>
+          {violationType === 'fullscreen_exit' && (securityLevel === 'medium' || securityLevel === 'high') && (
+            <button
+              type="button"
+              className={styles.submitConfirmBtn}
+              onClick={() => { onEnterFullscreen(); onDismiss() }}
+            >
+              Return to Fullscreen
+            </button>
+          )}
+          <button type="button" className={styles.cancelBtn} onClick={onDismiss}>
+            I Understand
+          </button>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+// ─── Fullscreen gate overlay ──────────────────────────────────────────────────
+
+function FullscreenGate({
+  onEnter,
+  canSkip,
+  onSkip,
+}: {
+  onEnter: () => void
+  canSkip: boolean
+  onSkip: () => void
+}) {
+  return (
+    <div className={styles.fullscreenGate} role="dialog" aria-modal="true" aria-labelledby="fs-gate-title">
+      <div className={styles.fullscreenGateCard}>
+        <div className={styles.fullscreenGateIcon} aria-hidden="true">
+          <ShieldIcon />
+        </div>
+        <h2 className={styles.fullscreenGateTitle} id="fs-gate-title">Fullscreen Required</h2>
+        <p className={styles.fullscreenGateBody}>
+          This exam runs in fullscreen mode. Exiting fullscreen will be logged as a violation.
+        </p>
+        <button type="button" className={styles.fullscreenGateBtn} onClick={onEnter}>
+          Enter Fullscreen &amp; Begin Exam
+        </button>
+        {canSkip && (
+          <button type="button" className={styles.fullscreenGateSkip} onClick={onSkip}>
+            Skip (not recommended)
+          </button>
+        )}
+      </div>
+    </div>
+  )
+}
+
 // ─── Main page ────────────────────────────────────────────────────────────────
 
 export default function ExamTaking() {
@@ -147,9 +248,26 @@ export default function ExamTaking() {
   const [answers, setAnswers] = useState<Record<number, string>>({})
   const [timeLeft, setTimeLeft] = useState<number | null>(null)
   const [showConfirm, setShowConfirm] = useState(false)
+  const [fullscreenSkipped, setFullscreenSkipped] = useState(false)
 
   const saveDebounce = useRef<ReturnType<typeof setTimeout> | null>(null)
   const autoSubmitRef = useRef(false)
+
+  const securityLevel = examData?.exam.security_level ?? 'none'
+  const securityActive = securityLevel !== 'none'
+
+  const {
+    violationsCount,
+    showViolationModal,
+    lastViolationType,
+    dismissViolationModal,
+    isFullscreen,
+    enterFullscreen,
+  } = useExamSecurity({
+    securityLevel,
+    examId,
+    enabled: !!examData,
+  })
 
   // ── Start exam ──
   useEffect(() => {
@@ -193,8 +311,6 @@ export default function ExamTaking() {
   // ── Submit mutation ──
   const { mutate: submitExam, isPending: isSubmitting } = useMutation({
     mutationFn: () => {
-      // Include all current answers in the submit payload as a safety net
-      // in case any individual auto-save calls failed
       const answersPayload = Object.entries(answers).map(([qId, ans]) => ({
         question_id: Number(qId),
         student_answer: ans,
@@ -216,6 +332,12 @@ export default function ExamTaking() {
       saveAnswer({ questionId, answer: value })
     }, 800)
   }, [saveAnswer])
+
+  // ── Copy / right-click prevention (low / medium / high) ──
+  const blockCopy = useCallback((e: React.ClipboardEvent | React.MouseEvent) => {
+    if (!securityActive) return
+    e.preventDefault()
+  }, [securityActive])
 
   // ── Loading ──
   if (starting) {
@@ -252,12 +374,35 @@ export default function ExamTaking() {
       : ''
 
   return (
-    <div className={styles.shell}>
+    <div
+      className={styles.shell}
+      onCopy={blockCopy}
+      onCut={blockCopy}
+      onContextMenu={blockCopy}
+    >
+      {/* ── Fullscreen gate (blocks exam until fullscreen is entered) ── */}
+      {(securityLevel === 'medium' || securityLevel === 'high') && !isFullscreen && !fullscreenSkipped && (
+        <FullscreenGate
+          onEnter={enterFullscreen}
+          canSkip={securityLevel === 'medium'}
+          onSkip={() => setFullscreenSkipped(true)}
+        />
+      )}
 
       {/* ── Header bar ── */}
       <header className={styles.header}>
         <h1 className={styles.examTitle}>{exam.title}</h1>
         <div className={styles.headerRight}>
+          {(securityLevel === 'medium' || securityLevel === 'high') && (
+            <span className={styles.securityBadge} title={`Security: ${securityLevel}`}>
+              <ShieldIcon /> Secured
+            </span>
+          )}
+          {violationsCount > 0 && (
+            <span className={styles.violationBadge} title="Violations logged">
+              <AlertIcon /> {violationsCount} {violationsCount === 1 ? 'violation' : 'violations'}
+            </span>
+          )}
           <span className={`${styles.timer} ${timerClass}`} role="timer" aria-live="off">
             <ClockIcon />
             {timeLeft !== null ? formatTime(timeLeft) : '--:--'}
@@ -303,7 +448,12 @@ export default function ExamTaking() {
             <span className={styles.marksBadge}>{q.marks} {q.marks === 1 ? 'mark' : 'marks'}</span>
           </div>
 
-          <p className={styles.questionText}>{q.question_text}</p>
+          <p
+            className={styles.questionText}
+            style={securityActive ? { userSelect: 'none' } : undefined}
+          >
+            {q.question_text}
+          </p>
 
           <div className={styles.answerArea}>
             {q.question_type === 'mcq' && q.options && (
@@ -390,6 +540,16 @@ export default function ExamTaking() {
           onConfirm={doSubmit}
           onCancel={() => setShowConfirm(false)}
           isSubmitting={isSubmitting}
+        />
+      )}
+
+      {showViolationModal && lastViolationType && (
+        <ViolationModal
+          violationType={lastViolationType}
+          violationsCount={violationsCount}
+          onDismiss={dismissViolationModal}
+          onEnterFullscreen={enterFullscreen}
+          securityLevel={securityLevel}
         />
       )}
     </div>

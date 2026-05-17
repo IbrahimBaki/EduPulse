@@ -110,7 +110,7 @@ class StudentExamController extends Controller
             ->where('student_id', $student->id)
             ->first();
 
-        $examPayload = $exam->only(['id', 'title', 'duration_minutes']);
+        $examPayload = $exam->only(['id', 'title', 'duration_minutes', 'security_level']);
 
         if ($existing) {
             if (in_array($existing->status, ['submitted', 'auto_submitted', 'graded'])) {
@@ -206,6 +206,7 @@ class StudentExamController extends Controller
 
         if ($attempt->percentage < 50) {
             SendN8nWebhookJob::dispatch('exam_score_alert', [
+                'student_id'    => $student->id,
                 'student_name'  => $student->name,
                 'exam_title'    => $exam->title,
                 'course_name'   => $exam->course->name,
@@ -220,6 +221,26 @@ class StudentExamController extends Controller
             'attempt'           => $attempt->only(['id', 'status', 'total_score', 'percentage', 'is_passed', 'submitted_at']),
             'teacher_approval'  => 'pending',
         ], 'Exam submitted and graded. Results will be visible after teacher approval.');
+    }
+
+    public function violation(Request $request, Exam $exam): JsonResponse
+    {
+        $request->validate(['type' => 'required|in:tab_switch,fullscreen_exit,copy_attempt']);
+
+        $attempt = ExamAttempt::where('exam_id', $exam->id)
+            ->where('student_id', auth()->id())
+            ->where('status', 'in_progress')
+            ->firstOrFail();
+
+        $log = $attempt->violation_log ?? [];
+        $log[] = ['type' => $request->type, 'at' => now()->toISOString()];
+
+        $attempt->update([
+            'violations_count' => $attempt->violations_count + 1,
+            'violation_log'    => $log,
+        ]);
+
+        return $this->ReturnSuccess(['violations_count' => $attempt->violations_count]);
     }
 
     public function result(Exam $exam): JsonResponse

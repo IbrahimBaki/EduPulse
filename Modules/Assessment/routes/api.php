@@ -50,6 +50,7 @@ Route::prefix('v1/{tenant_code}')->middleware(['tenant', 'auth:sanctum'])->group
         Route::post('{exam}/start', [StudentExamController::class, 'start']);
         Route::post('{exam}/answer', [StudentExamController::class, 'answer']);
         Route::post('{exam}/submit', [StudentExamController::class, 'submit']);
+        Route::post('{exam}/violation', [StudentExamController::class, 'violation']);
         Route::get('{exam}/result', [StudentExamController::class, 'result']);
     });
 });

@@ -18,7 +18,7 @@ class Exam extends Model
         'tenant_id', 'course_id', 'created_by', 'title', 'description',
         'status', 'total_marks', 'passing_percentage', 'duration_minutes',
         'scheduled_at', 'starts_at', 'ends_at',
-        'is_ai_generated', 'ai_model_used', 'language',
+        'is_ai_generated', 'ai_model_used', 'language', 'security_level',
     ];
 
     protected $casts = [

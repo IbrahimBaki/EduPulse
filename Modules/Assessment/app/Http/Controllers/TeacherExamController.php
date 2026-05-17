@@ -227,6 +227,7 @@ class TeacherExamController extends Controller
             'attempt' => $attempt->only([
                 'id', 'status', 'total_score', 'percentage', 'is_passed',
                 'started_at', 'submitted_at', 'graded_at', 'teacher_approved_at',
+                'violations_count', 'violation_log',
             ]),
             'student' => $attempt->student,
             'answers' => $answers,

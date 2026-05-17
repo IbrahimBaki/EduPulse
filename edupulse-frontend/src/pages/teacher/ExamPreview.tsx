@@ -6,9 +6,10 @@ import styles from './ExamPreview.module.css'
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
-type ExamStatus = 'draft' | 'published' | 'scheduled' | 'active' | 'completed' | 'archived'
-type QType      = 'mcq' | 'true_false' | 'short_answer' | 'essay'
-type Difficulty = 'easy' | 'medium' | 'hard'
+type ExamStatus    = 'draft' | 'published' | 'scheduled' | 'active' | 'completed' | 'archived'
+type QType         = 'mcq' | 'true_false' | 'short_answer' | 'essay'
+type Difficulty    = 'easy' | 'medium' | 'hard'
+type SecurityLevel = 'none' | 'low' | 'medium' | 'high'
 
 interface Question {
   id: number
@@ -32,6 +33,7 @@ interface Exam {
   language: string
   is_ai_generated: boolean
   passing_percentage: number
+  security_level: SecurityLevel
   scheduled_at: string | null
   starts_at: string | null
   ends_at: string | null
@@ -383,6 +385,57 @@ function QuestionCard({ q, index, examId }: { q: Question; index: number; examId
   )
 }
 
+// ─── Security level selector ──────────────────────────────────────────────────
+
+const SECURITY_LABELS: Record<SecurityLevel, string> = {
+  none:   'None — no restrictions',
+  low:    'Low — block copy-paste, log tab switches',
+  medium: 'Medium — fullscreen prompt, warn on tab switch',
+  high:   'High — fullscreen enforced, warn on tab switch',
+}
+
+function SecurityLevelSelector({ examId, current }: { examId: number; current: SecurityLevel }) {
+  const qc = useQueryClient()
+  const [value, setValue] = useState<SecurityLevel>(current)
+  const [saved, setSaved] = useState(false)
+
+  const { mutate, isPending } = useMutation({
+    mutationFn: (level: SecurityLevel) => api.patch(`/teacher/exams/${examId}`, { security_level: level }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['teacher-exam', examId] })
+      setSaved(true)
+      setTimeout(() => setSaved(false), 2000)
+    },
+  })
+
+  return (
+    <div className={styles.securitySelector}>
+      <label className={styles.securityLabel} htmlFor="security-level">Security Level</label>
+      <div className={styles.securityRow}>
+        <select
+          id="security-level"
+          className={styles.securitySelect}
+          value={value}
+          onChange={e => { setValue(e.target.value as SecurityLevel); setSaved(false) }}
+        >
+          {(Object.keys(SECURITY_LABELS) as SecurityLevel[]).map(lvl => (
+            <option key={lvl} value={lvl}>{SECURITY_LABELS[lvl]}</option>
+          ))}
+        </select>
+        <button
+          type="button"
+          className={`${styles.btn} ${styles.btnPrimary}`}
+          style={{ height: 34, fontSize: '0.8125rem' }}
+          onClick={() => mutate(value)}
+          disabled={isPending || value === current}
+        >
+          {isPending ? 'Saving…' : saved ? 'Saved ✓' : 'Save'}
+        </button>
+      </div>
+    </div>
+  )
+}
+
 // ─── Main page ────────────────────────────────────────────────────────────────
 
 export default function ExamPreview() {
@@ -446,7 +499,12 @@ export default function ExamPreview() {
             <span>{exam.duration_minutes} min</span>
             <span className={styles.dot} aria-hidden="true">·</span>
             <span>Pass {exam.passing_percentage}%</span>
+            <span className={styles.dot} aria-hidden="true">·</span>
+            <span>Security: <strong>{exam.security_level ?? 'none'}</strong></span>
           </div>
+          {exam.status === 'draft' && (
+            <SecurityLevelSelector examId={exam.id} current={exam.security_level ?? 'none'} />
+          )}
         </div>
 
         {/* Action bar */}

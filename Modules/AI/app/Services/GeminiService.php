@@ -28,14 +28,14 @@ class GeminiService
             ->post($this->url, [
                 'system_instruction' => ['parts' => [['text' => $systemPrompt]]],
                 'contents'           => $contents,
-                'generationConfig'   => ['temperature' => 0.7, 'maxOutputTokens' => 2048],
+                'generationConfig'   => ['temperature' => 0.7, 'maxOutputTokens' => 4096],
             ]);
 
         if (!$response->successful()) {
             throw new \RuntimeException('Gemini API error: ' . $response->status());
         }
 
-        $text = $response->json('candidates.0.content.parts.0.text', '');
+        $text = $this->extractText($response->json());
         if ($text === '') {
             throw new \RuntimeException('Gemini returned an empty response.');
         }
@@ -80,14 +80,14 @@ class GeminiService
             ->post($this->url, [
                 'system_instruction' => ['parts' => [['text' => $systemPrompt]]],
                 'contents'           => $contents,
-                'generationConfig'   => ['temperature' => 0.7, 'maxOutputTokens' => 2048],
+                'generationConfig'   => ['temperature' => 0.7, 'maxOutputTokens' => 4096],
             ]);
 
         if (!$response->successful()) {
             throw new \RuntimeException('Gemini API error: ' . $response->status());
         }
 
-        $text = $response->json('candidates.0.content.parts.0.text', '');
+        $text = $this->extractText($response->json());
         if ($text === '') {
             throw new \RuntimeException('Gemini returned an empty response.');
         }
@@ -137,6 +137,15 @@ class GeminiService
         $clean = trim(preg_replace('/^```(?:json)?\s*|\s*```$/m', '', $raw));
 
         return json_decode($clean, true) ?? [];
+    }
+
+    private function extractText(array $json): string
+    {
+        $parts = $json['candidates'][0]['content']['parts'] ?? [];
+        return implode('', array_column(
+            array_filter($parts, fn($p) => isset($p['text'])),
+            'text'
+        ));
     }
 
     public function generateExamFromPdfs(string $prompt, array $pdfPaths): string

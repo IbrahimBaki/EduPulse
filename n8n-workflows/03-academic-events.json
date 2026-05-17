@@ -1,0 +1,211 @@
+{
+  "name": "EduPulse - 03 Academic Events",
+  "nodes": [
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "cfg-app-url",
+              "name": "APP_URL",
+              "value": "https://edupulse.localhost",
+              "type": "string"
+            },
+            {
+              "id": "cfg-tenant",
+              "name": "TENANT_CODE",
+              "value": "demo",
+              "type": "string"
+            },
+            {
+              "id": "cfg-secret",
+              "name": "N8N_INCOMING_SECRET",
+              "value": "edupulse_n8n_secret_2026",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "03-node-config",
+      "name": "⚙️ Config",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [900, 80]
+    },
+
+    {
+      "parameters": {
+        "path": "schedule_created",
+        "options": {}
+      },
+      "id": "03-wh-schedule-created",
+      "name": "schedule_created",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [240, 160],
+      "webhookId": "edupulse-schedule-created"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $('⚙️ Config').item.json.APP_URL }}/api/v1/{{ $('⚙️ Config').item.json.TENANT_CODE }}/webhooks/n8n/notify",
+        "sendBody": true,
+        "contentType": "json",
+        "body": "={\n  \"secret\": \"{{ $('⚙️ Config').item.json.N8N_INCOMING_SECRET }}\",\n  \"type\": \"schedule_created\",\n  \"user_ids\": [],\n  \"title\": \"New Session Scheduled\",\n  \"body\": \"A new session has been scheduled for course #{{ $('schedule_created').item.json.course_id }} on {{ $('schedule_created').item.json.starts_at }}.\",\n  \"data\": {\n    \"schedule_id\": {{ $('schedule_created').item.json.schedule_id }},\n    \"course_id\": {{ $('schedule_created').item.json.course_id }},\n    \"starts_at\": \"{{ $('schedule_created').item.json.starts_at }}\"\n  }\n}",
+        "options": {}
+      },
+      "id": "03-notify-schedule-created",
+      "name": "Notify: Schedule Created",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1120, 160]
+    },
+
+    {
+      "parameters": {
+        "path": "session_live",
+        "options": {}
+      },
+      "id": "03-wh-session-live",
+      "name": "session_live",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [240, 300],
+      "webhookId": "edupulse-session-live"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $('⚙️ Config').item.json.APP_URL }}/api/v1/{{ $('⚙️ Config').item.json.TENANT_CODE }}/webhooks/n8n/notify",
+        "sendBody": true,
+        "contentType": "json",
+        "body": "={\n  \"secret\": \"{{ $('⚙️ Config').item.json.N8N_INCOMING_SECRET }}\",\n  \"type\": \"session_live\",\n  \"user_ids\": [],\n  \"title\": \"Session is Live Now!\",\n  \"body\": \"Session #{{ $('session_live').item.json.schedule_id }} for course #{{ $('session_live').item.json.course_id }} is now live. Join now!\",\n  \"data\": {\n    \"schedule_id\": {{ $('session_live').item.json.schedule_id }},\n    \"course_id\": {{ $('session_live').item.json.course_id }}\n  }\n}",
+        "options": {}
+      },
+      "id": "03-notify-session-live",
+      "name": "Notify: Session Live",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1120, 300]
+    },
+
+    {
+      "parameters": {
+        "path": "schedule_cancelled",
+        "options": {}
+      },
+      "id": "03-wh-schedule-cancelled",
+      "name": "schedule_cancelled",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [240, 440],
+      "webhookId": "edupulse-schedule-cancelled"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $('⚙️ Config').item.json.APP_URL }}/api/v1/{{ $('⚙️ Config').item.json.TENANT_CODE }}/webhooks/n8n/notify",
+        "sendBody": true,
+        "contentType": "json",
+        "body": "={\n  \"secret\": \"{{ $('⚙️ Config').item.json.N8N_INCOMING_SECRET }}\",\n  \"type\": \"session_cancelled\",\n  \"user_ids\": [],\n  \"title\": \"Session Cancelled\",\n  \"body\": \"Session #{{ $('schedule_cancelled').item.json.schedule_id }} for course #{{ $('schedule_cancelled').item.json.course_id }} has been cancelled.\",\n  \"data\": {\n    \"schedule_id\": {{ $('schedule_cancelled').item.json.schedule_id }},\n    \"course_id\": {{ $('schedule_cancelled').item.json.course_id }}\n  }\n}",
+        "options": {}
+      },
+      "id": "03-notify-schedule-cancelled",
+      "name": "Notify: Schedule Cancelled",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1120, 440]
+    },
+
+    {
+      "parameters": {
+        "path": "lesson_published",
+        "options": {}
+      },
+      "id": "03-wh-lesson-published",
+      "name": "lesson_published",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [240, 580],
+      "webhookId": "edupulse-lesson-published"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $('⚙️ Config').item.json.APP_URL }}/api/v1/{{ $('⚙️ Config').item.json.TENANT_CODE }}/webhooks/n8n/notify",
+        "sendBody": true,
+        "contentType": "json",
+        "body": "={\n  \"secret\": \"{{ $('⚙️ Config').item.json.N8N_INCOMING_SECRET }}\",\n  \"type\": \"lesson_published\",\n  \"user_ids\": [],\n  \"title\": \"New Lesson Available\",\n  \"body\": \"A new lesson \\\"{{ $('lesson_published').item.json.title }}\\\" has been published in course #{{ $('lesson_published').item.json.course_id }}.\",\n  \"data\": {\n    \"lesson_id\": {{ $('lesson_published').item.json.lesson_id }},\n    \"course_id\": {{ $('lesson_published').item.json.course_id }}\n  }\n}",
+        "options": {}
+      },
+      "id": "03-notify-lesson-published",
+      "name": "Notify: Lesson Published",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1120, 580]
+    },
+
+    {
+      "parameters": {
+        "path": "announcement_published",
+        "options": {}
+      },
+      "id": "03-wh-announcement",
+      "name": "announcement_published",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [240, 720],
+      "webhookId": "edupulse-announcement-published"
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={ \"received\": true, \"announcement_id\": {{ $('announcement_published').item.json.announcement_id }}, \"title\": \"{{ $('announcement_published').item.json.title }}\", \"audience\": \"{{ $('announcement_published').item.json.audience }}\" }",
+        "options": {}
+      },
+      "id": "03-log-announcement",
+      "name": "Log: Announcement Published",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [1120, 720]
+    }
+  ],
+  "connections": {
+    "schedule_created": {
+      "main": [[{ "node": "⚙️ Config", "type": "main", "index": 0 }]]
+    },
+    "session_live": {
+      "main": [[{ "node": "⚙️ Config", "type": "main", "index": 0 }]]
+    },
+    "schedule_cancelled": {
+      "main": [[{ "node": "⚙️ Config", "type": "main", "index": 0 }]]
+    },
+    "lesson_published": {
+      "main": [[{ "node": "⚙️ Config", "type": "main", "index": 0 }]]
+    },
+    "announcement_published": {
+      "main": [[{ "node": "⚙️ Config", "type": "main", "index": 0 }]]
+    },
+    "⚙️ Config": {
+      "main": [
+        [
+          { "node": "Notify: Schedule Created", "type": "main", "index": 0 },
+          { "node": "Notify: Session Live", "type": "main", "index": 0 },
+          { "node": "Notify: Schedule Cancelled", "type": "main", "index": 0 },
+          { "node": "Notify: Lesson Published", "type": "main", "index": 0 },
+          { "node": "Log: Announcement Published", "type": "main", "index": 0 }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "id": "edupulse-wf-03",
+  "tags": [
+    { "name": "edupulse" },
+    { "name": "academic" }
+  ]
+}

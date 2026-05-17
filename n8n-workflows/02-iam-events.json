@@ -1,0 +1,246 @@
+{
+  "name": "EduPulse - 02 IAM Events",
+  "nodes": [
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "cfg-app-url",
+              "name": "APP_URL",
+              "value": "https://edupulse.localhost",
+              "type": "string"
+            },
+            {
+              "id": "cfg-tenant",
+              "name": "TENANT_CODE",
+              "value": "demo",
+              "type": "string"
+            },
+            {
+              "id": "cfg-secret",
+              "name": "N8N_INCOMING_SECRET",
+              "value": "edupulse_n8n_secret_2026",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "02-node-config",
+      "name": "⚙️ Config",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [900, 80]
+    },
+
+    {
+      "parameters": {
+        "path": "student_registered",
+        "options": {}
+      },
+      "id": "02-wh-student-reg",
+      "name": "student_registered",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [240, 160],
+      "webhookId": "edupulse-student-registered"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $('⚙️ Config').item.json.APP_URL }}/api/v1/{{ $('⚙️ Config').item.json.TENANT_CODE }}/webhooks/n8n/notify",
+        "sendBody": true,
+        "contentType": "json",
+        "body": "={\n  \"secret\": \"{{ $('⚙️ Config').item.json.N8N_INCOMING_SECRET }}\",\n  \"type\": \"student_welcome\",\n  \"user_ids\": [{{ $('student_registered').item.json.student_id }}],\n  \"title\": \"Welcome to EduPulse!\",\n  \"body\": \"Hello {{ $('student_registered').item.json.name }}, your student account has been created. Your student code is {{ $('student_registered').item.json.student_code }}.\",\n  \"data\": { \"student_code\": \"{{ $('student_registered').item.json.student_code }}\" }\n}",
+        "options": {}
+      },
+      "id": "02-notify-student-reg",
+      "name": "Notify: Welcome Student",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1120, 160]
+    },
+
+    {
+      "parameters": {
+        "path": "student_deactivated",
+        "options": {}
+      },
+      "id": "02-wh-student-deact",
+      "name": "student_deactivated",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [240, 300],
+      "webhookId": "edupulse-student-deactivated"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $('⚙️ Config').item.json.APP_URL }}/api/v1/{{ $('⚙️ Config').item.json.TENANT_CODE }}/webhooks/n8n/notify",
+        "sendBody": true,
+        "contentType": "json",
+        "body": "={\n  \"secret\": \"{{ $('⚙️ Config').item.json.N8N_INCOMING_SECRET }}\",\n  \"type\": \"account_deactivated\",\n  \"user_ids\": [{{ $('student_deactivated').item.json.student_id }}],\n  \"title\": \"Account Deactivated\",\n  \"body\": \"Hello {{ $('student_deactivated').item.json.name }}, your account has been deactivated. Please contact your administrator.\",\n  \"data\": {}\n}",
+        "options": {}
+      },
+      "id": "02-notify-student-deact",
+      "name": "Notify: Account Deactivated",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1120, 300]
+    },
+
+    {
+      "parameters": {
+        "path": "teacher_welcome",
+        "options": {}
+      },
+      "id": "02-wh-teacher",
+      "name": "teacher_welcome",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [240, 440],
+      "webhookId": "edupulse-teacher-welcome"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $('⚙️ Config').item.json.APP_URL }}/api/v1/{{ $('⚙️ Config').item.json.TENANT_CODE }}/webhooks/n8n/notify",
+        "sendBody": true,
+        "contentType": "json",
+        "body": "={\n  \"secret\": \"{{ $('⚙️ Config').item.json.N8N_INCOMING_SECRET }}\",\n  \"type\": \"teacher_welcome\",\n  \"user_ids\": [{{ $('teacher_welcome').item.json.teacher_id }}],\n  \"title\": \"Welcome to EduPulse!\",\n  \"body\": \"Hello {{ $('teacher_welcome').item.json.name }}, your teacher account is ready. Start creating your courses today.\",\n  \"data\": { \"email\": \"{{ $('teacher_welcome').item.json.email }}\" }\n}",
+        "options": {}
+      },
+      "id": "02-notify-teacher",
+      "name": "Notify: Welcome Teacher",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1120, 440]
+    },
+
+    {
+      "parameters": {
+        "path": "parent_registered",
+        "options": {}
+      },
+      "id": "02-wh-parent",
+      "name": "parent_registered",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [240, 580],
+      "webhookId": "edupulse-parent-registered"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $('⚙️ Config').item.json.APP_URL }}/api/v1/{{ $('⚙️ Config').item.json.TENANT_CODE }}/webhooks/n8n/notify",
+        "sendBody": true,
+        "contentType": "json",
+        "body": "={\n  \"secret\": \"{{ $('⚙️ Config').item.json.N8N_INCOMING_SECRET }}\",\n  \"type\": \"parent_welcome\",\n  \"user_ids\": [{{ $('parent_registered').item.json.parent_id }}],\n  \"title\": \"Welcome to EduPulse!\",\n  \"body\": \"Hello {{ $('parent_registered').item.json.name }}, your parent account has been created. You can now track your children's progress.\",\n  \"data\": { \"email\": \"{{ $('parent_registered').item.json.email }}\" }\n}",
+        "options": {}
+      },
+      "id": "02-notify-parent",
+      "name": "Notify: Welcome Parent",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1120, 580]
+    },
+
+    {
+      "parameters": {
+        "path": "enrollment_approved",
+        "options": {}
+      },
+      "id": "02-wh-enroll-approved",
+      "name": "enrollment_approved",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [240, 720],
+      "webhookId": "edupulse-enrollment-approved"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $('⚙️ Config').item.json.APP_URL }}/api/v1/{{ $('⚙️ Config').item.json.TENANT_CODE }}/webhooks/n8n/notify",
+        "sendBody": true,
+        "contentType": "json",
+        "body": "={\n  \"secret\": \"{{ $('⚙️ Config').item.json.N8N_INCOMING_SECRET }}\",\n  \"type\": \"enrollment_approved\",\n  \"user_ids\": [{{ $('enrollment_approved').item.json.student_id }}],\n  \"title\": \"Enrollment Approved!\",\n  \"body\": \"Your enrollment request has been approved. You can now access the course content.\",\n  \"data\": {\n    \"enrollment_request_id\": {{ $('enrollment_approved').item.json.enrollment_request_id }},\n    \"course_id\": {{ $('enrollment_approved').item.json.course_id }}\n  }\n}",
+        "options": {}
+      },
+      "id": "02-notify-enroll-approved",
+      "name": "Notify: Enrollment Approved",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1120, 720]
+    },
+
+    {
+      "parameters": {
+        "path": "enrollment_rejected",
+        "options": {}
+      },
+      "id": "02-wh-enroll-rejected",
+      "name": "enrollment_rejected",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [240, 860],
+      "webhookId": "edupulse-enrollment-rejected"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $('⚙️ Config').item.json.APP_URL }}/api/v1/{{ $('⚙️ Config').item.json.TENANT_CODE }}/webhooks/n8n/notify",
+        "sendBody": true,
+        "contentType": "json",
+        "body": "={\n  \"secret\": \"{{ $('⚙️ Config').item.json.N8N_INCOMING_SECRET }}\",\n  \"type\": \"enrollment_rejected\",\n  \"user_ids\": [{{ $('enrollment_rejected').item.json.student_id }}],\n  \"title\": \"Enrollment Request Declined\",\n  \"body\": \"Your enrollment request could not be approved at this time. Please contact your administrator for more information.\",\n  \"data\": {\n    \"enrollment_request_id\": {{ $('enrollment_rejected').item.json.enrollment_request_id }},\n    \"course_id\": {{ $('enrollment_rejected').item.json.course_id }}\n  }\n}",
+        "options": {}
+      },
+      "id": "02-notify-enroll-rejected",
+      "name": "Notify: Enrollment Rejected",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1120, 860]
+    }
+  ],
+  "connections": {
+    "student_registered": {
+      "main": [[{ "node": "⚙️ Config", "type": "main", "index": 0 }]]
+    },
+    "student_deactivated": {
+      "main": [[{ "node": "⚙️ Config", "type": "main", "index": 0 }]]
+    },
+    "teacher_welcome": {
+      "main": [[{ "node": "⚙️ Config", "type": "main", "index": 0 }]]
+    },
+    "parent_registered": {
+      "main": [[{ "node": "⚙️ Config", "type": "main", "index": 0 }]]
+    },
+    "enrollment_approved": {
+      "main": [[{ "node": "⚙️ Config", "type": "main", "index": 0 }]]
+    },
+    "enrollment_rejected": {
+      "main": [[{ "node": "⚙️ Config", "type": "main", "index": 0 }]]
+    },
+    "⚙️ Config": {
+      "main": [
+        [
+          { "node": "Notify: Welcome Student", "type": "main", "index": 0 },
+          { "node": "Notify: Account Deactivated", "type": "main", "index": 0 },
+          { "node": "Notify: Welcome Teacher", "type": "main", "index": 0 },
+          { "node": "Notify: Welcome Parent", "type": "main", "index": 0 },
+          { "node": "Notify: Enrollment Approved", "type": "main", "index": 0 },
+          { "node": "Notify: Enrollment Rejected", "type": "main", "index": 0 }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "id": "edupulse-wf-02",
+  "tags": [
+    { "name": "edupulse" },
+    { "name": "iam" }
+  ]
+}

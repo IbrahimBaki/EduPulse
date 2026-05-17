@@ -18,6 +18,7 @@ class UpdateExamRequest extends FormRequest
             'description'        => 'nullable|string',
             'duration_minutes'   => 'sometimes|integer|min:10|max:300',
             'passing_percentage' => 'sometimes|integer|min:1|max:100',
+            'security_level'     => 'sometimes|in:none,low,medium,high',
         ];
     }
 }

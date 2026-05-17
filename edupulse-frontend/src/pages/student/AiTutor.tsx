@@ -21,9 +21,10 @@ interface Message {
 
 interface ChatSession {
   id: number
-  topic: string
+  topic: string | null
   lesson_id?: number
   lesson_name?: string
+  course_name?: string
   created_at: string
   messages?: Message[]
 }
@@ -662,8 +663,26 @@ export default function StudentAiTutor() {
                   className={styles.historyItem}
                   onClick={() => loadSession(s)}
                 >
-                  <span className={styles.historyTopic}>{s.topic}</span>
-                  {s.lesson_name && <span className={styles.historyLesson}>{s.lesson_name}</span>}
+                  <span className={styles.historyTopic}>
+                    {(() => {
+                      const raw = s.messages?.find(m => m.role === 'user')?.content ?? s.topic ?? ''
+                      return raw.length > 20 ? raw.slice(0, 20) + '…' : raw || '…'
+                    })()}
+                  </span>
+                  {(s.course_name || s.lesson_name) && (
+                    <div className={styles.historyBadges}>
+                      {s.course_name && (
+                        <span className={`${styles.historyBadge} ${styles.historyBadgeCourse}`}>
+                          {s.course_name}
+                        </span>
+                      )}
+                      {s.lesson_name && (
+                        <span className={`${styles.historyBadge} ${styles.historyBadgeLesson}`}>
+                          {s.lesson_name}
+                        </span>
+                      )}
+                    </div>
+                  )}
                   <span className={styles.historyDate}>{formatDate(s.created_at)}</span>
                 </button>
               ))}

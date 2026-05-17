@@ -615,3 +615,156 @@
   .modalOverlay { animation: none; }
   .takeBtn, .submitBtn, .navArrow, .mcqOption, .tfOption { transition: none; }
 }
+
+/* ─── Security badges ────────────────────────────────────────────────────────── */
+
+.securityBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 4px 10px;
+  border-radius: 4px;
+  background: color-mix(in oklch, var(--color-blue) 10%, transparent);
+  color: var(--color-blue);
+  border: 1px solid color-mix(in oklch, var(--color-blue) 25%, transparent);
+}
+
+.violationBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 4px 10px;
+  border-radius: 4px;
+  background: color-mix(in oklch, var(--color-amber) 10%, transparent);
+  color: var(--color-amber);
+  border: 1px solid color-mix(in oklch, var(--color-amber) 30%, transparent);
+}
+
+/* ─── Violation modal extras ─────────────────────────────────────────────────── */
+
+.violationHeader {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 12px;
+  color: var(--color-amber);
+}
+
+.violationHeader .modalTitle {
+  margin: 0;
+  color: var(--text-primary);
+}
+
+.violationCount {
+  font-size: 0.8125rem;
+  color: var(--text-muted);
+  margin: -12px 0 20px;
+}
+
+.violationCount strong {
+  color: var(--color-amber);
+}
+
+/* ─── Fullscreen gate overlay ────────────────────────────────────────────────── */
+
+.fullscreenGate {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  background: oklch(10% 0.01 255 / 85%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  backdrop-filter: blur(4px);
+  animation: fadeIn 200ms ease-out;
+}
+
+.fullscreenGateCard {
+  background: var(--surface-2);
+  border: 1px solid var(--neutral-border);
+  border-radius: 16px;
+  padding: 40px 36px;
+  max-width: 400px;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 14px;
+  animation: slideUp 220ms ease-out;
+}
+
+.fullscreenGateIcon {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: color-mix(in oklch, var(--color-blue) 12%, transparent);
+  border: 1px solid color-mix(in oklch, var(--color-blue) 25%, transparent);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-blue);
+}
+
+.fullscreenGateIcon svg {
+  width: 24px;
+  height: 24px;
+}
+
+.fullscreenGateTitle {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin: 0;
+}
+
+.fullscreenGateBody {
+  font-size: 0.9375rem;
+  color: var(--text-muted);
+  line-height: 1.55;
+  margin: 0;
+  max-width: 32ch;
+}
+
+.fullscreenGateBtn {
+  margin-block-start: 6px;
+  width: 100%;
+  padding: 11px 20px;
+  border-radius: var(--radius-md, 8px);
+  background: var(--color-blue);
+  color: oklch(98% 0.005 255);
+  border: none;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: filter 150ms ease-out, transform 120ms ease-out;
+}
+
+.fullscreenGateBtn:hover {
+  filter: brightness(1.08);
+  transform: translateY(-1px);
+}
+
+.fullscreenGateBtn:focus-visible {
+  outline: 2px solid var(--color-blue);
+  outline-offset: 2px;
+}
+
+.fullscreenGateSkip {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  font-size: 0.8125rem;
+  cursor: pointer;
+  text-decoration: underline;
+  padding: 0;
+}
+
+.fullscreenGateSkip:hover {
+  color: var(--text-primary);
+}

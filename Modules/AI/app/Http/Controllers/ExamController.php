@@ -17,7 +17,7 @@ class ExamController extends Controller
             'count'    => 'nullable|integer|min:5|max:50',
         ]);
 
-        $systemPrompt = app(SystemPromptBuilder::class)->build($request->user()->id);
+        $systemPrompt = app(SystemPromptBuilder::class)->build($request->user()->id, null, null, 'quiz');
         $exam         = app(GeminiService::class)->generateExam(
             $systemPrompt,
             $data['topics'],
