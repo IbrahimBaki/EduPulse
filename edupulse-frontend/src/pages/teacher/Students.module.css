@@ -120,6 +120,7 @@
   flex-shrink: 0;
   letter-spacing: 0.02em;
   text-transform: uppercase;
+  overflow: hidden;
 }
 
 .studentCell {

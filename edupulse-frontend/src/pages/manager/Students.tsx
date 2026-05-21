@@ -4,10 +4,13 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
 import api from '../../lib/axios'
 import styles from './Students.module.css'
+import UserAvatar from '../../components/UserAvatar'
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
 interface GradeLevel { id: number; name: string; level: number }
+
+interface ParentLite { id: number; name: string; email: string; phone: string | null; avatar_url?: string | null }
 
 interface StudentProfile {
   student_code: string
@@ -26,6 +29,7 @@ interface Student {
   name: string
   email: string
   phone: string | null
+  avatar_url?: string | null
   is_active: boolean
   student_profile: StudentProfile | null
 }
@@ -68,6 +72,20 @@ interface CreatePayload {
   gender: string
   address: string
   enrollment_date: string
+  parent_id?: number
+}
+
+interface UpdateStudentPayload {
+  name?: string
+  email?: string
+  phone?: string
+  password?: string
+  grade_level_id?: number | ''
+  date_of_birth?: string
+  gender?: string
+  address?: string
+  enrollment_date?: string
+  is_active?: boolean
 }
 
 // ─── API ──────────────────────────────────────────────────────────────────────
@@ -107,6 +125,30 @@ async function toggleStudentStatus(id: number) {
 async function createStudentApi(payload: CreatePayload) {
   const { data } = await api.post('/manager/students', payload)
   return data
+}
+
+async function searchParentsApi(q: string) {
+  const { data } = await api.get('/manager/parents', { params: { search: q, per_page: 15 } })
+  const raw = data.data
+  const list = Array.isArray(raw) ? raw : Array.isArray(raw?.data) ? raw.data : []
+  return list as ParentLite[]
+}
+
+async function assignParentApi(studentId: number, parentId: number) {
+  await api.post(`/manager/students/${studentId}/assign-parent`, { parent_id: parentId })
+}
+
+async function removeParentApi(studentId: number, parentId: number) {
+  await api.delete(`/manager/students/${studentId}/parents/${parentId}`)
+}
+
+async function updateStudentApi(id: number, payload: UpdateStudentPayload) {
+  const { data } = await api.put(`/manager/students/${id}`, payload)
+  return data.data as StudentDetail
+}
+
+async function updateFeeStatusApi(id: number, payload: { fee_status: string; fee_due_date?: string }) {
+  await api.patch(`/manager/students/${id}/fee-status`, payload)
 }
 
 // ─── FeeBadge ─────────────────────────────────────────────────────────────────
@@ -247,11 +289,12 @@ function AddStudentForm({ gradeLevels, onSuccess, onCancel }: {
     name: '', email: '', password: '', grade_level_id: '',
     phone: '', date_of_birth: '', gender: '', address: '', enrollment_date: '',
   })
+  const [selectedParent, setSelectedParent] = useState<ParentLite | null>(null)
   const [errors, setErrors] = useState<FieldErrors>({})
   const [serverError, setServerError] = useState<string | null>(null)
 
   const mutation = useMutation({
-    mutationFn: createStudentApi,
+    mutationFn: (payload: CreatePayload) => createStudentApi(payload),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['manager-students'] })
       onSuccess()
@@ -289,7 +332,10 @@ function AddStudentForm({ gradeLevels, onSuccess, onCancel }: {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
     if (!validate()) return
-    mutation.mutate(form)
+    mutation.mutate({
+      ...form,
+      ...(selectedParent ? { parent_id: selectedParent.id } : {}),
+    })
   }
 
   const inp = (hasErr?: string) => `${styles.formInput}${hasErr ? ' ' + styles.inputError : ''}`
@@ -337,6 +383,14 @@ function AddStudentForm({ gradeLevels, onSuccess, onCancel }: {
           <label className={styles.formLabel} htmlFor="fs-enroll">Enrollment date</label>
           <input id="fs-enroll" type="date" className={styles.formInput} value={form.enrollment_date}
             onChange={e => field('enrollment_date', e.target.value)} />
+        </div>
+      </div>
+
+      <div className={styles.formSection}>
+        <p className={styles.formSectionHeading}>Guardian (optional)</p>
+        <div className={styles.formGroup}>
+          <label className={styles.formLabel}>Parent</label>
+          <ParentSingleCombobox value={selectedParent} onChange={setSelectedParent} />
         </div>
       </div>
 
@@ -448,6 +502,395 @@ function EnrollCourseInline({ studentId, enrolledIds }: { studentId: number; enr
   )
 }
 
+// ─── ParentSingleCombobox ─────────────────────────────────────────────────────
+
+function ParentSingleCombobox({ value, onChange }: {
+  value: ParentLite | null
+  onChange: (p: ParentLite | null) => void
+}) {
+  const [query, setQuery] = useState('')
+  const [debQuery, setDebQuery] = useState('')
+  const [open, setOpen] = useState(false)
+  const wrapRef = useRef<HTMLDivElement>(null)
+  const timer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined)
+
+  useEffect(() => {
+    clearTimeout(timer.current)
+    timer.current = setTimeout(() => setDebQuery(query), 300)
+    return () => clearTimeout(timer.current)
+  }, [query])
+
+  useEffect(() => {
+    if (!open) return
+    const handler = (e: MouseEvent) => {
+      if (wrapRef.current && !wrapRef.current.contains(e.target as Node)) setOpen(false)
+    }
+    document.addEventListener('mousedown', handler)
+    return () => document.removeEventListener('mousedown', handler)
+  }, [open])
+
+  const parentsQ = useQuery({
+    queryKey: ['parent-search', debQuery],
+    queryFn: () => searchParentsApi(debQuery),
+    enabled: debQuery.length >= 1,
+    staleTime: 30_000,
+  })
+
+  if (value) {
+    return (
+      <div className={styles.chips}>
+        <span className={styles.chip} style={{ maxWidth: 'none', flex: '0 1 auto' }}>
+          <span className={styles.chipLabel}>{value.name}</span>
+          <button
+            type="button"
+            className={styles.chipX}
+            onClick={() => onChange(null)}
+            aria-label={`Remove ${value.name}`}
+          >
+            <svg width="9" height="9" viewBox="0 0 9 9" fill="none">
+              <path d="M1 1l7 7M8 1L1 8" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+            </svg>
+          </button>
+        </span>
+        <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', alignSelf: 'center' }}>
+          {value.email}
+        </span>
+      </div>
+    )
+  }
+
+  return (
+    <div ref={wrapRef} className={styles.comboWrap}>
+      <svg className={styles.comboSearchIcon} width="13" height="13" viewBox="0 0 14 14" fill="none">
+        <circle cx="6" cy="6" r="4.5" stroke="currentColor" strokeWidth="1.5"/>
+        <path d="M9.5 9.5L12.5 12.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+      </svg>
+      <input
+        type="text"
+        className={styles.comboInput}
+        placeholder="Search parents by name or email…"
+        value={query}
+        onChange={e => { setQuery(e.target.value); setOpen(true) }}
+        onFocus={() => { if (query) setOpen(true) }}
+        autoComplete="off"
+        aria-autocomplete="list"
+        aria-expanded={open}
+        aria-haspopup="listbox"
+      />
+      {open && debQuery.length >= 1 && (
+        <div className={styles.comboDropdown} role="listbox">
+          {parentsQ.isFetching ? (
+            <div className={styles.comboEmpty}>Searching…</div>
+          ) : (parentsQ.data ?? []).length > 0 ? (
+            (parentsQ.data ?? []).slice(0, 8).map(p => {
+              return (
+                <div
+                  key={p.id}
+                  className={styles.comboOption}
+                  role="option"
+                  aria-selected={false}
+                  onMouseDown={() => { onChange(p); setQuery(''); setOpen(false) }}
+                >
+                  <UserAvatar
+                    name={p.name}
+                    avatarUrl={p.avatar_url}
+                    className={styles.avatarInitials}
+                    style={{ width: '26px', height: '26px', fontSize: '0.5rem', flexShrink: 0 }}
+                  />
+                  <div className={styles.nameStack} style={{ flex: 1, minWidth: 0 }}>
+                    <span className={styles.studentName}>{p.name}</span>
+                    <span className={styles.studentEmail}>{p.email}</span>
+                  </div>
+                </div>
+              )
+            })
+          ) : (
+            <div className={styles.comboEmpty}>No parents found for "{debQuery}"</div>
+          )}
+        </div>
+      )}
+    </div>
+  )
+}
+
+// ─── AssignParentInline ───────────────────────────────────────────────────────
+
+function AssignParentInline({ studentId }: { studentId: number }) {
+  const qc = useQueryClient()
+  const [selectedParent, setSelectedParent] = useState<ParentLite | null>(null)
+  const [assignError, setAssignError] = useState<string | null>(null)
+
+  const assignMut = useMutation({
+    mutationFn: (parentId: number) => assignParentApi(studentId, parentId),
+    onSuccess: () => {
+      setSelectedParent(null)
+      setAssignError(null)
+      qc.invalidateQueries({ queryKey: ['manager-student-detail', studentId] })
+    },
+    onError: (err: unknown) => {
+      const msg = (err as { response?: { data?: { message?: string } } })?.response?.data?.message ?? 'Could not assign parent'
+      setAssignError(msg)
+    },
+  })
+
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+      <ParentSingleCombobox value={selectedParent} onChange={p => { setSelectedParent(p); setAssignError(null) }} />
+      {selectedParent && (
+        <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+          <button
+            type="button"
+            className={styles.enrollSubmitBtn}
+            style={{ height: '28px' }}
+            disabled={assignMut.isPending}
+            onClick={() => assignMut.mutate(selectedParent.id)}
+          >
+            {assignMut.isPending ? 'Adding…' : 'Add'}
+          </button>
+        </div>
+      )}
+      {assignError && <p className={styles.enrollError} role="alert">{assignError}</p>}
+    </div>
+  )
+}
+
+// ─── StudentEditForm ──────────────────────────────────────────────────────────
+
+function StudentEditForm({ data, gradeLevels, onSuccess, onCancel }: {
+  data: StudentDetail
+  gradeLevels: GradeLevel[]
+  onSuccess: () => void
+  onCancel: () => void
+}) {
+  const qc = useQueryClient()
+  const p = data.student_profile
+  const [name, setName]         = useState(data.name)
+  const [email, setEmail]       = useState(data.email)
+  const [phone, setPhone]       = useState(data.phone ?? '')
+  const [password, setPassword] = useState('')
+  const [gradeId, setGradeId]   = useState<number | ''>(p?.grade_level_id ?? '')
+  const [dob, setDob]           = useState(p?.date_of_birth ?? '')
+  const [gender, setGender]     = useState(p?.gender ?? '')
+  const [address, setAddress]   = useState(p?.address ?? '')
+  const [enrollDate, setEnrollDate] = useState(p?.enrollment_date ?? '')
+  const [isActive, setIsActive] = useState(data.is_active)
+  const [errors, setErrors]     = useState<FieldErrors>({})
+  const [serverError, setServerError] = useState<string | null>(null)
+
+  const mutation = useMutation({
+    mutationFn: (payload: UpdateStudentPayload) => updateStudentApi(data.id, payload),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['manager-students'] })
+      qc.invalidateQueries({ queryKey: ['manager-student-detail', data.id] })
+      onSuccess()
+    },
+    onError: (err: unknown) => {
+      const e = err as { response?: { data?: { errors?: Record<string, string[]>; message?: string } } }
+      if (e.response?.data?.errors) {
+        const mapped: FieldErrors = {}
+        for (const [k, v] of Object.entries(e.response.data.errors)) mapped[k] = v[0]
+        setErrors(mapped)
+      } else {
+        setServerError(e.response?.data?.message ?? 'Something went wrong.')
+      }
+    },
+  })
+
+  const clearErr = (key: string) => setErrors(e => ({ ...e, [key]: undefined }))
+
+  const validate = (): boolean => {
+    const e: FieldErrors = {}
+    if (!name.trim())  e.name = 'Name is required'
+    if (!email.trim()) e.email = 'Email is required'
+    else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) e.email = 'Enter a valid email'
+    if (password && password.length < 8) e.password = 'Minimum 8 characters'
+    if (!gradeId) e.grade_level_id = 'Grade level is required'
+    setErrors(e)
+    return Object.keys(e).length === 0
+  }
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!validate()) return
+    const payload: UpdateStudentPayload = {
+      name:           name.trim(),
+      email:          email.trim(),
+      grade_level_id: gradeId || undefined,
+      is_active:      isActive,
+    }
+    if (phone.trim())   payload.phone = phone.trim()
+    if (password)       payload.password = password
+    if (dob)            payload.date_of_birth = dob
+    if (gender)         payload.gender = gender
+    if (address.trim()) payload.address = address.trim()
+    if (enrollDate)     payload.enrollment_date = enrollDate
+    mutation.mutate(payload)
+  }
+
+  const inp = (hasErr?: string) => `${styles.formInput}${hasErr ? ' ' + styles.inputError : ''}`
+  const sel = (hasErr?: string) => `${styles.formSelect}${hasErr ? ' ' + styles.inputError : ''}`
+
+  return (
+    <form className={styles.addForm} onSubmit={handleSubmit} noValidate>
+      {serverError && <div className={styles.formBanner} role="alert">{serverError}</div>}
+
+      <div className={styles.formSection}>
+        <p className={styles.formSectionHeading}>Account</p>
+        <div className={styles.formGroup}>
+          <label className={styles.formLabel} htmlFor="se-name">Full name <span aria-hidden>*</span></label>
+          <input id="se-name" type="text" className={inp(errors.name)} value={name}
+            onChange={e => { setName(e.target.value); clearErr('name'); setServerError(null) }} />
+          {errors.name && <p className={styles.fieldErr}>{errors.name}</p>}
+        </div>
+        <div className={styles.formGroup}>
+          <label className={styles.formLabel} htmlFor="se-email">Email <span aria-hidden>*</span></label>
+          <input id="se-email" type="email" className={inp(errors.email)} value={email}
+            onChange={e => { setEmail(e.target.value); clearErr('email'); setServerError(null) }} />
+          {errors.email && <p className={styles.fieldErr}>{errors.email}</p>}
+        </div>
+        <div className={styles.formGroup}>
+          <label className={styles.formLabel} htmlFor="se-phone">Phone</label>
+          <input id="se-phone" type="tel" className={styles.formInput} value={phone}
+            onChange={e => setPhone(e.target.value)} />
+        </div>
+        <div className={styles.formGroup}>
+          <label className={styles.formLabel} htmlFor="se-pw">New password</label>
+          <input id="se-pw" type="password" className={inp(errors.password)} value={password}
+            placeholder="Leave blank to keep current"
+            onChange={e => { setPassword(e.target.value); clearErr('password') }}
+            autoComplete="new-password" />
+          {errors.password && <p className={styles.fieldErr}>{errors.password}</p>}
+        </div>
+        <div className={styles.formGroup} style={{ flexDirection: 'row', alignItems: 'center', gap: '10px' }}>
+          <label className={styles.formLabel} style={{ marginBottom: 0 }}>Active</label>
+          <Toggle checked={isActive} onChange={() => setIsActive(a => !a)} label="Active status" />
+        </div>
+      </div>
+
+      <div className={styles.formSection}>
+        <p className={styles.formSectionHeading}>Academic</p>
+        <div className={styles.formGroup}>
+          <label className={styles.formLabel} htmlFor="se-grade">Grade level <span aria-hidden>*</span></label>
+          <select id="se-grade" className={sel(errors.grade_level_id)} value={gradeId}
+            onChange={e => { setGradeId(e.target.value ? Number(e.target.value) : ''); clearErr('grade_level_id') }}>
+            <option value="">Select grade level</option>
+            {gradeLevels.map(g => <option key={g.id} value={g.id}>{g.name}</option>)}
+          </select>
+          {errors.grade_level_id && <p className={styles.fieldErr}>{errors.grade_level_id}</p>}
+        </div>
+        <div className={styles.formGroup}>
+          <label className={styles.formLabel} htmlFor="se-enroll">Enrollment date</label>
+          <input id="se-enroll" type="date" className={styles.formInput} value={enrollDate}
+            onChange={e => setEnrollDate(e.target.value)} />
+        </div>
+      </div>
+
+      <div className={styles.formSection}>
+        <p className={styles.formSectionHeading}>Personal</p>
+        <div className={styles.formRow}>
+          <div className={styles.formGroup}>
+            <label className={styles.formLabel} htmlFor="se-gender">Gender</label>
+            <select id="se-gender" className={styles.formSelect} value={gender}
+              onChange={e => setGender(e.target.value)}>
+              <option value="">—</option>
+              <option value="male">Male</option>
+              <option value="female">Female</option>
+            </select>
+          </div>
+          <div className={styles.formGroup}>
+            <label className={styles.formLabel} htmlFor="se-dob">Date of birth</label>
+            <input id="se-dob" type="date" className={styles.formInput} value={dob}
+              onChange={e => setDob(e.target.value)} />
+          </div>
+        </div>
+        <div className={styles.formGroup}>
+          <label className={styles.formLabel} htmlFor="se-addr">Address</label>
+          <textarea id="se-addr" rows={2} className={styles.formTextarea} value={address}
+            onChange={e => setAddress(e.target.value)} />
+        </div>
+      </div>
+
+      <div className={styles.formFooter}>
+        <button type="button" className={styles.formCancel} onClick={onCancel}>Cancel</button>
+        <button type="submit" className={styles.formSubmit} disabled={mutation.isPending}>
+          {mutation.isPending ? 'Saving…' : 'Save changes'}
+        </button>
+      </div>
+    </form>
+  )
+}
+
+// ─── FeeStatusInlineEdit ──────────────────────────────────────────────────────
+
+function FeeStatusInlineEdit({ studentId, feeStatus, feeDueDate, onCancel, onSuccess }: {
+  studentId: number
+  feeStatus: string | null
+  feeDueDate: string | null
+  onCancel: () => void
+  onSuccess: () => void
+}) {
+  const qc = useQueryClient()
+  const [status, setStatus]   = useState(feeStatus ?? 'pending')
+  const [dueDate, setDueDate] = useState(feeDueDate ?? '')
+  const [error, setError]     = useState<string | null>(null)
+
+  const mut = useMutation({
+    mutationFn: (vars: { fee_status: string; fee_due_date?: string }) =>
+      updateFeeStatusApi(studentId, vars),
+    onSuccess: () => {
+      setError(null)
+      qc.invalidateQueries({ queryKey: ['manager-student-detail', studentId] })
+      onSuccess()
+    },
+    onError: (err: unknown) => {
+      setError(
+        (err as { response?: { data?: { message?: string } } })?.response?.data?.message
+          ?? 'Failed to update fee status'
+      )
+    },
+  })
+
+  return (
+    <form
+      className={styles.feeEditForm}
+      onSubmit={e => {
+        e.preventDefault()
+        mut.mutate({ fee_status: status, ...(dueDate ? { fee_due_date: dueDate } : {}) })
+      }}
+    >
+      <select
+        className={styles.feeSelect}
+        value={status}
+        onChange={e => setStatus(e.target.value)}
+        aria-label="Fee status"
+        disabled={mut.isPending}
+      >
+        <option value="paid">Paid</option>
+        <option value="pending">Pending</option>
+        <option value="overdue">Overdue</option>
+      </select>
+      <input
+        type="date"
+        className={styles.feeDateInput}
+        value={dueDate}
+        onChange={e => setDueDate(e.target.value)}
+        aria-label="Due date"
+        disabled={mut.isPending}
+      />
+      <div className={styles.feeEditActions}>
+        <button type="button" className={styles.feeEditCancel} onClick={onCancel} disabled={mut.isPending}>
+          Cancel
+        </button>
+        <button type="submit" className={styles.enrollSubmitBtn} disabled={mut.isPending}
+          style={{ height: '30px' }}>
+          {mut.isPending ? '…' : 'Save'}
+        </button>
+      </div>
+      {error && <p className={styles.enrollError} role="alert" style={{ width: '100%' }}>{error}</p>}
+    </form>
+  )
+}
+
 // ─── StudentDetailPanel ───────────────────────────────────────────────────────
 
 function DRow({ label, children }: { label: string; children: ReactNode }) {
@@ -460,9 +903,31 @@ function DRow({ label, children }: { label: string; children: ReactNode }) {
 }
 
 function StudentDetailPanel({ id }: { id: number }) {
+  const qc = useQueryClient()
+  const [isEditing, setIsEditing]       = useState(false)
+  const [editingFee, setEditingFee]     = useState(false)
+  const [removingParentIds, setRemovingParentIds] = useState<Set<number>>(new Set())
+
   const { data, isLoading, isError, refetch } = useQuery({
     queryKey: ['manager-student-detail', id],
     queryFn: () => fetchStudentDetail(id),
+  })
+
+  const gradesQ = useQuery({
+    queryKey: ['manager-grade-levels'],
+    queryFn: fetchGradeLevels,
+    staleTime: 30 * 60 * 1000,
+  })
+
+  const removeParentMut = useMutation({
+    mutationFn: (parentId: number) => removeParentApi(id, parentId),
+    onMutate: (parentId: number) => {
+      setRemovingParentIds(s => { const n = new Set(s); n.add(parentId); return n })
+    },
+    onSettled: (_d, _e, parentId: number) => {
+      setRemovingParentIds(s => { const n = new Set(s); n.delete(parentId); return n })
+      qc.invalidateQueries({ queryKey: ['manager-student-detail', id] })
+    },
   })
 
   if (isLoading) {
@@ -486,14 +951,24 @@ function StudentDetailPanel({ id }: { id: number }) {
     )
   }
 
+  if (isEditing) {
+    return (
+      <StudentEditForm
+        data={data}
+        gradeLevels={gradesQ.data ?? []}
+        onSuccess={() => setIsEditing(false)}
+        onCancel={() => setIsEditing(false)}
+      />
+    )
+  }
+
   const p = data.student_profile
-  const initials = data.name.split(' ').map(n => n[0]).filter(Boolean).join('').slice(0, 2).toUpperCase()
   const fmt = (d: string | null | undefined) => d ? new Date(d).toLocaleDateString() : null
 
   return (
     <div className={styles.dContent}>
       <div className={styles.dHero}>
-        <div className={styles.dAvatar}>{initials}</div>
+        <UserAvatar name={data.name} avatarUrl={data.avatar_url} className={styles.dAvatar} />
         <div className={styles.dHeroInfo}>
           <p className={styles.dName}>{data.name}</p>
           <p className={styles.dCode}>{p?.student_code ?? '—'}</p>
@@ -503,6 +978,16 @@ function StudentDetailPanel({ id }: { id: number }) {
             </span>
             {p?.fee_status && <FeeBadge status={p.fee_status} />}
           </div>
+          <button
+            type="button"
+            className={styles.dEditBtn}
+            onClick={() => setIsEditing(true)}
+          >
+            <svg width="11" height="11" viewBox="0 0 11 11" fill="none" aria-hidden="true">
+              <path d="M7.5 1.5l2 2L3 10H1V8L7.5 1.5z" stroke="currentColor" strokeWidth="1.4" strokeLinejoin="round"/>
+            </svg>
+            Edit student
+          </button>
         </div>
       </div>
 
@@ -529,27 +1014,100 @@ function StudentDetailPanel({ id }: { id: number }) {
       </section>
 
       <section className={styles.dSection}>
-        <h3 className={styles.dSectionTitle}>Finance</h3>
+        <div className={styles.dSectionHeader}>
+          <h3 className={styles.dSectionTitle} style={{ margin: 0 }}>Finance</h3>
+          {!editingFee && (
+            <button type="button" className={styles.dSectionHeaderBtn} onClick={() => setEditingFee(true)}>
+              Edit
+            </button>
+          )}
+        </div>
         <dl className={styles.dGrid}>
           <DRow label="Fee status"><FeeBadge status={p?.fee_status} /></DRow>
           <DRow label="Due date">{fmt(p?.fee_due_date)}</DRow>
         </dl>
+        {editingFee && (
+          <FeeStatusInlineEdit
+            studentId={data.id}
+            feeStatus={p?.fee_status ?? null}
+            feeDueDate={p?.fee_due_date ?? null}
+            onCancel={() => setEditingFee(false)}
+            onSuccess={() => setEditingFee(false)}
+          />
+        )}
       </section>
 
-      {data.parents.length > 0 && (
-        <section className={styles.dSection}>
-          <h3 className={styles.dSectionTitle}>Parents / Guardians</h3>
-          <ul className={styles.parentList}>
-            {data.parents.map(parent => (
-              <li key={parent.id} className={styles.parentCard}>
-                <p className={styles.parentName}>{parent.name}</p>
-                <p className={styles.parentContact}>{parent.email}</p>
-                {parent.phone && <p className={styles.parentContact}>{parent.phone}</p>}
-              </li>
-            ))}
+      <section className={styles.dSection}>
+        <div className={styles.dSectionHeader}>
+          <h3 className={styles.dSectionTitle} style={{ margin: 0 }}>Parents / Guardians</h3>
+          <span className={styles.guardianCapacity}>{data.parents.length}/2</span>
+        </div>
+        {data.parents.length > 0 ? (
+          <ul className={styles.enrolledList}>
+            {data.parents.map(parent => {
+              const pInitials = parent.name.split(' ').map(n => n[0]).filter(Boolean).join('').slice(0, 2).toUpperCase()
+              return (
+                <li key={parent.id} className={styles.enrolledItem}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', minWidth: 0, flex: 1 }}>
+                    <div
+                      className={styles.avatarInitials}
+                      style={{ width: '26px', height: '26px', fontSize: '0.5rem', flexShrink: 0 }}
+                    >
+                      {pInitials}
+                    </div>
+                    <div className={styles.nameStack} style={{ minWidth: 0 }}>
+                      <span className={styles.enrolledCourseName}>{parent.name}</span>
+                      <span className={styles.enrolledDate}>{parent.email}</span>
+                    </div>
+                  </div>
+                  <button
+                    type="button"
+                    aria-label={`Remove ${parent.name}`}
+                    disabled={removingParentIds.has(parent.id)}
+                    onClick={() => removeParentMut.mutate(parent.id)}
+                    style={{
+                      flexShrink: 0,
+                      height: '24px',
+                      padding: '0 10px',
+                      fontSize: '0.75rem',
+                      fontWeight: 500,
+                      color: 'var(--color-red)',
+                      background: 'var(--color-red-dim)',
+                      border: '1px solid oklch(58% 0.22 27 / 0.22)',
+                      borderRadius: 'var(--radius-sm)',
+                      cursor: 'pointer',
+                      opacity: removingParentIds.has(parent.id) ? 0.5 : 1,
+                      transition: 'opacity var(--dur-fast) var(--ease-out-quart)',
+                      fontFamily: 'inherit',
+                    }}
+                  >
+                    {removingParentIds.has(parent.id) ? '…' : 'Remove'}
+                  </button>
+                </li>
+              )
+            })}
           </ul>
-        </section>
-      )}
+        ) : (
+          <p className={styles.dPlaceholder}>No guardians assigned yet.</p>
+        )}
+        {data.parents.length < 2 ? (
+          <div style={{ marginTop: '12px' }}>
+            <p style={{
+              fontSize: '0.6875rem',
+              fontWeight: 600,
+              color: 'var(--text-muted)',
+              letterSpacing: '0.06em',
+              textTransform: 'uppercase',
+              marginBottom: '8px',
+            }}>
+              {data.parents.length === 1 ? 'Add second guardian' : 'Add guardian'}
+            </p>
+            <AssignParentInline studentId={data.id} />
+          </div>
+        ) : (
+          <p className={styles.guardianSlotNote}>Both guardian slots are filled.</p>
+        )}
+      </section>
 
       <section className={styles.dSection}>
         <h3 className={styles.dSectionTitle}>Enrolled Courses</h3>
@@ -811,7 +1369,6 @@ export default function StudentsPage() {
                 students.map(s => {
                   const p = s.student_profile
                   const isSel = selected.has(s.id)
-                  const initials = s.name.split(' ').map(n => n[0]).filter(Boolean).join('').slice(0, 2).toUpperCase()
                   return (
                     <tr
                       key={s.id}
@@ -829,7 +1386,7 @@ export default function StudentsPage() {
                       </td>
                       <td className={styles.td}>
                         <div className={styles.cellName}>
-                          <div className={styles.avatarInitials}>{initials}</div>
+                          <UserAvatar name={s.name} avatarUrl={s.avatar_url} className={styles.avatarInitials} />
                           <div className={styles.nameStack}>
                             <span className={styles.studentName}>{s.name}</span>
                             <span className={styles.studentEmail}>{s.email}</span>

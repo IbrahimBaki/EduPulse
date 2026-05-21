@@ -13,6 +13,10 @@ export default defineConfig({
         target: 'http://edupulse.localhost',
         changeOrigin: true,
       },
+      '/storage': {
+        target: 'http://edupulse.localhost',
+        changeOrigin: true,
+      },
     },
   },
 })

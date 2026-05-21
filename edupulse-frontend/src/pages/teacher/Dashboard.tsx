@@ -14,6 +14,7 @@ import { useTranslation } from 'react-i18next'
 import { useAuthStore } from '../../stores/authStore'
 import api from '../../lib/axios'
 import styles from './Dashboard.module.css'
+import UserAvatar from '../../components/UserAvatar'
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -43,6 +44,7 @@ interface Session {
 interface AtRiskStudent {
   id: number
   name: string
+  avatar_url?: string | null
   course_name: string
   weakest_topic: string
   weakest_score: number
@@ -51,6 +53,7 @@ interface AtRiskStudent {
 interface QuizActivity {
   id: number
   student_name: string
+  student_avatar_url?: string | null
   topic: string
   score: number
   grade_level: string
@@ -64,9 +67,6 @@ interface TopicPerformance {
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
-function nameInitials(name: string | null | undefined): string {
-  return (name ?? '').trim().split(/\s+/).filter(Boolean).slice(0, 2).map(w => w[0]).join('').toUpperCase()
-}
 
 function getGreeting(name: string | null | undefined, t: (key: string) => string): string {
   const hour = new Date().getHours()
@@ -387,9 +387,7 @@ function AtRiskStudents({ students, loading, error, refetch }: {
         <ul className={styles.atRiskList} aria-label="At-risk students">
           {students.map(s => (
             <li key={s.id} className={styles.atRiskRow}>
-              <div className={styles.atRiskAvatar} aria-hidden="true">
-                {nameInitials(s.name)}
-              </div>
+              <UserAvatar name={s.name} avatarUrl={s.avatar_url} className={styles.atRiskAvatar} />
               <div className={styles.atRiskInfo}>
                 <div className={styles.atRiskName}>{s.name}</div>
                 <div className={styles.atRiskCourse}>{s.course_name}</div>
@@ -463,9 +461,7 @@ function RecentQuizActivity({ activity, loading, error, refetch }: {
         <ul className={styles.quizList} aria-label="Recent quiz activity">
           {activity.slice(0, 8).map(a => (
             <li key={a.id} className={styles.quizRow}>
-              <div className={styles.quizAvatar} aria-hidden="true">
-                {nameInitials(a.student_name)}
-              </div>
+              <UserAvatar name={a.student_name} avatarUrl={a.student_avatar_url} className={styles.quizAvatar} />
               <div className={styles.quizInfo}>
                 <div className={styles.quizStudent}>{a.student_name}</div>
                 <div className={styles.quizTopic}>{a.topic}</div>

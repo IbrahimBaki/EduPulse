@@ -24,6 +24,7 @@ Route::prefix('v1/{tenant_code}')->middleware(['tenant', 'auth:sanctum'])->group
         // Finance dashboard
         Route::get('finance/summary', [FinanceDashboardController::class, 'summary']);
         Route::get('finance/transactions', [FinanceDashboardController::class, 'transactions']);
+        Route::get('finance/fees-by-parent', [FinanceDashboardController::class, 'feesByParent']);
     });
 
     // Student fees
@@ -31,8 +32,5 @@ Route::prefix('v1/{tenant_code}')->middleware(['tenant', 'auth:sanctum'])->group
         Route::get('fees', [StudentFeeController::class, 'myFees']);
     });
 
-    // Parent fees
-    Route::middleware('role:parent')->prefix('parent')->group(function () {
-        Route::get('fees', [StudentFeeController::class, 'childrenFees']);
-    });
+    // Parent fees are handled by the Academic module's ParentDashboardController
 });

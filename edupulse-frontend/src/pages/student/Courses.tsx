@@ -4,6 +4,7 @@ import { useQuery } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
 import api from '../../lib/axios'
 import styles from './Courses.module.css'
+import UserAvatar from '../../components/UserAvatar'
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -12,7 +13,7 @@ interface Course {
   name: string
   subject: string | { name?: string; [k: string]: unknown }
   grade_level: string | { name?: string; level?: string | number; [k: string]: unknown }
-  teacher?: { id: number; name: string }
+  teacher?: { id: number; name: string; avatar_url?: string | null }
   status: 'active' | 'archived' | string
   lessons_count: number
   completed_lessons_count?: number
@@ -58,10 +59,6 @@ function subjectHue(subject: unknown): number {
   return SUBJECT_HUE[key] ?? hashHue(s)
 }
 
-function teacherInitials(name?: string): string {
-  if (!name) return '?'
-  return name.trim().split(/\s+/).filter(Boolean).slice(0, 2).map(w => w[0]).join('').toUpperCase()
-}
 
 function formatNextSession(iso: string): string {
   const d = new Date(iso)
@@ -154,9 +151,12 @@ function CourseCard({ course }: { course: Course }) {
 
         {course.teacher && (
           <div className={styles.teacherRow}>
-            <span className={styles.teacherAvatar} style={{ background: `oklch(62% 0.22 ${hue} / 0.2)`, color }}>
-              {teacherInitials(course.teacher.name)}
-            </span>
+            <UserAvatar
+              name={course.teacher.name}
+              avatarUrl={course.teacher.avatar_url}
+              className={styles.teacherAvatar}
+              style={{ background: `oklch(62% 0.22 ${hue} / 0.2)`, color }}
+            />
             <span className={styles.teacherName}>{course.teacher.name}</span>
           </div>
         )}

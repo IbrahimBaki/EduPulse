@@ -7,12 +7,14 @@ import {
 } from 'recharts'
 import api from '../../lib/axios'
 import styles from './ChildDetail.module.css'
+import UserAvatar from '../../components/UserAvatar'
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
 interface ChildDetail {
   id: number
   name: string
+  avatar_url?: string | null
   grade: string
   student_code: string
   academy_name: string
@@ -83,9 +85,6 @@ function nameHue(name: string): number {
   return hues[h % hues.length]
 }
 
-function initials(name: string): string {
-  return name.trim().split(/\s+/).filter(Boolean).slice(0, 2).map(w => w[0]).join('').toUpperCase()
-}
 
 function fmt(iso: string): string {
   return new Date(iso).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })
@@ -553,9 +552,7 @@ export default function ParentChildDetail() {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.22, ease: [0.16, 1, 0.3, 1] }}
       >
-        <div className={styles.childAvatar} style={{ background: avatarColor }} aria-hidden="true">
-          {initials(child.name)}
-        </div>
+        <UserAvatar name={child.name} avatarUrl={child.avatar_url} className={styles.childAvatar} style={{ background: avatarColor }} />
         <div className={styles.childMeta}>
           <h1 className={styles.childName}>{child.name}</h1>
           <div className={styles.childMetaRow}>

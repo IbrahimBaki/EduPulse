@@ -2,8 +2,10 @@
 
 use Illuminate\Support\Facades\Route;
 use Modules\IAM\Http\Controllers\AuthController;
+use Modules\IAM\Http\Controllers\DeviceTokenController;
 use Modules\IAM\Http\Controllers\EnrollmentRequestController;
 use Modules\IAM\Http\Controllers\ParentController;
+use Modules\IAM\Http\Controllers\ProfileController;
 use Modules\IAM\Http\Controllers\StudentController;
 use Modules\IAM\Http\Controllers\TeacherController;
 
@@ -13,6 +15,11 @@ Route::prefix('v1/{tenant_code}/auth')->middleware('tenant')->group(function () 
     Route::middleware(['auth:sanctum'])->group(function () {
         Route::get('/me', [AuthController::class, 'me']);
         Route::post('/logout', [AuthController::class, 'logout']);
+        Route::patch('/profile', [ProfileController::class, 'update']);
+        Route::post('/avatar', [ProfileController::class, 'uploadAvatar']);
+        Route::delete('/avatar', [ProfileController::class, 'deleteAvatar']);
+        Route::post('/device-token', [DeviceTokenController::class, 'store']);
+        Route::delete('/device-token', [DeviceTokenController::class, 'destroy']);
     });
 });
 

@@ -1,0 +1,372 @@
+/* ─── Page ────────────────────────────────────────────────────────────────── */
+
+.page {
+  padding: 32px 40px 80px;
+  min-height: 100%;
+}
+
+.pageHead {
+  margin-block-end: 28px;
+}
+
+.pageTitle {
+  font-size: 1.375rem;
+  font-weight: 700;
+  letter-spacing: -0.025em;
+  color: var(--text-primary);
+  margin: 0;
+  line-height: 1.2;
+}
+
+.pageSubtitle {
+  margin: 4px 0 0;
+  font-size: 0.875rem;
+  color: var(--text-muted);
+  line-height: 1.5;
+}
+
+.sections {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  max-width: 720px;
+}
+
+/* ─── Section ─────────────────────────────────────────────────────────────── */
+
+.section {
+  background: var(--surface-panel);
+  border: 1px solid var(--neutral-border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+}
+
+.sectionHead {
+  display: flex;
+  align-items: center;
+  padding: 13px 20px;
+  border-bottom: 1px solid var(--neutral-border);
+}
+
+.sectionTitle {
+  font-size: 0.9375rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  letter-spacing: -0.01em;
+  margin: 0;
+}
+
+.sectionBody {
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* ─── Logo upload area ────────────────────────────────────────────────────── */
+
+.logoArea {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.logoPreview {
+  width: 72px;
+  height: 72px;
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--neutral-border);
+  background: var(--surface-elevated);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  overflow: hidden;
+}
+
+.logoImg {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.logoPlaceholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-muted);
+  opacity: 0.5;
+}
+
+.logoActions {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.logoHint {
+  font-size: 0.8125rem;
+  color: var(--text-muted);
+  line-height: 1.4;
+  margin: 0;
+}
+
+.uploadBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 32px;
+  padding-inline: 14px;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: var(--color-blue);
+  background: var(--color-blue-dim);
+  border: 1px solid oklch(62% 0.26 255 / 0.2);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  white-space: nowrap;
+  transition:
+    background var(--dur-fast) var(--ease-out-quart),
+    transform 100ms var(--ease-out-quart);
+}
+
+.uploadBtn:hover:not(:disabled)  { background: oklch(62% 0.26 255 / 0.16); }
+.uploadBtn:active:not(:disabled) { transform: scale(0.97); }
+.uploadBtn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+/* ─── Form fields ─────────────────────────────────────────────────────────── */
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.fieldRow {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.label {
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: var(--text-secondary);
+}
+
+.input {
+  height: 36px;
+  padding-inline: 10px;
+  background: var(--surface-elevated);
+  border: 1px solid var(--neutral-border);
+  border-radius: var(--radius-md);
+  font-size: 0.875rem;
+  color: var(--text-primary);
+  width: 100%;
+  transition: border-color var(--dur-fast) var(--ease-out-quart);
+}
+
+.input::placeholder { color: var(--text-muted); }
+.input:focus { outline: none; border-color: var(--color-blue); }
+.inputErr { border-color: var(--color-red) !important; }
+
+.textarea {
+  padding: 9px 10px;
+  height: auto;
+  resize: vertical;
+  min-height: 72px;
+  background: var(--surface-elevated);
+  border: 1px solid var(--neutral-border);
+  border-radius: var(--radius-md);
+  font-size: 0.875rem;
+  color: var(--text-primary);
+  width: 100%;
+  font-family: inherit;
+  line-height: 1.5;
+  transition: border-color var(--dur-fast) var(--ease-out-quart);
+}
+
+.textarea::placeholder { color: var(--text-muted); }
+.textarea:focus { outline: none; border-color: var(--color-blue); }
+
+.select {
+  height: 36px;
+  padding-inline: 10px;
+  background: var(--surface-elevated);
+  border: 1px solid var(--neutral-border);
+  border-radius: var(--radius-md);
+  font-size: 0.875rem;
+  color: var(--text-primary);
+  width: 100%;
+  cursor: pointer;
+  transition: border-color var(--dur-fast) var(--ease-out-quart);
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8' fill='none'%3E%3Cpath d='M1 1.5L6 6.5L11 1.5' stroke='%236b7280' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+  padding-inline-end: 28px;
+}
+
+.select:focus { outline: none; border-color: var(--color-blue); }
+
+/* Color input row */
+.colorRow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.colorSwatch {
+  width: 36px;
+  height: 36px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--neutral-border);
+  cursor: pointer;
+  padding: 0;
+  background: none;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.colorSwatch input[type="color"] {
+  width: 100%;
+  height: 100%;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  margin: 0;
+}
+
+.colorInput {
+  flex: 1;
+}
+
+.fieldHint {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  line-height: 1.4;
+  margin: 0;
+}
+
+.fieldErr {
+  font-size: 0.6875rem;
+  color: var(--color-red);
+  line-height: 1.2;
+}
+
+/* ─── Save bar ────────────────────────────────────────────────────────────── */
+
+.saveBar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding-block-start: 4px;
+}
+
+.saveBtn {
+  height: 36px;
+  padding-inline: 20px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: oklch(99% 0.005 255);
+  background: var(--color-blue);
+  border: none;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  white-space: nowrap;
+  transition:
+    filter var(--dur-fast) var(--ease-out-quart),
+    transform 100ms var(--ease-out-quart);
+}
+
+.saveBtn:hover:not(:disabled)  { filter: brightness(1.1); }
+.saveBtn:active:not(:disabled) { transform: scale(0.97); }
+.saveBtn:disabled { opacity: 0.55; cursor: not-allowed; }
+
+.savedMsg {
+  font-size: 0.8125rem;
+  color: var(--color-green, oklch(72% 0.19 145));
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  animation: fadeIn 0.2s var(--ease-out-quart) both;
+}
+
+.errMsg {
+  font-size: 0.8125rem;
+  color: var(--color-red);
+  animation: fadeIn 0.2s var(--ease-out-quart) both;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(4px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ─── Loading / error state ───────────────────────────────────────────────── */
+
+.loadingWrap {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 40px 20px;
+  font-size: 0.875rem;
+  color: var(--text-muted);
+}
+
+.errorWrap {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 20px;
+  font-size: 0.875rem;
+  color: var(--text-muted);
+}
+
+.retryLink {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--color-blue);
+  font-size: 0.875rem;
+  text-decoration: underline;
+  padding: 0;
+  text-underline-offset: 2px;
+}
+
+/* ─── Skeleton ────────────────────────────────────────────────────────────── */
+
+.skeleton {
+  display: inline-block;
+  border-radius: 4px;
+  background: linear-gradient(
+    90deg,
+    oklch(26% 0.026 255) 0%,
+    oklch(30% 0.028 255) 50%,
+    oklch(26% 0.026 255) 100%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.4s ease-in-out infinite;
+  height: 11px;
+}
+
+@keyframes shimmer {
+  0%   { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+/* ─── Responsive ──────────────────────────────────────────────────────────── */
+
+@media (max-width: 899px) {
+  .page     { padding: 20px 16px 80px; }
+  .sections { max-width: 100%; }
+  .fieldRow { grid-template-columns: 1fr; }
+}
+
+/* ─── Reduced motion ──────────────────────────────────────────────────────── */
+
+@media (prefers-reduced-motion: reduce) {
+  .skeleton  { animation: none; background: oklch(26% 0.026 255); }
+  .savedMsg,
+  .errMsg    { animation: none; }
+}

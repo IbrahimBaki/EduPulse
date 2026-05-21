@@ -20,12 +20,14 @@ import StudentExamTaking     from '../pages/student/ExamTaking'
 import StudentExamResult     from '../pages/student/ExamResult'
 import ManagerDashboard from '../pages/manager/Dashboard'
 import ManagerStudents  from '../pages/manager/Students'
+import ManagerParents   from '../pages/manager/Parents'
 import ManagerTeachers  from '../pages/manager/Teachers'
 import ManagerCourses   from '../pages/manager/Courses'
 import ManagerSettings  from '../pages/manager/Settings'
 import ManagerSchedule  from '../pages/manager/Schedule'
 import ManagerFinance   from '../pages/manager/Finance'
 import ManagerAnnouncements from '../pages/manager/Announcements'
+import ManagerSchoolProfile from '../pages/manager/SchoolProfile'
 import TeacherDashboard      from '../pages/teacher/Dashboard'
 import TeacherCourses         from '../pages/teacher/Courses'
 import TeacherCourseDetail    from '../pages/teacher/CourseDetail'
@@ -36,6 +38,9 @@ import TeacherExams           from '../pages/teacher/Exams'
 import TeacherExamGenerator   from '../pages/teacher/ExamGenerator'
 import TeacherExamPreview     from '../pages/teacher/ExamPreview'
 import TeacherExamResults     from '../pages/teacher/ExamResults'
+import TeacherProfile     from '../pages/teacher/Profile'
+import StudentProfile     from '../pages/student/Profile'
+import ParentProfile      from '../pages/parent/Profile'
 import ParentDashboard    from '../pages/parent/Dashboard'
 import ParentChildren    from '../pages/parent/Children'
 import ParentChildDetail from '../pages/parent/ChildDetail'
@@ -43,17 +48,6 @@ import ParentAttendance  from '../pages/parent/Attendance'
 import ParentExams       from '../pages/parent/Exams'
 import ParentFees        from '../pages/parent/Fees'
 import ParentAnnouncements from '../pages/parent/Announcements'
-
-function Placeholder({ title }: { title: string }) {
-  return (
-    <div style={{ padding: '40px 48px' }}>
-      <h1 style={{ fontSize: '1.25rem', fontWeight: 700, letterSpacing: '-0.02em', color: 'var(--text-primary)' }}>
-        {title}
-      </h1>
-      <p style={{ marginTop: '8px', fontSize: '0.9rem', color: 'var(--text-muted)' }}>Coming soon.</p>
-    </div>
-  )
-}
 
 const router = createBrowserRouter([
   { path: '/login', element: <LoginPage /> },
@@ -74,6 +68,7 @@ const router = createBrowserRouter([
       { path: 'schedule',              element: <StudentSchedule /> },
       { path: 'announcements',         element: <StudentAnnouncements /> },
       { path: 'fees',                  element: <StudentFees /> },
+      { path: 'profile',               element: <StudentProfile /> },
     ],
   },
 
@@ -85,12 +80,14 @@ const router = createBrowserRouter([
       { index: true,                 element: <Navigate to="dashboard" replace /> },
       { path: 'dashboard',           element: <ManagerDashboard /> },
       { path: 'students',            element: <ManagerStudents /> },
+      { path: 'parents',             element: <ManagerParents /> },
       { path: 'teachers',            element: <ManagerTeachers /> },
       { path: 'courses',             element: <ManagerCourses /> },
       { path: 'schedule',            element: <ManagerSchedule /> },
       { path: 'finance',             element: <ManagerFinance /> },
       { path: 'announcements',       element: <ManagerAnnouncements /> },
       { path: 'settings',            element: <ManagerSettings /> },
+      { path: 'school-profile',      element: <ManagerSchoolProfile /> },
     ],
   },
 
@@ -110,6 +107,7 @@ const router = createBrowserRouter([
       { path: 'exams/:examId',          element: <TeacherExamPreview /> },
       { path: 'exams/:examId/results',  element: <TeacherExamResults /> },
       { path: 'announcements',          element: <TeacherAnnouncements /> },
+      { path: 'profile',                element: <TeacherProfile /> },
     ],
   },
 
@@ -126,6 +124,7 @@ const router = createBrowserRouter([
       { path: 'exams',                 element: <ParentExams /> },
       { path: 'fees',                  element: <ParentFees /> },
       { path: 'announcements',         element: <ParentAnnouncements /> },
+      { path: 'profile',               element: <ParentProfile /> },
     ],
   },
 

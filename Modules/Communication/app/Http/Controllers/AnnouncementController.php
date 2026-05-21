@@ -80,18 +80,34 @@ class AnnouncementController extends Controller
 
     public function parentIndex()
     {
-        $parent = auth()->user();
+        $parent   = auth()->user();
         $children = $parent->children;
 
-        $courseIds = collect();
-        $gradeIds = collect();
+        $courseIds    = collect();
+        $gradeIds     = collect();
+        $childByCourse = [];
+        $childByGrade  = [];
 
         foreach ($children as $child) {
-            $gradeIds->push($child->studentProfile?->grade_level_id);
-            $courseIds = $courseIds->merge(
-                \Modules\Academic\Models\Enrollment::where('student_id', $child->id)->pluck('course_id')
-            );
+            $gradeId = $child->studentProfile?->grade_level_id;
+            if ($gradeId) {
+                $gradeIds->push($gradeId);
+                $childByGrade[$gradeId] = $child->name;
+            }
+            $childCourseIds = \Modules\Academic\Models\Enrollment::where('student_id', $child->id)->pluck('course_id');
+            foreach ($childCourseIds as $cid) {
+                $courseIds->push($cid);
+                $childByCourse[$cid] = $child->name;
+            }
         }
+
+        $gradeLevels = $gradeIds->isNotEmpty()
+            ? \Modules\Academic\Models\GradeLevel::whereIn('id', $gradeIds->filter()->unique())->pluck('name', 'id')
+            : collect();
+
+        $courses = $courseIds->isNotEmpty()
+            ? \Modules\Academic\Models\Course::whereIn('id', $courseIds->unique())->pluck('name', 'id')
+            : collect();
 
         $announcements = Announcement::published()
             ->notExpired()
@@ -100,9 +116,31 @@ class AnnouncementController extends Controller
                   ->orWhere(fn($q2) => $q2->where('audience', 'grade_level')->whereIn('audience_id', $gradeIds->filter()))
                   ->orWhere(fn($q2) => $q2->where('audience', 'course')->whereIn('audience_id', $courseIds));
             })
-            ->with('creator')
-            ->paginate(15);
+            ->latest('published_at')
+            ->get()
+            ->map(fn($a) => [
+                'id'          => $a->id,
+                'title'       => $a->title,
+                'body'        => $a->body,
+                'scope'       => match ($a->audience) {
+                    'grade_level' => 'grade',
+                    'course'      => 'course',
+                    default       => 'school',
+                },
+                'scope_label' => match ($a->audience) {
+                    'grade_level' => $gradeLevels[$a->audience_id] ?? 'Grade',
+                    'course'      => $courses[$a->audience_id] ?? 'Course',
+                    default       => 'School-wide',
+                },
+                'child_name'  => match ($a->audience) {
+                    'grade_level' => $childByGrade[$a->audience_id] ?? null,
+                    'course'      => $childByCourse[$a->audience_id] ?? null,
+                    default       => null,
+                },
+                'created_at'  => $a->created_at->toIso8601String(),
+                'is_read'     => false,
+            ]);
 
-        return $this->ReturnSuccess($announcements, 'Announcements retrieved');
+        return $this->ReturnSuccess(['announcements' => $announcements], 'Announcements retrieved');
     }
 }

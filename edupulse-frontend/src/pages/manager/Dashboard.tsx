@@ -14,6 +14,7 @@ import {
 import { useAuthStore } from '../../stores/authStore'
 import api from '../../lib/axios'
 import styles from './Dashboard.module.css'
+import UserAvatar from '../../components/UserAvatar'
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -50,7 +51,7 @@ interface UpcomingSession {
 }
 
 interface AtRiskStudent {
-  student: { id: number; name: string; code: string }
+  student: { id: number; name: string; code: string; avatar_url?: string | null }
   avg_quiz_score: number
   weak_topics: string[] | null
   attendance_rate: string
@@ -78,6 +79,7 @@ interface RecentStudent {
   id: number
   name: string
   email: string
+  avatar_url?: string | null
   student_code: string
   grade_level: string
   parent_name: string | null
@@ -117,16 +119,6 @@ function formatTime(iso: string): string {
   })
 }
 
-function nameInitials(name: string): string {
-  return name
-    .trim()
-    .split(/\s+/)
-    .filter(Boolean)
-    .slice(0, 2)
-    .map(w => w[0])
-    .join('')
-    .toUpperCase()
-}
 
 function getSalutationKey(): string {
   const hour = new Date().getHours()
@@ -477,9 +469,7 @@ function AtRiskStudents({
         <ul className={styles.atRiskList} aria-label={t('manager.dashboard.atRiskStudents')}>
           {atRisk.slice(0, 8).map(s => (
             <li key={s.student.id} className={styles.atRiskRow}>
-              <div className={styles.atRiskAvatar} aria-hidden="true">
-                {nameInitials(s.student.name)}
-              </div>
+              <UserAvatar name={s.student.name} avatarUrl={s.student.avatar_url} className={styles.atRiskAvatar} />
               <div className={styles.atRiskInfo}>
                 <div className={styles.atRiskName}>{s.student.name}</div>
                 <div className={styles.atRiskScore}>
@@ -628,9 +618,7 @@ function RecentEnrollments({
         <ul className={styles.enrollList} aria-label={t('manager.dashboard.recentEnrollments')}>
           {data.map(s => (
             <li key={s.id} className={styles.enrollRow}>
-              <div className={styles.enrollAvatar} aria-hidden="true">
-                {nameInitials(s.name)}
-              </div>
+              <UserAvatar name={s.name} avatarUrl={s.avatar_url} className={styles.enrollAvatar} />
               <div className={styles.enrollInfo}>
                 <div className={styles.enrollName}>{s.name}</div>
                 <div className={styles.enrollGrade}>{s.grade_level}</div>

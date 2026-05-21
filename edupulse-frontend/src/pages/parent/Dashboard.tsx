@@ -3,12 +3,14 @@ import { useQuery } from '@tanstack/react-query'
 import { motion } from 'framer-motion'
 import api from '../../lib/axios'
 import styles from './Dashboard.module.css'
+import UserAvatar from '../../components/UserAvatar'
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
 interface ChildSummary {
   id: number
   name: string
+  avatar_url?: string | null
   grade: string
   attendance_rate: number
   avg_score: number
@@ -55,9 +57,6 @@ function nameHue(name: string): number {
   return hues[h % hues.length]
 }
 
-function initials(name: string): string {
-  return name.trim().split(/\s+/).filter(Boolean).slice(0, 2).map(w => w[0]).join('').toUpperCase()
-}
 
 function relativeTime(iso: string): string {
   const diff = Date.now() - new Date(iso).getTime()
@@ -121,9 +120,7 @@ function ChildPanel({ child }: { child: ChildSummary }) {
 
   return (
     <div className={styles.childPanel}>
-      <div className={styles.childAvatar} style={{ background: avatarColor }} aria-hidden="true">
-        {initials(child.name)}
-      </div>
+      <UserAvatar name={child.name} avatarUrl={child.avatar_url} className={styles.childAvatar} style={{ background: avatarColor }} />
       <p className={styles.childName}>{child.name}</p>
       <span className={styles.gradeBadge}>{child.grade}</span>
       <div className={styles.childStats}>

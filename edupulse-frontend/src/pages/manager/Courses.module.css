@@ -233,6 +233,7 @@
   flex-shrink: 0;
   letter-spacing: 0.04em;
   user-select: none;
+  overflow: hidden;
 }
 
 .cardTeacherName {

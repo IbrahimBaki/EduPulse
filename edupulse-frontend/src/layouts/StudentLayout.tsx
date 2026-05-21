@@ -3,6 +3,7 @@ import { NavLink, Outlet, useNavigate } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
 import { useAuthStore } from '../stores/authStore'
+import { useSchoolSettings } from '../hooks/useSchoolSettings'
 import RoleGuard from '../components/RoleGuard'
 import TopControls from '../components/TopControls'
 import api from '../lib/axios'
@@ -96,6 +97,15 @@ function BellIcon() {
   )
 }
 
+function UserIcon() {
+  return (
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+      <circle cx="12" cy="7" r="4"/>
+    </svg>
+  )
+}
+
 function LogOutIcon() {
   return (
     <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
@@ -118,6 +128,7 @@ const NAV_ITEMS: NavItem[] = [
   { to: '/student/schedule',      tKey: 'nav.schedule',      Icon: CalendarIcon },
   { to: '/student/announcements', tKey: 'nav.announcements', Icon: FileTextIcon, notif: true },
   { to: '/student/fees',          tKey: 'nav.fees',          Icon: CreditCardIcon },
+  { to: '/student/profile',       tKey: 'nav.profile',       Icon: UserIcon },
 ]
 
 // ─── Component ───────────────────────────────────────────────────────────────
@@ -128,6 +139,7 @@ export default function StudentLayout() {
   const tenantCode = useAuthStore(s => s.tenantCode)
   const clearAuth  = useAuthStore(s => s.clearAuth)
   const navigate   = useNavigate()
+  const { data: schoolSettings } = useSchoolSettings()
 
   const { data: unreadCount = 0 } = useQuery<number>({
     queryKey: ['notifications-unread-count'],
@@ -141,9 +153,10 @@ export default function StudentLayout() {
     ? user.name.trim().split(/\s+/).filter(Boolean).slice(0, 2).map(w => w[0]).join('').toUpperCase()
     : '?'
 
-  const schoolName = tenantCode
+  const fallbackName = tenantCode
     ? tenantCode.replace(/-/g, ' ').replace(/\b\w/g, c => c.toUpperCase())
     : ''
+  const schoolName = schoolSettings?.academy_name || fallbackName
 
   const handleLogout = () => {
     clearAuth()
@@ -157,7 +170,10 @@ export default function StudentLayout() {
         {/* ── Sidebar (desktop) ── */}
         <aside className={styles.sidebar}>
           <div className={styles.sidebarHead}>
-            <LogoMark />
+            {schoolSettings?.logo_url
+              ? <img src={schoolSettings.logo_url} alt={schoolName} style={{ width: 22, height: 22, borderRadius: 6, objectFit: 'contain' }} />
+              : <LogoMark />
+            }
             <span className={styles.logoText}>
               Edu<span className={styles.logoAccent}>Pulse</span>
             </span>
@@ -188,7 +204,10 @@ export default function StudentLayout() {
           <TopControls />
 
           <div className={styles.userFooter}>
-            <div className={styles.avatar} aria-hidden="true">{initials}</div>
+            {user?.avatar_url
+              ? <img src={user.avatar_url} alt={user.name} className={styles.avatar} />
+              : <div className={styles.avatar} aria-hidden="true">{initials}</div>
+            }
             <div className={styles.userInfo}>
               <span className={styles.userName}>{user?.name}</span>
               <span className={styles.userRole}>{t('roles.student')}</span>
@@ -202,7 +221,10 @@ export default function StudentLayout() {
         {/* ── Mobile top bar ── */}
         <header className={styles.topBar}>
           <div className={styles.topBarLogo}>
-            <LogoMark />
+            {schoolSettings?.logo_url
+              ? <img src={schoolSettings.logo_url} alt={schoolName} style={{ width: 22, height: 22, borderRadius: 6, objectFit: 'contain' }} />
+              : <LogoMark />
+            }
             <span className={styles.topBarSchool}>{schoolName || 'EduPulse'}</span>
           </div>
           <NavLink

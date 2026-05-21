@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next'
 import api from '../../lib/axios'
 import { SlideOver } from '../../components/SlideOver'
 import styles from './Students.module.css'
+import UserAvatar from '../../components/UserAvatar'
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -17,6 +18,7 @@ interface Student {
   id: number
   name: string
   code: string
+  avatar_url?: string | null
   grade_level?: string
   attendance_rate: number
   avg_quiz_score: number | null
@@ -47,9 +49,6 @@ function normalizeArray<T>(data: unknown): T[] {
   return []
 }
 
-function initials(name: string): string {
-  return name.split(' ').slice(0, 2).map(w => w[0]).join('').toUpperCase()
-}
 
 function scoreClass(score: number | null): string {
   if (score === null) return styles.scoreMuted
@@ -368,7 +367,7 @@ export default function TeacherStudents() {
                     >
                       <td>
                         <div className={styles.studentCell}>
-                          <div className={styles.studentAvatar} aria-hidden="true">{initials(s.name)}</div>
+                          <UserAvatar name={s.name} avatarUrl={s.avatar_url} className={styles.studentAvatar} />
                           <div>
                             <div className={styles.studentName}>{s.name}</div>
                             <div className={styles.studentCode}>{s.code}</div>

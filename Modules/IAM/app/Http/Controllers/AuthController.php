@@ -41,15 +41,16 @@ class AuthController extends Controller
             'access_token' => $token,
             'token_type' => 'Bearer',
             'user' => [
-                'id' => $user->id,
-                'name' => $user->name,
-                'email' => $user->email,
-                'roles' => $user->roles->pluck('name'),
-                'tenant' => [
-                    'id' => $tenant->id,
+                'id'         => $user->id,
+                'name'       => $user->name,
+                'email'      => $user->email,
+                'avatar_url' => $user->avatar_url,
+                'roles'      => $user->roles->pluck('name'),
+                'tenant'     => [
+                    'id'   => $tenant->id,
                     'name' => $tenant->name,
-                    'code' => $tenant->code
-                ]
+                    'code' => $tenant->code,
+                ],
             ]
         ], 'Login successful');
     }
@@ -60,19 +61,42 @@ class AuthController extends Controller
         $user->load('roles.permissions');
         $tenant = app()->bound('tenant') ? app('tenant') : null;
 
-        return $this->ReturnSuccess([
-            'user' => [
-                'id' => $user->id,
-                'name' => $user->name,
-                'email' => $user->email,
-                'roles' => $user->roles->pluck('name'),
-                'tenant' => $tenant ? [
-                    'id' => $tenant->id,
-                    'name' => $tenant->name,
-                    'code' => $tenant->code
-                ] : null
-            ]
-        ], 'Profile retrieved successfully');
+        $userData = [
+            'id'          => $user->id,
+            'name'        => $user->name,
+            'email'       => $user->email,
+            'phone'       => $user->phone,
+            'national_id' => $user->national_id,
+            'avatar_url'  => $user->avatar_url,
+            'is_active'   => $user->is_active,
+            'roles'       => $user->roles->pluck('name'),
+            'tenant'      => $tenant ? [
+                'id'   => $tenant->id,
+                'name' => $tenant->name,
+                'code' => $tenant->code,
+            ] : null,
+        ];
+
+        if ($user->hasRole('teacher')) {
+            $user->load('teacherAssignments.subject', 'teacherAssignments.gradeLevel');
+            $userData['teacher_assignments'] = $user->teacherAssignments;
+        }
+
+        if ($user->hasRole('student')) {
+            $user->load('studentProfile.gradeLevel');
+            $userData['student_profile'] = $user->studentProfile;
+        }
+
+        if ($user->hasRole('parent')) {
+            $user->load('children');
+            $userData['children'] = $user->children->map(fn ($c) => [
+                'id'    => $c->id,
+                'name'  => $c->name,
+                'email' => $c->email,
+            ]);
+        }
+
+        return $this->ReturnSuccess(['user' => $userData], 'Profile retrieved successfully');
     }
 
     public function logout(Request $request)

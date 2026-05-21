@@ -26,7 +26,7 @@ class AdminPanelProvider extends PanelProvider
     {
         $logoHtml = '<div style="display:flex;align-items:center;gap:0.625rem;">
             <img src="'.asset('images/epa-logo.png').'" style="height:2rem;width:auto;border-radius:0.375rem;">
-            <span style="font-size:1rem;font-weight:800;letter-spacing:-0.02em;color:oklch(96% 0.005 255);">EduPulse</span>
+            <span class="ep-brand-text" style="font-size:1rem;font-weight:800;letter-spacing:-0.02em;">EduPulse</span>
         </div>';
 
         return $panel
@@ -97,6 +97,10 @@ class AdminPanelProvider extends PanelProvider
                      ->icon('heroicon-o-cog-8-tooth'),
             ])
             ->viteTheme('resources/css/filament/admin/custom.css')
+            ->renderHook(
+                PanelsRenderHook::HEAD_END,
+                fn (): string => "<script>if(!localStorage.getItem('theme')){localStorage.setItem('theme','dark');document.documentElement.classList.add('dark');}</script>",
+            )
             ->renderHook(
                 PanelsRenderHook::TOPBAR_END,
                 fn (): string => view('filament.components.theme-toggle')->render(),

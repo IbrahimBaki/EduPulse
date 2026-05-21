@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
 import api from '../../lib/axios'
 import styles from './ExamResults.module.css'
+import UserAvatar from '../../components/UserAvatar'
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -32,7 +33,7 @@ interface StudentAttempt {
   submitted_at: string | null
   teacher_approved_at: string | null
   violations_count: number
-  student: { id: number; name: string; email: string }
+  student: { id: number; name: string; email: string; avatar_url?: string | null }
 }
 
 interface ResultsData {
@@ -67,9 +68,6 @@ function DownloadIcon() {
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
-function initials(name: string | null | undefined): string {
-  return (name ?? '').trim().split(/\s+/).filter(Boolean).slice(0, 2).map(w => w[0]).join('').toUpperCase()
-}
 
 function timeTaken(start: string | null, end: string | null): string {
   if (!start || !end) return '—'
@@ -192,7 +190,7 @@ function AttemptRow({
       >
         <td>
           <div className={styles.studentCell}>
-            <span className={styles.avatar} aria-hidden="true">{initials(attempt.student.name)}</span>
+            <UserAvatar name={attempt.student.name} avatarUrl={attempt.student.avatar_url} className={styles.avatar} />
             <div>
               <span className={styles.studentName}>{attempt.student.name}</span>
               <span className={styles.studentEmail}>{attempt.student.email}</span>

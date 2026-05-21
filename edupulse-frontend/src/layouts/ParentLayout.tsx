@@ -2,6 +2,7 @@ import React from 'react'
 import { NavLink, Outlet, useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { useAuthStore } from '../stores/authStore'
+import { useSchoolSettings } from '../hooks/useSchoolSettings'
 import RoleGuard from '../components/RoleGuard'
 import TopControls from '../components/TopControls'
 import styles from './AppLayout.module.css'
@@ -31,6 +32,10 @@ function FileTextIcon() {
   return <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
 }
 
+function UserIcon() {
+  return <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+}
+
 function LogOutIcon() {
   return <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
 }
@@ -52,6 +57,7 @@ const NAV_ITEMS: NavItem[] = [
   { to: '/parent/exams',         tKey: 'nav.examsResults',  Icon: ClipboardListIcon },
   { to: '/parent/fees',          tKey: 'nav.fees',          Icon: CreditCardIcon },
   { to: '/parent/announcements', tKey: 'nav.announcements', Icon: FileTextIcon },
+  { to: '/parent/profile',       tKey: 'nav.profile',       Icon: UserIcon },
 ]
 
 export default function ParentLayout() {
@@ -60,21 +66,26 @@ export default function ParentLayout() {
   const tenantCode = useAuthStore(s => s.tenantCode)
   const clearAuth  = useAuthStore(s => s.clearAuth)
   const navigate   = useNavigate()
+  const { data: schoolSettings } = useSchoolSettings()
 
   const initials = user?.name
     ? user.name.trim().split(/\s+/).filter(Boolean).slice(0, 2).map(w => w[0]).join('').toUpperCase()
     : '?'
 
-  const schoolName = tenantCode
+  const fallbackName = tenantCode
     ? tenantCode.replace(/-/g, ' ').replace(/\b\w/g, c => c.toUpperCase())
     : ''
+  const schoolName = schoolSettings?.academy_name || fallbackName
 
   return (
     <RoleGuard role="parent">
       <div className={styles.shell}>
         <aside className={styles.sidebar}>
           <div className={styles.sidebarHead}>
-            <LogoMark />
+            {schoolSettings?.logo_url
+              ? <img src={schoolSettings.logo_url} alt={schoolName} style={{ width: 22, height: 22, borderRadius: 6, objectFit: 'contain' }} />
+              : <LogoMark />
+            }
             <span className={styles.logoText}>Edu<span className={styles.logoAccent}>Pulse</span></span>
           </div>
           {schoolName && <div className={styles.schoolLabel}>{schoolName}</div>}
@@ -87,7 +98,10 @@ export default function ParentLayout() {
           </nav>
           <TopControls />
           <div className={styles.userFooter}>
-            <div className={styles.avatar} aria-hidden="true">{initials}</div>
+            {user?.avatar_url
+              ? <img src={user.avatar_url} alt={user.name} className={styles.avatar} />
+              : <div className={styles.avatar} aria-hidden="true">{initials}</div>
+            }
             <div className={styles.userInfo}>
               <span className={styles.userName}>{user?.name}</span>
               <span className={styles.userRole}>{t('roles.parent')}</span>

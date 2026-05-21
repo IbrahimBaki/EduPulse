@@ -5,10 +5,13 @@ use Modules\Communication\Http\Controllers\AnnouncementController;
 use Modules\Communication\Http\Controllers\NotificationController;
 use Modules\Communication\Http\Controllers\WebhookController;
 
-// No-auth routes (secured internally)
+// No-auth routes (secured via X-N8n-Secret header)
 Route::prefix('v1/{tenant_code}')->middleware('tenant')->group(function () {
     Route::post('webhooks/n8n/notify', [WebhookController::class, 'notify']);
     Route::get('internal/upcoming-sessions', [WebhookController::class, 'internalUpcoming']);
+    Route::get('internal/weekly-summary', [WebhookController::class, 'weeklySummary']);
+    Route::get('internal/student/{student_id}/intervention-context', [WebhookController::class, 'studentInterventionContext']);
+    Route::get('internal/course/{course_id}/enrolled-users', [WebhookController::class, 'courseEnrolledUsers']);
 });
 
 Route::prefix('v1/{tenant_code}')->middleware(['tenant', 'auth:sanctum'])->group(function () {

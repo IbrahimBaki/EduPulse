@@ -211,6 +211,7 @@
   flex-shrink: 0;
   letter-spacing: 0.04em;
   user-select: none;
+  overflow: hidden;
 }
 
 .nameStack {
@@ -743,6 +744,7 @@
   flex-shrink: 0;
   letter-spacing: 0.04em;
   user-select: none;
+  overflow: hidden;
 }
 
 .dHeroInfo {
@@ -1033,6 +1035,37 @@
 .assignAddActions .formCancel {
   padding: 5px 14px;
   font-size: 0.8125rem;
+}
+
+/* ─── Edit button & section header ───────────────────────────────────────── */
+
+.dEditBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  height: 26px;
+  padding-inline: 10px;
+  background: var(--surface-elevated);
+  border: 1px solid var(--neutral-border);
+  border-radius: var(--radius-sm);
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--text-secondary);
+  cursor: pointer;
+  font-family: inherit;
+  margin-top: 8px;
+  transition:
+    color var(--dur-fast) var(--ease-out-quart),
+    background var(--dur-fast) var(--ease-out-quart);
+}
+.dEditBtn:hover  { color: var(--text-primary); background: oklch(26% 0.026 255); }
+.dEditBtn:active { transform: scale(0.97); }
+
+.dCode {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+  margin: 0;
 }
 
 /* ─── Responsive ──────────────────────────────────────────────────────────── */

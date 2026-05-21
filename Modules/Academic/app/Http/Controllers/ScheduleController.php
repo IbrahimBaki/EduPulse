@@ -142,7 +142,7 @@ class ScheduleController extends Controller
     {
         $query = Schedule::whereHas('course', function ($q) {
             $q->whereHas('enrollments', fn($e) => $e->where('student_id', auth()->id()));
-        })->with(['course:id,name,subject_id', 'course.subject:id,name']);
+        })->with(['course:id,name,subject_id', 'course.subject:id,name', 'teacher:id,name,avatar_url']);
 
         if ($courseId = request('course_id')) {
             $query->where('course_id', $courseId);

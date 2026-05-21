@@ -4,12 +4,13 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
 import api from '../../lib/axios'
 import styles from './Courses.module.css'
+import UserAvatar from '../../components/UserAvatar'
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
 interface Subject    { id: number; name: string }
 interface GradeLevel { id: number; name: string; level: number }
-interface TeacherMin { id: number; name: string }
+interface TeacherMin { id: number; name: string; avatar_url?: string | null }
 
 interface TeacherFull extends TeacherMin {
   teacher_assignments: Array<{ subject_id: number; grade_level_id: number }>
@@ -623,9 +624,6 @@ function CourseCard({ course, isUpdating, onCardClick, onEdit, onStatusAction }:
   const accent    = subjectAccent(course.subject_id)
   const accentDim = subjectAccentDim(course.subject_id)
 
-  const teacherInitials = course.teacher.name
-    .split(' ').map(n => n[0]).filter(Boolean).join('').slice(0, 2).toUpperCase()
-
   const nextStatus: CourseStatus | null =
     course.status === 'draft' ? 'active' :
     course.status === 'active' ? 'archived' : null
@@ -656,12 +654,12 @@ function CourseCard({ course, isUpdating, onCardClick, onEdit, onStatusAction }:
           )}
 
           <div className={styles.cardTeacher}>
-            <span
+            <UserAvatar
+              name={course.teacher.name}
+              avatarUrl={course.teacher.avatar_url}
               className={styles.cardTeacherAvatar}
               style={{ background: accentDim, color: accent }}
-            >
-              {teacherInitials}
-            </span>
+            />
             <span className={styles.cardTeacherName}>{course.teacher.name}</span>
           </div>
 

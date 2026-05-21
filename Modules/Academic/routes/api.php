@@ -96,11 +96,18 @@ Route::prefix('v1/{tenant_code}')->middleware(['tenant', 'auth:sanctum'])->group
     // Parent routes
     Route::middleware('role:parent')->prefix('parent')->group(function () {
         Route::get('dashboard', [ParentDashboardController::class, 'dashboard']);
+        Route::get('children', [ParentDashboardController::class, 'children']);
+        Route::get('children/{childId}', [ParentDashboardController::class, 'childDetail']);
+        Route::get('children/{childId}/attendance', [ParentDashboardController::class, 'childAttendance']);
+        Route::get('children/{childId}/exams', [ParentDashboardController::class, 'childExams']);
+        Route::get('fees', [ParentDashboardController::class, 'fees']);
+        Route::get('attendance', [ParentDashboardController::class, 'attendance']);
     });
 
     // Dashboard routes
     Route::middleware('role:manager')->prefix('manager')->group(function () {
         Route::get('dashboard', [ManagerDashboardController::class, 'dashboard']);
+        Route::get('schedule', [ManagerDashboardController::class, 'schedule']);
         Route::get('reports/students', [ManagerDashboardController::class, 'studentsReport']);
         Route::get('reports/at-risk-students', [ManagerDashboardController::class, 'atRiskStudents']);
         Route::get('reports/attendance', [ManagerDashboardController::class, 'attendanceReport']);

@@ -86,6 +86,25 @@ class ManagerDashboardController extends Controller
         return $this->ReturnSuccess($data, 'Manager dashboard retrieved');
     }
 
+    public function schedule()
+    {
+        $sessions = Schedule::with('course', 'teacher')
+            ->where('status', 'scheduled')
+            ->where('starts_at', '>', now())
+            ->orderBy('starts_at')
+            ->get()
+            ->map(fn($s) => [
+                'id'        => $s->id,
+                'title'     => $s->title,
+                'starts_at' => $s->starts_at,
+                'type'      => $s->type,
+                'course'    => $s->course?->name ?? '',
+                'teacher'   => $s->teacher?->name ?? '',
+            ]);
+
+        return $this->ReturnSuccess($sessions, 'Schedule retrieved');
+    }
+
     public function studentsReport()
     {
         $query = User::role('student')->with('studentProfile.gradeLevel');
@@ -121,7 +140,7 @@ class ManagerDashboardController extends Controller
 
         $studentIds = collect($atRiskAvg->items())->pluck('student_id');
 
-        $studentNames = User::whereIn('id', $studentIds)->pluck('name', 'id');
+        $studentUsers = User::whereIn('id', $studentIds)->get(['id', 'name', 'avatar_url'])->keyBy('id');
         $studentCodes = StudentProfile::whereIn('student_id', $studentIds)
             ->pluck('student_code', 'student_id');
 
@@ -154,18 +173,20 @@ class ManagerDashboardController extends Controller
             ->pluck('count', 'student_id');
 
         $items = collect($atRiskAvg->items())->map(function ($row) use (
-            $studentNames, $studentCodes, $weakTopicsMap,
+            $studentUsers, $studentCodes, $weakTopicsMap,
             $attendanceMap, $feeStatusMap, $enrollCountMap
         ) {
             $att   = $attendanceMap[$row->student_id] ?? null;
             $total = $att?->total ?? 0;
             $rate  = $total > 0 ? round(($att->present_count / $total) * 100, 1) . '%' : '0%';
+            $u     = $studentUsers[$row->student_id] ?? null;
 
             return [
                 'student'          => [
-                    'id'   => $row->student_id,
-                    'name' => $studentNames[$row->student_id] ?? 'Unknown',
-                    'code' => $studentCodes[$row->student_id] ?? null,
+                    'id'         => $row->student_id,
+                    'name'       => $u?->name ?? 'Unknown',
+                    'code'       => $studentCodes[$row->student_id] ?? null,
+                    'avatar_url' => $u?->avatar_url,
                 ],
                 'avg_quiz_score'   => round((float) $row->avg_score, 1),
                 'weak_topics'      => $weakTopicsMap[$row->student_id] ?? [],

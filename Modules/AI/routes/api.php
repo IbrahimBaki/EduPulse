@@ -8,6 +8,7 @@ use Modules\AI\Http\Controllers\ExamController;
 use Modules\AI\Http\Controllers\WeakTopicController;
 use Modules\AI\Http\Controllers\ChatHistoryController;
 use Modules\AI\Http\Controllers\DashboardController;
+use Modules\AI\Http\Controllers\StudyPlanController;
 
 Route::prefix('v1/{tenant_code}')->middleware(['tenant', 'auth:sanctum'])->group(function () {
 
@@ -25,5 +26,14 @@ Route::prefix('v1/{tenant_code}')->middleware(['tenant', 'auth:sanctum'])->group
         Route::get('/students/{student}/chat-history', [ChatHistoryController::class, 'index']);
         Route::get('/teacher/dashboard', [DashboardController::class, 'teacher'])->middleware('role:teacher');
         Route::get('/parent/dashboard',  [DashboardController::class, 'parent'])->middleware('role:parent');
+
+        Route::middleware('role:student')->group(function () {
+            Route::get('/study-plans',       [StudyPlanController::class, 'index']);
+            Route::get('/study-plans/{plan}', [StudyPlanController::class, 'show']);
+        });
+
+        Route::middleware('role:teacher')->group(function () {
+            Route::get('/students/{student}/study-plans', [StudyPlanController::class, 'studentPlans']);
+        });
     });
 });

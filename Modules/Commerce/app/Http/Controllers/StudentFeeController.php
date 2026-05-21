@@ -22,7 +22,7 @@ class StudentFeeController extends Controller
 
     public function index()
     {
-        $query = StudentFee::with('student', 'feeStructure', 'course');
+        $query = StudentFee::with('student.parents:id,name', 'feeStructure', 'course');
 
         if (request('status')) {
             $query->where('status', request('status'));
@@ -32,6 +32,11 @@ class StudentFeeController extends Controller
         }
         if (request('course_id')) {
             $query->where('course_id', request('course_id'));
+        }
+        if (request('search')) {
+            $query->whereHas('student', fn($q) =>
+                $q->where('name', 'like', '%' . request('search') . '%')
+            );
         }
 
         return $this->ReturnSuccess($query->paginate(15), 'Student fees retrieved');

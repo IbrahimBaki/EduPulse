@@ -1,22 +1,15 @@
 <div
     class="ep-theme-toggle"
     x-data="{
-        theme: localStorage.getItem('ep-theme') || 'dark',
-        init() {
-            this.applyTheme(this.theme);
-        },
-        applyTheme(t) {
-            document.documentElement.classList.toggle('dark', t === 'dark');
-            document.documentElement.classList.toggle('light', t === 'light');
-            localStorage.setItem('ep-theme', t);
-            this.theme = t;
-        },
+        theme: document.documentElement.classList.contains('dark') ? 'dark' : 'light',
         toggleTheme() {
-            this.applyTheme(this.theme === 'dark' ? 'light' : 'dark');
+            this.theme = this.theme === 'dark' ? 'light' : 'dark';
+            const isDark = this.theme === 'dark';
+            document.documentElement.classList.toggle('dark', isDark);
+            localStorage.setItem('theme', this.theme);
         }
     }"
 >
-    {{-- Theme toggle --}}
     <button
         type="button"
         class="ep-theme-toggle-btn"

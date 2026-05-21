@@ -26,6 +26,7 @@ class User extends Authenticatable implements FilamentUser
         'password',
         'phone',
         'national_id',
+        'avatar_url',
         'is_active',
         'tenant_id',
     ];
@@ -94,6 +95,11 @@ class User extends Authenticatable implements FilamentUser
     public function enrollments()
     {
         return $this->hasMany(\Modules\Academic\Models\Enrollment::class, 'student_id');
+    }
+
+    public function studentFees()
+    {
+        return $this->hasMany(\Modules\Commerce\Models\StudentFee::class, 'student_id');
     }
 
     /**

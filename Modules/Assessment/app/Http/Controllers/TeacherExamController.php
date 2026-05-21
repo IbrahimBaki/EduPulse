@@ -181,7 +181,7 @@ class TeacherExamController extends Controller
     {
         $this->authorizeExam($exam);
 
-        $attempts = $exam->attempts()->with('student:id,name,email')->get();
+        $attempts = $exam->attempts()->with('student:id,name,email,avatar_url')->get();
 
         $stats = [
             'total_attempts' => $attempts->count(),

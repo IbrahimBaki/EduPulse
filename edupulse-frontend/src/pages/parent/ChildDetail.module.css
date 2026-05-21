@@ -45,6 +45,7 @@
   font-weight: 700;
   color: oklch(98% 0.005 255);
   flex-shrink: 0;
+  overflow: hidden;
 }
 
 .childMeta {

@@ -3,6 +3,7 @@
 namespace Modules\Commerce\Http\Controllers;
 
 use App\Http\Controllers\Controller;
+use App\Models\User;
 use App\Traits\ApiResponser;
 use Illuminate\Support\Facades\DB;
 use Modules\Commerce\Models\PaymentTransaction;
@@ -36,13 +37,34 @@ class FinanceDashboardController extends Controller
             ->pluck('student');
 
         return $this->ReturnSuccess([
-            'total_expected'   => $totalExpected,
+            'expected'         => $totalExpected,
             'collected'        => $collected,
             'pending'          => (float) ($totals->pending ?? 0),
             'overdue'          => (float) ($totals->overdue ?? 0),
             'collection_rate'  => $collectionRate,
             'overdue_students' => $overdueStudents,
         ], 'Finance summary retrieved');
+    }
+
+    public function feesByParent()
+    {
+        $parents = User::role('parent')
+            ->whereHas('children.studentFees')
+            ->with([
+                'children' => function ($q) {
+                    $q->whereHas('studentFees')
+                      ->with([
+                          'studentFees' => fn($q2) => $q2->orderByRaw(
+                              "CASE status WHEN 'overdue' THEN 0 WHEN 'pending' THEN 1 WHEN 'paid' THEN 2 ELSE 3 END"
+                          )
+                      ])
+                      ->select('users.id', 'users.name', 'users.email', 'users.avatar_url');
+                }
+            ])
+            ->select('id', 'name', 'email')
+            ->get();
+
+        return $this->ReturnSuccess($parents, 'Fees by parent retrieved');
     }
 
     public function transactions()

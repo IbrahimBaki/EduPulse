@@ -54,7 +54,7 @@ class TeacherDashboardController extends Controller
 
             $atRiskIds = $atRiskAvg->pluck('student_id');
 
-            $studentNames = User::whereIn('id', $atRiskIds)->pluck('name', 'id');
+            $studentUsers = User::whereIn('id', $atRiskIds)->get(['id', 'name', 'avatar_url'])->keyBy('id');
 
             $enrollmentByCourse = Enrollment::whereIn('student_id', $atRiskIds)
                 ->whereIn('course_id', $myCourseIds)
@@ -71,12 +71,14 @@ class TeacherDashboardController extends Controller
                 ->groupBy('student_id')
                 ->map(fn($rows) => $rows->first());
 
-            $atRiskStudents = $atRiskAvg->map(function ($row) use ($studentNames, $enrollmentByCourse, $weakestTopics) {
+            $atRiskStudents = $atRiskAvg->map(function ($row) use ($studentUsers, $enrollmentByCourse, $weakestTopics) {
                 $weakest = $weakestTopics[$row->student_id] ?? null;
                 $course  = $enrollmentByCourse[$row->student_id]?->first()?->course;
+                $u       = $studentUsers[$row->student_id] ?? null;
                 return [
                     'id'            => $row->student_id,
-                    'name'          => $studentNames[$row->student_id] ?? 'Unknown',
+                    'name'          => $u?->name ?? 'Unknown',
+                    'avatar_url'    => $u?->avatar_url,
                     'course_name'   => $course?->name ?? '',
                     'weakest_topic' => $weakest?->topic ?? '',
                     'weakest_score' => (float) ($weakest?->score ?? 0),
@@ -84,18 +86,19 @@ class TeacherDashboardController extends Controller
             })->values();
 
             // Recent quiz activity with student name and grade level
-            $recentQuizActivity = QuizAttempt::with(['student:id,name', 'student.studentProfile.gradeLevel:id,name'])
+            $recentQuizActivity = QuizAttempt::with(['student:id,name,avatar_url', 'student.studentProfile.gradeLevel:id,name'])
                 ->whereIn('student_id', $myStudentIds)
                 ->latest()
                 ->take(10)
                 ->get()
                 ->map(fn($a) => [
-                    'id'           => $a->id,
-                    'student_name' => $a->student?->name ?? 'Unknown',
-                    'topic'        => $a->topic,
-                    'score'        => $a->score,
-                    'grade_level'  => $a->student?->studentProfile?->gradeLevel?->name ?? '',
-                    'submitted_at' => $a->created_at,
+                    'id'                  => $a->id,
+                    'student_name'        => $a->student?->name ?? 'Unknown',
+                    'student_avatar_url'  => $a->student?->avatar_url,
+                    'topic'               => $a->topic,
+                    'score'               => $a->score,
+                    'grade_level'         => $a->student?->studentProfile?->gradeLevel?->name ?? '',
+                    'submitted_at'        => $a->created_at,
                 ]);
 
             $topicPerformance = DB::table('quiz_attempts')

@@ -250,6 +250,7 @@
   flex-shrink: 0;
   letter-spacing: 0.04em;
   user-select: none;
+  overflow: hidden;
 }
 
 .nameStack {
@@ -900,6 +901,7 @@
   flex-shrink: 0;
   letter-spacing: 0.04em;
   user-select: none;
+  overflow: hidden;
 }
 
 .dHeroInfo {
@@ -1116,6 +1118,330 @@
   font-size: 0.8rem;
   color: oklch(60% 0.22 27);
 }
+
+/* ─── Combobox (search-as-you-type picker) ────────────────────────────────── */
+
+.comboWrap { position: relative; }
+
+.comboInput {
+  width: 100%;
+  height: 36px;
+  padding-inline: 32px 10px;
+  background: var(--surface-elevated);
+  border: 1px solid var(--neutral-border);
+  border-radius: var(--radius-md);
+  font-size: 0.875rem;
+  color: var(--text-primary);
+  font-family: inherit;
+  transition: border-color var(--dur-fast) var(--ease-out-quart);
+}
+
+.comboInput::placeholder { color: var(--text-muted); }
+.comboInput:focus        { outline: none; border-color: var(--color-blue); }
+
+.comboSearchIcon {
+  position: absolute;
+  inset-inline-start: 10px;
+  inset-block-start: 50%;
+  transform: translateY(-50%);
+  color: var(--text-muted);
+  pointer-events: none;
+}
+
+.comboDropdown {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  right: 0;
+  background: oklch(22% 0.026 255);
+  border: 1px solid var(--neutral-border);
+  border-radius: var(--radius-md);
+  z-index: 50;
+  max-height: 240px;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: oklch(32% 0.028 255) transparent;
+  box-shadow: 0 8px 24px oklch(5% 0.01 255 / 0.45);
+  animation: dropIn 0.15s var(--ease-out-quart) both;
+}
+
+@keyframes dropIn {
+  from { opacity: 0; transform: translateY(-5px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.comboOption {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 10px;
+  cursor: pointer;
+  transition: background var(--dur-fast) var(--ease-out-quart);
+}
+
+.comboOption:hover,
+.comboOptionActive { background: oklch(26% 0.028 255); }
+
+.comboCreateRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 10px;
+  cursor: pointer;
+  color: oklch(75% 0.18 75);
+  font-size: 0.8125rem;
+  font-weight: 500;
+  border-top: 1px solid oklch(28% 0.026 255);
+  transition: background var(--dur-fast) var(--ease-out-quart);
+}
+
+.comboCreateRow:hover { background: oklch(75% 0.18 75 / 0.07); }
+
+.comboEmpty {
+  padding: 12px 10px;
+  font-size: 0.8125rem;
+  color: var(--text-muted);
+}
+
+/* ─── Selection chips ─────────────────────────────────────────────────────── */
+
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  margin-bottom: 8px;
+}
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  height: 24px;
+  padding: 0 5px 0 8px;
+  background: var(--color-blue-dim);
+  border: 1px solid oklch(62% 0.26 255 / 0.28);
+  border-radius: var(--radius-sm);
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--color-blue);
+  max-width: 220px;
+}
+
+.chipLabel {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.chipX {
+  display: flex;
+  align-items: center;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: inherit;
+  padding: 0;
+  opacity: 0.55;
+  flex-shrink: 0;
+  font-family: inherit;
+  transition: opacity var(--dur-fast) var(--ease-out-quart);
+}
+
+.chipX:hover { opacity: 1; }
+
+/* ─── Create-student inline card ──────────────────────────────────────────── */
+
+.createStudentCard {
+  margin-top: 10px;
+  padding: 14px;
+  background: var(--surface-elevated);
+  border: 1px solid var(--neutral-border);
+  border-radius: var(--radius-md);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  animation: slideDown 0.18s var(--ease-out-quart) both;
+}
+
+.createStudentCardTitle {
+  font-size: 0.6875rem;
+  font-weight: 600;
+  color: oklch(75% 0.18 75);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  margin: 0;
+}
+
+.createStudentActions {
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+  padding-top: 2px;
+}
+
+.createStudentSubmit {
+  height: 30px;
+  padding-inline: 14px;
+  background: var(--color-blue);
+  color: oklch(99% 0.005 255);
+  border: none;
+  border-radius: var(--radius-sm);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  transition:
+    background var(--dur-fast) var(--ease-out-quart),
+    opacity var(--dur-fast) var(--ease-out-quart);
+}
+
+.createStudentSubmit:hover:not(:disabled) { background: oklch(58% 0.26 255); }
+.createStudentSubmit:disabled { opacity: 0.45; cursor: not-allowed; }
+
+.createStudentCancel {
+  height: 30px;
+  padding-inline: 12px;
+  background: transparent;
+  color: var(--text-secondary);
+  border: 1px solid var(--neutral-border);
+  border-radius: var(--radius-sm);
+  font-size: 0.8125rem;
+  font-weight: 500;
+  font-family: inherit;
+  cursor: pointer;
+  transition: background var(--dur-fast) var(--ease-out-quart);
+}
+
+.createStudentCancel:hover { background: var(--surface-panel); }
+
+/* ─── Student Edit & Fee Inline ───────────────────────────────────────────── */
+
+.dEditBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  height: 26px;
+  padding-inline: 10px;
+  background: var(--surface-elevated);
+  border: 1px solid var(--neutral-border);
+  border-radius: var(--radius-sm);
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--text-secondary);
+  cursor: pointer;
+  font-family: inherit;
+  margin-top: 8px;
+  transition:
+    color var(--dur-fast) var(--ease-out-quart),
+    background var(--dur-fast) var(--ease-out-quart);
+}
+.dEditBtn:hover  { color: var(--text-primary); background: oklch(26% 0.026 255); }
+.dEditBtn:active { transform: scale(0.97); }
+
+.dSectionHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+
+.dSectionHeaderBtn {
+  height: 20px;
+  padding-inline: 7px;
+  background: transparent;
+  border: 1px solid var(--neutral-border);
+  border-radius: var(--radius-sm);
+  font-size: 0.6875rem;
+  font-weight: 500;
+  color: var(--text-muted);
+  cursor: pointer;
+  font-family: inherit;
+  transition:
+    color var(--dur-fast) var(--ease-out-quart),
+    background var(--dur-fast) var(--ease-out-quart);
+}
+.dSectionHeaderBtn:hover { color: var(--text-primary); background: oklch(26% 0.026 255); }
+
+.guardianCapacity {
+  font-size: 0.6875rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  letter-spacing: 0.03em;
+}
+
+.guardianSlotNote {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  margin: 8px 0 0;
+}
+
+.feeEditForm {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  align-items: flex-start;
+  padding-top: 10px;
+  border-top: 1px solid oklch(24% 0.024 255);
+}
+
+.feeSelect {
+  flex: 0 0 auto;
+  min-width: 110px;
+  height: 30px;
+  padding-inline: 8px 26px;
+  background: var(--surface-panel);
+  border: 1px solid var(--neutral-border);
+  border-radius: var(--radius-sm);
+  color: var(--text-primary);
+  font-size: 0.8125rem;
+  font-family: inherit;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='oklch(62%25 0.02 255)' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 7px center;
+  transition: border-color var(--dur-fast) var(--ease-out-quart);
+  cursor: pointer;
+}
+.feeSelect:focus { outline: none; border-color: var(--color-blue); }
+.feeSelect:disabled { opacity: 0.5; cursor: not-allowed; }
+
+.feeDateInput {
+  flex: 1;
+  min-width: 120px;
+  height: 30px;
+  padding-inline: 8px;
+  background: var(--surface-panel);
+  border: 1px solid var(--neutral-border);
+  border-radius: var(--radius-sm);
+  color: var(--text-primary);
+  font-size: 0.8125rem;
+  font-family: inherit;
+  transition: border-color var(--dur-fast) var(--ease-out-quart);
+}
+.feeDateInput:focus { outline: none; border-color: var(--color-blue); }
+.feeDateInput:disabled { opacity: 0.5; }
+
+.feeEditActions {
+  display: flex;
+  gap: 4px;
+  flex-shrink: 0;
+}
+
+.feeEditCancel {
+  height: 30px;
+  padding-inline: 10px;
+  background: transparent;
+  border: 1px solid var(--neutral-border);
+  border-radius: var(--radius-sm);
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: var(--text-muted);
+  cursor: pointer;
+  font-family: inherit;
+  transition: color var(--dur-fast) var(--ease-out-quart);
+}
+.feeEditCancel:hover:not(:disabled) { color: var(--text-primary); }
+.feeEditCancel:disabled { opacity: 0.5; cursor: not-allowed; }
 
 /* ─── Responsive ──────────────────────────────────────────────────────────── */
 

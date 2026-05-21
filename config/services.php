@@ -42,4 +42,9 @@ return [
         'private_key' => env('JITSI_PRIVATE_KEY'),
     ],
 
+    'n8n' => [
+        'webhook_url'     => env('N8N_WEBHOOK_URL'),
+        'incoming_secret' => env('N8N_INCOMING_SECRET'),
+    ],
+
 ];

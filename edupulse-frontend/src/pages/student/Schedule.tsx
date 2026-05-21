@@ -3,6 +3,7 @@ import { useQuery } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
 import api from '../../lib/axios'
 import styles from './Schedule.module.css'
+import UserAvatar from '../../components/UserAvatar'
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -10,7 +11,7 @@ interface Session {
   id: number
   title: string
   course: { id: number; name: string; subject?: string | { name?: string } }
-  teacher?: { id: number; name: string }
+  teacher?: { id: number; name: string; avatar_url?: string | null }
   starts_at: string
   ends_at: string
   type: 'online' | 'offline' | 'recorded'
@@ -63,10 +64,6 @@ function formatTimeRange(starts_at: string, ends_at: string): string {
   return `${fmt(starts_at)} – ${fmt(ends_at)}`
 }
 
-function teacherInitials(name?: string): string {
-  if (!name) return '?'
-  return name.trim().split(/\s+/).filter(Boolean).slice(0, 2).map(w => w[0]).join('').toUpperCase()
-}
 
 // ─── Icons ────────────────────────────────────────────────────────────────────
 
@@ -138,7 +135,7 @@ function SessionCard({ s }: { s: Session }) {
         <p className={styles.sessionCourse}>{s.course?.name}</p>
         {s.teacher && (
           <div className={styles.teacherRow}>
-            <span className={styles.teacherAvatar}>{teacherInitials(s.teacher.name)}</span>
+            <UserAvatar name={s.teacher.name} avatarUrl={s.teacher.avatar_url} className={styles.teacherAvatar} />
             <span className={styles.teacherName}>{s.teacher.name}</span>
           </div>
         )}

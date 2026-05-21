@@ -8,6 +8,7 @@ use App\Traits\ApiResponser;
 use Illuminate\Support\Facades\Hash;
 use Modules\AI\Jobs\SendN8nWebhookJob;
 use Modules\IAM\Http\Requests\StoreParentRequest;
+use Modules\IAM\Http\Requests\UpdateParentRequest;
 use Modules\IAM\Models\ParentStudent;
 
 class ParentController extends Controller
@@ -16,11 +17,18 @@ class ParentController extends Controller
 
     public function index()
     {
-        $parents = User::role('parent')
-            ->withCount('children')
-            ->paginate(15);
+        $query = User::role('parent')->withCount('children');
 
-        return $this->ReturnSuccess($parents, 'Parents retrieved');
+        if ($search = request('search')) {
+            $query->where(fn ($q) =>
+                $q->where('name', 'like', "%{$search}%")
+                  ->orWhere('email', 'like', "%{$search}%")
+            );
+        }
+
+        $perPage = (int) request('per_page', 15);
+
+        return $this->ReturnSuccess($query->paginate($perPage), 'Parents retrieved');
     }
 
     public function store(StoreParentRequest $request)
@@ -66,7 +74,7 @@ class ParentController extends Controller
         return $this->ReturnSuccess($parent, 'Parent retrieved');
     }
 
-    public function update($id, StoreParentRequest $request)
+    public function update($id, UpdateParentRequest $request)
     {
         $parent = User::role('parent')->findOrFail($id);
         $validated = $request->validated();

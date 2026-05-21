@@ -23,16 +23,42 @@ class SendN8nWebhookJob implements ShouldQueue
         private readonly int    $tenantId,
     ) {}
 
+    private const ACTIVE_WEBHOOK_TYPES = [
+        'exam_score_alert',
+        'weekly_parent_report',
+        'schedule_created',
+        'schedule_cancelled',
+    ];
+
     public function handle(): void
     {
-        $log = N8nLog::create([
+        if (!in_array($this->webhookType, self::ACTIVE_WEBHOOK_TYPES)) {
+            return;
+        }
+
+        // On retries a new log row must NOT be created — reuse the pending one.
+        $log = $this->attempts() > 1
+            ? N8nLog::where('tenant_id', $this->tenantId)
+                ->where('webhook_type', $this->webhookType)
+                ->where('status', 'pending')
+                ->latest()
+                ->first()
+            : null;
+
+        $log ??= N8nLog::create([
             'tenant_id'    => $this->tenantId,
             'webhook_type' => $this->webhookType,
             'payload'      => $this->payload,
             'status'       => 'pending',
         ]);
 
-        $baseUrl  = rtrim(env('N8N_WEBHOOK_URL', ''), '/');
+        $baseUrl = rtrim(config('services.n8n.webhook_url', ''), '/');
+
+        if (empty($baseUrl)) {
+            $log->update(['status' => 'failed', 'sent_at' => now()]);
+            return;
+        }
+
         $response = Http::timeout(10)->post("{$baseUrl}/{$this->webhookType}", $this->payload);
 
         $log->update([
@@ -44,11 +70,10 @@ class SendN8nWebhookJob implements ShouldQueue
 
     public function failed(\Throwable $e): void
     {
+        // Mark ALL pending logs for this type+tenant as failed to avoid orphans on retries.
         N8nLog::where('tenant_id', $this->tenantId)
             ->where('webhook_type', $this->webhookType)
             ->where('status', 'pending')
-            ->latest()
-            ->first()
-            ?->update(['status' => 'failed']);
+            ->update(['status' => 'failed']);
     }
 }

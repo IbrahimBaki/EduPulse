@@ -3,12 +3,14 @@ import { useQuery } from '@tanstack/react-query'
 import { motion } from 'framer-motion'
 import api from '../../lib/axios'
 import styles from './Children.module.css'
+import UserAvatar from '../../components/UserAvatar'
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
 interface Child {
   id: number
   name: string
+  avatar_url?: string | null
   student_code: string
   grade: string
   attendance_rate: number
@@ -26,9 +28,6 @@ function nameHue(name: string): number {
   return hues[h % hues.length]
 }
 
-function initials(name: string): string {
-  return name.trim().split(/\s+/).filter(Boolean).slice(0, 2).map(w => w[0]).join('').toUpperCase()
-}
 
 // ─── Icons ────────────────────────────────────────────────────────────────────
 
@@ -58,9 +57,7 @@ function ChildRow({ child, index }: { child: Child; index: number }) {
       transition={{ duration: 0.22, delay: index * 0.05, ease: [0.16, 1, 0.3, 1] }}
       aria-label={child.name}
     >
-      <div className={styles.childAvatar} style={{ background: avatarColor }} aria-hidden="true">
-        {initials(child.name)}
-      </div>
+      <UserAvatar name={child.name} avatarUrl={child.avatar_url} className={styles.childAvatar} style={{ background: avatarColor }} />
 
       <div className={styles.childInfo}>
         <div className={styles.childNameRow}>

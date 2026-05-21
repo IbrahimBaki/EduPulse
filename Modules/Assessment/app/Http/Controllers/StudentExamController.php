@@ -7,7 +7,7 @@ use Illuminate\Database\QueryException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
-use Modules\AI\Jobs\SendN8nWebhookJob;
+use Modules\AI\Jobs\GenerateStudyPlanJob;
 use Modules\Assessment\Http\Requests\SubmitAnswerRequest;
 use Modules\Assessment\Models\Exam;
 use Modules\Assessment\Models\ExamAnswer;
@@ -205,16 +205,7 @@ class StudentExamController extends Controller
         $attempt->refresh();
 
         if ($attempt->percentage < 50) {
-            SendN8nWebhookJob::dispatch('exam_score_alert', [
-                'student_id'    => $student->id,
-                'student_name'  => $student->name,
-                'exam_title'    => $exam->title,
-                'course_name'   => $exam->course->name,
-                'score'         => $attempt->total_score,
-                'percentage'    => $attempt->percentage,
-                'teacher_email' => $exam->creator->email,
-                'tenant_code'   => app('tenant')->code,
-            ], app('tenant')->id);
+            GenerateStudyPlanJob::dispatch($attempt->load(['exam.course', 'exam.creator', 'exam.lessons', 'student']));
         }
 
         return $this->ReturnSuccess([

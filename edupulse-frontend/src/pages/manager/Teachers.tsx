@@ -4,6 +4,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
 import api from '../../lib/axios'
 import styles from './Teachers.module.css'
+import UserAvatar from '../../components/UserAvatar'
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -24,6 +25,7 @@ interface Teacher {
   email: string
   phone: string | null
   national_id: string | null
+  avatar_url?: string | null
   is_active: boolean
   teacher_assignments: TeacherAssignment[]
 }
@@ -35,6 +37,15 @@ interface CreatePayload {
   phone: string
   national_id: string
   assignments: Array<{ subject_id: number | ''; grade_level_id: number | '' }>
+}
+
+interface UpdateTeacherPayload {
+  name?: string
+  email?: string
+  phone?: string
+  national_id?: string
+  password?: string
+  is_active?: boolean
 }
 
 type FieldErrors = Partial<Record<string, string>>
@@ -49,6 +60,11 @@ async function fetchTeachers() {
 
 async function fetchTeacherDetail(id: number) {
   const { data } = await api.get(`/manager/teachers/${id}`)
+  return data.data as Teacher
+}
+
+async function updateTeacherApi(id: number, payload: UpdateTeacherPayload) {
+  const { data } = await api.put(`/manager/teachers/${id}`, payload)
   return data.data as Teacher
 }
 
@@ -383,6 +399,145 @@ function AddTeacherForm({ subjects, gradeLevels, onSuccess, onCancel }: {
   )
 }
 
+// ─── TeacherEditForm ──────────────────────────────────────────────────────────
+
+function TeacherEditForm({ data, onSuccess, onCancel }: {
+  data: Teacher
+  onSuccess: () => void
+  onCancel: () => void
+}) {
+  const qc = useQueryClient()
+  const [form, setForm] = useState({
+    name:        data.name,
+    email:       data.email,
+    phone:       data.phone ?? '',
+    national_id: data.national_id ?? '',
+    password:    '',
+    is_active:   data.is_active,
+  })
+  const [errors, setErrors]           = useState<FieldErrors>({})
+  const [serverError, setServerError] = useState<string | null>(null)
+
+  const mutation = useMutation({
+    mutationFn: (payload: UpdateTeacherPayload) => updateTeacherApi(data.id, payload),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['manager-teacher-detail', data.id] })
+      qc.invalidateQueries({ queryKey: ['manager-teachers'] })
+      onSuccess()
+    },
+    onError: (err: unknown) => {
+      const e = err as { response?: { data?: { errors?: Record<string, string[]>; message?: string } } }
+      if (e.response?.data?.errors) {
+        const mapped: FieldErrors = {}
+        for (const [k, v] of Object.entries(e.response.data.errors)) mapped[k] = v[0]
+        setErrors(mapped)
+      } else {
+        setServerError(e.response?.data?.message ?? 'Something went wrong.')
+      }
+    },
+  })
+
+  const field = (k: keyof Omit<typeof form, 'is_active'>, v: string) => {
+    setForm(f => ({ ...f, [k]: v }))
+    setErrors(e => ({ ...e, [k]: undefined }))
+    setServerError(null)
+  }
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault()
+    const errs: FieldErrors = {}
+    if (!form.name.trim())  errs.name  = 'Name is required'
+    if (!form.email.trim()) errs.email = 'Email is required'
+    else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)) errs.email = 'Enter a valid email'
+    if (form.password && form.password.length < 8) errs.password = 'Minimum 8 characters'
+    setErrors(errs)
+    if (Object.keys(errs).length > 0) return
+
+    const payload: UpdateTeacherPayload = {
+      name:        form.name.trim(),
+      email:       form.email.trim(),
+      phone:       form.phone || undefined,
+      national_id: form.national_id || undefined,
+      is_active:   form.is_active,
+    }
+    if (form.password) payload.password = form.password
+    mutation.mutate(payload)
+  }
+
+  const inp = (k: string) => `${styles.formInput}${errors[k] ? ' ' + styles.inputError : ''}`
+
+  return (
+    <form className={styles.addForm} onSubmit={handleSubmit} noValidate>
+      {serverError && <div className={styles.formBanner} role="alert">{serverError}</div>}
+
+      <div className={styles.formSection}>
+        <p className={styles.formSectionHeading}>Account</p>
+        <div className={styles.formGroup}>
+          <label className={styles.formLabel} htmlFor="te-name">Full name <span aria-hidden>*</span></label>
+          <input id="te-name" type="text" className={inp('name')} value={form.name}
+            onChange={e => field('name', e.target.value)} />
+          {errors.name && <p className={styles.fieldErr}>{errors.name}</p>}
+        </div>
+        <div className={styles.formGroup}>
+          <label className={styles.formLabel} htmlFor="te-email">Email <span aria-hidden>*</span></label>
+          <input id="te-email" type="email" className={inp('email')} value={form.email}
+            onChange={e => field('email', e.target.value)} />
+          {errors.email && <p className={styles.fieldErr}>{errors.email}</p>}
+        </div>
+        <div className={styles.formRow}>
+          <div className={styles.formGroup}>
+            <label className={styles.formLabel} htmlFor="te-phone">Phone</label>
+            <input id="te-phone" type="tel" className={styles.formInput} value={form.phone}
+              onChange={e => field('phone', e.target.value)} />
+          </div>
+          <div className={styles.formGroup}>
+            <label className={styles.formLabel} htmlFor="te-nid">National ID</label>
+            <input id="te-nid" type="text" className={styles.formInput} value={form.national_id}
+              onChange={e => field('national_id', e.target.value)} />
+          </div>
+        </div>
+      </div>
+
+      <div className={styles.formSection}>
+        <p className={styles.formSectionHeading}>Security</p>
+        <div className={styles.formGroup}>
+          <label className={styles.formLabel} htmlFor="te-pw">New password</label>
+          <input
+            id="te-pw" type="password" className={inp('password')} value={form.password}
+            placeholder="Leave blank to keep current"
+            onChange={e => { field('password', e.target.value) }}
+            autoComplete="new-password"
+          />
+          {errors.password && <p className={styles.fieldErr}>{errors.password}</p>}
+        </div>
+      </div>
+
+      <div className={styles.formSection}>
+        <p className={styles.formSectionHeading}>Status</p>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '4px 0' }}>
+          <span className={styles.formLabel}>Active account</span>
+          <button
+            type="button"
+            role="switch"
+            aria-checked={form.is_active}
+            className={`${styles.toggle}${form.is_active ? ' ' + styles.toggleOn : ''}`}
+            onClick={() => setForm(f => ({ ...f, is_active: !f.is_active }))}
+          >
+            <span className={styles.toggleThumb} />
+          </button>
+        </div>
+      </div>
+
+      <div className={styles.formFooter}>
+        <button type="button" className={styles.formCancel} onClick={onCancel}>Cancel</button>
+        <button type="submit" className={styles.formSubmit} disabled={mutation.isPending}>
+          {mutation.isPending ? 'Saving…' : 'Save changes'}
+        </button>
+      </div>
+    </form>
+  )
+}
+
 // ─── TeacherDetailPanel ───────────────────────────────────────────────────────
 
 function DRow({ label, children }: { label: string; children: ReactNode }) {
@@ -401,10 +556,11 @@ function TeacherDetailPanel({ id, subjects, gradeLevels }: {
 }) {
   const { t } = useTranslation()
   const qc = useQueryClient()
-  const [addingAssign, setAddingAssign]   = useState(false)
-  const [newSubjectId, setNewSubjectId]   = useState<number | ''>('')
-  const [newGradeId, setNewGradeId]       = useState<number | ''>('')
-  const [addError, setAddError]           = useState<string | null>(null)
+  const [isEditing, setIsEditing]             = useState(false)
+  const [addingAssign, setAddingAssign]       = useState(false)
+  const [newSubjectId, setNewSubjectId]       = useState<number | ''>('')
+  const [newGradeId, setNewGradeId]           = useState<number | ''>('')
+  const [addError, setAddError]               = useState<string | null>(null)
   const [confirmRemoveId, setConfirmRemoveId] = useState<number | null>(null)
 
   const { data, isLoading, isError, refetch } = useQuery({
@@ -475,12 +631,20 @@ function TeacherDetailPanel({ id, subjects, gradeLevels }: {
     )
   }
 
-  const initials = data.name.split(' ').map(n => n[0]).filter(Boolean).join('').slice(0, 2).toUpperCase()
+  if (isEditing) {
+    return (
+      <TeacherEditForm
+        data={data}
+        onSuccess={() => setIsEditing(false)}
+        onCancel={() => setIsEditing(false)}
+      />
+    )
+  }
 
   return (
     <div className={styles.dContent}>
       <div className={styles.dHero}>
-        <div className={styles.dAvatar}>{initials}</div>
+        <UserAvatar name={data.name} avatarUrl={data.avatar_url} className={styles.dAvatar} />
         <div className={styles.dHeroInfo}>
           <p className={styles.dName}>{data.name}</p>
           <p className={styles.dSubName}>{data.email}</p>
@@ -489,6 +653,12 @@ function TeacherDetailPanel({ id, subjects, gradeLevels }: {
               {data.is_active ? t('manager.teachers.statusActive') : t('manager.teachers.statusInactive')}
             </span>
           </div>
+          <button type="button" className={styles.dEditBtn} onClick={() => setIsEditing(true)}>
+            <svg width="11" height="11" viewBox="0 0 14 14" fill="none">
+              <path d="M9.5 2.5l2 2L4 12H2v-2L9.5 2.5z" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round"/>
+            </svg>
+            Edit teacher
+          </button>
         </div>
       </div>
 
@@ -780,14 +950,13 @@ export default function TeachersPage() {
                 </tr>
               ) : (
                 filtered.map(t => {
-                  const initials = t.name.split(' ').map(n => n[0]).filter(Boolean).join('').slice(0, 2).toUpperCase()
                   const shown = t.teacher_assignments.slice(0, 3)
                   const extra = t.teacher_assignments.length - shown.length
                   return (
                     <tr key={t.id} className={styles.row} onClick={() => setDetailId(t.id)}>
                       <td className={styles.td}>
                         <div className={styles.cellName}>
-                          <div className={styles.avatarInitials}>{initials}</div>
+                          <UserAvatar name={t.name} avatarUrl={t.avatar_url} className={styles.avatarInitials} />
                           <div className={styles.nameStack}>
                             <span className={styles.teacherName}>{t.name}</span>
                             <span className={styles.teacherEmail}>{t.email}</span>
@@ -850,7 +1019,7 @@ export default function TeachersPage() {
         open={detailId !== null}
         onClose={() => setDetailId(null)}
         title={t('manager.teachers.teacherProfileTitle')}
-        width={520}
+        width={640}
       >
         {detailId !== null && (
           <TeacherDetailPanel
