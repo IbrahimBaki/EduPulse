@@ -31,14 +31,13 @@
   display: flex;
   align-items: center;
   gap: 9px;
-  padding: 0 16px;
-  height: 52px;
+  padding: 14px 14px;
   flex-shrink: 0;
   border-bottom: 1px solid var(--neutral-border);
 }
 
 .logoText {
-  font-size: 1rem;
+  font-size: 0.9375rem;
   font-weight: 700;
   letter-spacing: -0.02em;
   color: var(--text-primary);
@@ -50,7 +49,7 @@
 }
 
 .schoolLabel {
-  padding: 10px 16px 2px;
+  padding: 10px 14px 2px;
   font-size: 0.6875rem;
   font-weight: 500;
   color: var(--text-muted);
@@ -75,20 +74,43 @@
   display: flex;
   align-items: center;
   gap: 9px;
-  padding: 8px 10px;
+  padding: 9px 14px;
   border-radius: var(--radius-md);
-  font-size: 0.875rem;
+  font-size: 0.84375rem;
   font-weight: 500;
   color: var(--text-secondary);
   text-decoration: none;
+  position: relative;
   transition:
     background var(--dur-fast) var(--ease-out-quart),
     color var(--dur-fast) var(--ease-out-quart);
 }
 
-.navItem svg {
+.navIcon {
+  color: oklch(68% 0.02 255);
+  display: flex;
+  align-items: center;
   flex-shrink: 0;
-  transition: transform 150ms var(--ease-out-quart);
+  transition: color 150ms var(--ease-out-quart), filter 150ms var(--ease-out-quart);
+}
+
+.navIcon svg {
+  width: 18px;
+  height: 18px;
+}
+
+.navLabel {
+  flex: 1;
+  min-width: 0;
+}
+
+.navItem:not(.navActive):hover .navIcon {
+  color: oklch(85% 0.02 255);
+}
+
+.navActive .navIcon {
+  color: var(--color-blue);
+  filter: drop-shadow(0 0 6px oklch(62% 0.26 255 / 35%));
 }
 
 .navItem:hover {
@@ -101,15 +123,33 @@
   outline-offset: -2px;
 }
 
-.navItem:hover:not(.navActive) svg {
-  transform: scale(1.14);
-}
-
 .navActive,
 .navActive:hover {
-  background: oklch(62% 0.26 255 / 0.14);
+  background: oklch(62% 0.26 255 / 0.12);
   color: var(--color-blue);
   font-weight: 600;
+}
+
+.navActive::before {
+  content: '';
+  position: absolute;
+  inset-inline-start: 0;
+  top: 6px;
+  bottom: 6px;
+  width: 2.5px;
+  background: var(--color-blue);
+  border-radius: 0 2px 2px 0;
+}
+
+.navSection {
+  font-size: 9px;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: oklch(45% 0.02 255);
+  padding: 10px 14px 3px;
+  border-top: 0.5px solid var(--neutral-border);
+  margin-top: 4px;
+  flex-shrink: 0;
 }
 
 .navBadge {
@@ -131,7 +171,7 @@
   display: flex;
   align-items: center;
   gap: 9px;
-  padding: 12px 16px;
+  padding: 12px 14px;
   border-top: 1px solid var(--neutral-border);
   flex-shrink: 0;
 }

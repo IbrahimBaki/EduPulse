@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useEffect } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
 import api from '../../lib/axios'
@@ -178,7 +178,7 @@ function AddSessionPanel({ open, onClose, courses }: { open: boolean; onClose: (
     mutationFn: (body: Record<string, unknown> & { course_id: number }) =>
       api.post(`/teacher/courses/${body.course_id}/schedules`, body),
     onSuccess: (_data, vars) => {
-      qc.invalidateQueries({ queryKey: ['teacher-schedules', String(vars.course_id)] })
+      qc.invalidateQueries({ queryKey: ['teacher-schedules'] })
       setForm({ course_id: '', title: '', description: '', date: '', starts_at: '', ends_at: '', type: 'online' })
       onClose()
     },
@@ -266,24 +266,60 @@ function AddSessionPanel({ open, onClose, courses }: { open: boolean; onClose: (
 
 // ─── Attendance slide-over ────────────────────────────────────────────────────
 
+interface ExistingAttendanceRecord {
+  student_id: number
+  status: AttendanceStatus
+}
+
 function AttendancePanel({ open, onClose, session }: { open: boolean; onClose: () => void; session: Session }) {
   const { t } = useTranslation()
   const qc = useQueryClient()
   const [attendance, setAttendance] = useState<Record<number, AttendanceStatus>>({})
+  const [saveError, setSaveError] = useState<string | null>(null)
 
-  const { data: attendees = [], isLoading } = useQuery<StudentAttendee[]>({
+  // Reset local state whenever this panel is opened for a different session
+  useEffect(() => {
+    setAttendance({})
+    setSaveError(null)
+  }, [session.id])
+
+  const { data: attendees = [], isLoading: attendeesLoading } = useQuery<StudentAttendee[]>({
     queryKey: ['session-attendees', session.id],
     queryFn: () => api.get(`/teacher/courses/${session.course_id}/students`).then(r => normalizeArray<StudentAttendee>(r.data.data ?? r.data)),
     enabled: open,
   })
+
+  // Fetch existing attendance for this session so reopening shows saved statuses
+  const { data: existingRecords = [], isLoading: attendanceLoading } = useQuery<ExistingAttendanceRecord[]>({
+    queryKey: ['session-attendance', session.id],
+    queryFn: () =>
+      api.get(`/teacher/schedules/${session.id}/attendance`)
+        .then(r => normalizeArray<ExistingAttendanceRecord>(r.data.data ?? r.data)),
+    enabled: open,
+    staleTime: 0,
+  })
+
+  // Populate radio buttons from fetched records (onSuccess was removed in TanStack Query v5)
+  useEffect(() => {
+    if (existingRecords.length === 0) return
+    const map: Record<number, AttendanceStatus> = {}
+    existingRecords.forEach(rec => { map[rec.student_id] = rec.status })
+    setAttendance(map)
+  }, [existingRecords])
+
+  const isLoading = attendeesLoading || attendanceLoading
 
   const submitMutation = useMutation({
     mutationFn: () => api.post(`/teacher/schedules/${session.id}/attendance`, {
       attendance: attendees.map(a => ({ student_id: a.id, status: attendance[a.id] ?? 'absent' })),
     }),
     onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ['teacher-schedules'] })  // invalidates all course schedule caches
+      qc.invalidateQueries({ queryKey: ['teacher-schedules'] })
+      qc.invalidateQueries({ queryKey: ['session-attendance', session.id] })
       onClose()
+    },
+    onError: () => {
+      setSaveError(t('teacher.attendance.saveError'))
     },
   })
 
@@ -308,6 +344,9 @@ function AttendancePanel({ open, onClose, session }: { open: boolean; onClose: (
       description={session.title}
       footer={
         <>
+          {saveError && (
+            <span style={{ fontSize: '0.8rem', color: 'var(--color-red)', flex: 1 }}>{saveError}</span>
+          )}
           <button type="button" className={`${styles.btn} ${styles.btnOutline}`} onClick={onClose}>{t('common.cancel')}</button>
           <button type="button" className={`${styles.btn} ${styles.btnPrimary}`} disabled={submitMutation.isPending || attendees.length === 0} onClick={() => submitMutation.mutate()}>
             {submitMutation.isPending ? t('teacher.attendance.submitting') : t('teacher.attendance.submit')}
@@ -393,17 +432,16 @@ export default function TeacherSchedule() {
   })
 
   const { data: sessions = [], isLoading, isError, refetch } = useQuery<Session[]>({
-    queryKey: ['teacher-schedules', courseFilter],
-    queryFn: () => api.get(`/teacher/courses/${courseFilter}/schedules`).then(r => normalizeArray<Session>(r.data.data ?? r.data)),
+    queryKey: ['teacher-schedules'],
+    queryFn: () => api.get('/teacher/schedules').then(r => normalizeArray<Session>(r.data.data ?? r.data)),
     staleTime: 2 * 60 * 1000,
-    enabled: !!courseFilter,
   })
 
   const statusMutation = useMutation({
     mutationFn: ({ session, status }: { session: Session; status: string }) =>
       api.patch(`/teacher/courses/${session.course_id}/schedules/${session.id}/status`, { status }),
     onSuccess: (_data, vars) => {
-      qc.invalidateQueries({ queryKey: ['teacher-schedules', courseFilter] })
+      qc.invalidateQueries({ queryKey: ['teacher-schedules'] })
       if (vars.status === 'live') {
         joinAsHost(vars.session)
       }
@@ -413,7 +451,9 @@ export default function TeacherSchedule() {
     },
   })
 
-  const filtered = sessions
+  const filtered = courseFilter
+    ? sessions.filter(s => s.course_id === Number(courseFilter))
+    : sessions
 
   const sessionsForDay = (day: Date) =>
     filtered.filter(s => sameDay(new Date(s.starts_at), day))
@@ -445,11 +485,7 @@ export default function TeacherSchedule() {
         <div>
           <h1 className={styles.pageTitle}>{t('teacher.schedule.schedule')}</h1>
           <p className={styles.pageSubtitle}>
-            {!courseFilter
-              ? t('teacher.schedule.selectCourse')
-              : isLoading
-                ? t('common.loading')
-                : `${filtered.length} session${filtered.length !== 1 ? 's' : ''}`}
+            {isLoading ? t('common.loading') : `${filtered.length} session${filtered.length !== 1 ? 's' : ''}`}
           </p>
         </div>
         <button type="button" className={`${styles.btn} ${styles.btnPrimary}`} onClick={() => setShowAdd(true)}>
@@ -490,17 +526,8 @@ export default function TeacherSchedule() {
         </div>
       </div>
 
-      {/* No course selected */}
-      {!courseFilter && (
-        <div className={styles.emptyState}>
-          <div style={{ color: 'oklch(44% 0.018 255)' }}><CalendarEmptyIcon /></div>
-          <p className={styles.emptyTitle}>{t('teacher.schedule.selectACourse')}</p>
-          <p className={styles.emptyText}>{t('teacher.schedule.chooseCourseToManage')}</p>
-        </div>
-      )}
-
       {/* Week navigator */}
-      {courseFilter && <div className={styles.weekNav}>
+      <div className={styles.weekNav}>
         <button type="button" className={styles.weekNavBtn} onClick={() => goWeek(-1)} aria-label="Previous week">
           <ChevronLeftIcon />
         </button>
@@ -509,10 +536,10 @@ export default function TeacherSchedule() {
           <ChevronRightIcon />
         </button>
         <button type="button" className={styles.todayBtn} onClick={() => setAnchor(today)}>{t('teacher.schedule.today')}</button>
-      </div>}
+      </div>
 
       {/* Week grid view */}
-      {courseFilter && view === 'week' && (
+      {view === 'week' && (
         <div className={styles.weekGrid} role="grid" aria-label="Weekly schedule">
           {weekDates.map((day, i) => {
             const isToday = sameDay(day, today)
@@ -543,6 +570,7 @@ export default function TeacherSchedule() {
                           {s.status === 'live' && <span className={styles.liveDot} />}
                           {s.status === 'scheduled' && isWithin30Min(s.starts_at) && <span className={styles.soonDot} />}
                           {s.title}
+                          {s.course && <span style={{ display: 'block', fontSize: '0.65em', opacity: 0.75, fontWeight: 400 }}>{s.course.name}</span>}
                         </span>
                         <span className={styles.chipTime}>{formatTime(s.starts_at)} – {formatTime(s.ends_at)}</span>
                       </button>
@@ -556,7 +584,7 @@ export default function TeacherSchedule() {
       )}
 
       {/* List view */}
-      {courseFilter && view === 'list' && (
+      {view === 'list' && (
         isLoading ? (
           <div className={styles.listView}>
             {Array.from({ length: 5 }, (_, i) => (

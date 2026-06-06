@@ -12,6 +12,9 @@ use Modules\Academic\Http\Controllers\StudentDashboardController;
 use Modules\Academic\Http\Controllers\SubjectController;
 use Modules\Academic\Http\Controllers\TeacherDashboardController;
 
+// Public PDF serving via short-lived token (no auth required — token is the credential)
+Route::get('v1/pdf/{token}', [LessonController::class, 'servePdfByToken']);
+
 Route::prefix('v1/{tenant_code}')->middleware(['tenant', 'auth:sanctum'])->group(function () {
     // Manager routes
     Route::middleware('role:manager')->prefix('manager')->group(function () {
@@ -39,6 +42,7 @@ Route::prefix('v1/{tenant_code}')->middleware(['tenant', 'auth:sanctum'])->group
         Route::delete('courses/{id}', [CourseController::class, 'destroy']);
 
         // Schedules (manager)
+        Route::get('schedules', [ScheduleController::class, 'managerAllSchedules']);
         Route::get('courses/{courseId}/schedules', [ScheduleController::class, 'index']);
         Route::post('courses/{courseId}/schedules', [ScheduleController::class, 'store']);
         Route::put('courses/{courseId}/schedules/{id}', [ScheduleController::class, 'update']);
@@ -56,6 +60,7 @@ Route::prefix('v1/{tenant_code}')->middleware(['tenant', 'auth:sanctum'])->group
         Route::get('courses', [CourseController::class, 'myCourses']);
         Route::get('courses/{id}', [CourseController::class, 'myCourseDetail']);
         Route::get('courses/{id}/students', [CourseController::class, 'students']);
+        Route::get('courses/{courseId}/students/{studentId}', [CourseController::class, 'studentDetail']);
 
         // Lessons
         Route::get('courses/{courseId}/lessons', [LessonController::class, 'index']);
@@ -64,6 +69,7 @@ Route::prefix('v1/{tenant_code}')->middleware(['tenant', 'auth:sanctum'])->group
         Route::patch('courses/{courseId}/lessons/{id}/publish', [LessonController::class, 'publish']);
         Route::delete('courses/{courseId}/lessons/{id}', [LessonController::class, 'destroy']);
         Route::get('courses/{courseId}/lessons/{id}/pdf', [LessonController::class, 'teacherServePdf']);
+        Route::get('courses/{courseId}/lessons/{id}/pdf-token', [LessonController::class, 'getPdfToken']);
 
         // Schedules (teacher)
         Route::get('courses/{courseId}/schedules', [ScheduleController::class, 'index']);

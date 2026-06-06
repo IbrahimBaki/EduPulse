@@ -50,14 +50,17 @@ function LogOutIcon() {
 
 type NavItem = { to: string; tKey: string; Icon: () => React.ReactElement }
 
-const NAV_ITEMS: NavItem[] = [
-  { to: '/teacher/dashboard',      tKey: 'nav.dashboard',     Icon: HomeIcon },
-  { to: '/teacher/courses',        tKey: 'nav.myCourses',     Icon: BookOpenIcon },
-  { to: '/teacher/schedule',       tKey: 'nav.schedule',      Icon: CalendarIcon },
-  { to: '/teacher/students',       tKey: 'nav.students',      Icon: UsersIcon },
-  { to: '/teacher/exams',          tKey: 'nav.exams',         Icon: ClipboardIcon },
-  { to: '/teacher/announcements',  tKey: 'nav.announcements', Icon: BellIcon },
-  { to: '/teacher/profile',        tKey: 'nav.profile',       Icon: UserIcon },
+const MAIN_NAV: NavItem[] = [
+  { to: '/teacher/dashboard',     tKey: 'nav.dashboard',     Icon: HomeIcon },
+  { to: '/teacher/courses',       tKey: 'nav.myCourses',     Icon: BookOpenIcon },
+  { to: '/teacher/schedule',      tKey: 'nav.schedule',      Icon: CalendarIcon },
+  { to: '/teacher/students',      tKey: 'nav.students',      Icon: UsersIcon },
+  { to: '/teacher/exams',         tKey: 'nav.exams',         Icon: ClipboardIcon },
+  { to: '/teacher/announcements', tKey: 'nav.announcements', Icon: BellIcon },
+]
+
+const PROFILE_NAV: NavItem[] = [
+  { to: '/teacher/profile', tKey: 'nav.profile', Icon: UserIcon },
 ]
 
 export default function TeacherLayout() {
@@ -77,6 +80,13 @@ export default function TeacherLayout() {
     : ''
   const schoolName = schoolSettings?.academy_name || fallbackName
 
+  const renderNavItem = ({ to, tKey, Icon }: NavItem) => (
+    <NavLink key={to} to={to} className={({ isActive }) => `${styles.navItem} ${isActive ? styles.navActive : ''}`}>
+      <span className={styles.navIcon}><Icon /></span>
+      <span className={styles.navLabel}>{t(tKey)}</span>
+    </NavLink>
+  )
+
   return (
     <RoleGuard role="teacher">
       <div className={styles.shell}>
@@ -90,11 +100,9 @@ export default function TeacherLayout() {
           </div>
           {schoolName && <div className={styles.schoolLabel}>{schoolName}</div>}
           <nav className={styles.nav} aria-label="Teacher navigation">
-            {NAV_ITEMS.map(({ to, tKey, Icon }) => (
-              <NavLink key={to} to={to} className={({ isActive }) => `${styles.navItem} ${isActive ? styles.navActive : ''}`}>
-                <Icon /><span>{t(tKey)}</span>
-              </NavLink>
-            ))}
+            {MAIN_NAV.map(renderNavItem)}
+            <div className={styles.navSection} />
+            {PROFILE_NAV.map(renderNavItem)}
           </nav>
           <TopControls />
           <div className={styles.userFooter}>

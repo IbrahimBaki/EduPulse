@@ -18,6 +18,9 @@ Route::prefix('v1/{tenant_code}')->middleware(['tenant', 'auth:sanctum'])->group
         Route::post('/explain',       [ExplainController::class, 'explain']);
         Route::post('/quiz/generate', [QuizController::class, 'generate']);
         Route::post('/quiz/submit',   [QuizController::class, 'submit']);
+        Route::post('/quiz/quick',    [QuizController::class, 'quickQuiz']);
+        Route::get('/quiz/history',              [QuizController::class, 'history']);
+        Route::get('/quiz/history/{attempt}',    [QuizController::class, 'showAttempt']);
         Route::post('/exam/generate', [ExamController::class, 'generate'])->middleware('role:teacher');
 
         Route::get('/chat-history',                    [ChatHistoryController::class, 'myHistory']);

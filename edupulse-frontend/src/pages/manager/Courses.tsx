@@ -248,8 +248,8 @@ function CourseForm({ course, subjects, gradeLevels, teachers, onSuccess, onCanc
     subject_id:    course?.subject_id    ?? '',
     grade_level_id: course?.grade_level_id ?? '',
     teacher_id:    course?.teacher_id    ?? '',
-    start_date:    course?.start_date    ?? '',
-    end_date:      course?.end_date      ?? '',
+    start_date:    course?.start_date ? course.start_date.split('T')[0] : '',
+    end_date:      course?.end_date   ? course.end_date.split('T')[0]   : '',
     max_students:  course?.max_students?.toString() ?? '',
   })
   const [errors, setErrors]           = useState<FieldErrors>({})

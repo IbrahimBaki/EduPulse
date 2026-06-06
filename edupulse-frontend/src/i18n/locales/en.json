@@ -17,7 +17,84 @@
     "myChildren": "My Children",
     "attendance": "Attendance",
     "examsResults": "Exams & Results",
-    "profile": "My Profile"
+    "profile": "My Profile",
+    "management": "Management"
+  },
+  "students": {
+    "columns": {
+      "student": "Student",
+      "code": "Code",
+      "grade": "Grade",
+      "parent": "Parent",
+      "fees": "Fees",
+      "active": "Active"
+    },
+    "status": {
+      "pending": "Pending",
+      "paid": "Paid",
+      "overdue": "Overdue",
+      "active": "Active",
+      "inactive": "Inactive"
+    },
+    "actions": {
+      "add": "Add student",
+      "export": "Export",
+      "edit": "Edit student",
+      "remove": "Remove"
+    },
+    "filters": {
+      "allStatuses": "All statuses",
+      "allGrades": "All grades",
+      "searchPlaceholder": "Search by name or email"
+    }
+  },
+  "profile": {
+    "sections": {
+      "academic": "Academic",
+      "contact": "Contact",
+      "finance": "Finance",
+      "parents": "Parents / Guardians",
+      "enrolledCourses": "Enrolled Courses"
+    },
+    "fields": {
+      "gradeLevel": "Grade level",
+      "studentCode": "Student code",
+      "enrolled": "Enrolled",
+      "email": "Email",
+      "phone": "Phone",
+      "gender": "Gender",
+      "dateOfBirth": "Date of birth",
+      "address": "Address",
+      "feeStatus": "Fee status",
+      "dueDate": "Due date"
+    },
+    "actions": {
+      "addGuardian": "Add second guardian",
+      "addFirstGuardian": "Add guardian"
+    }
+  },
+  "dashboard": {
+    "kpi": {
+      "students": "Total Students",
+      "teachers": "Total Teachers",
+      "attendance": "Attendance This Week",
+      "collectionRate": "Collection Rate",
+      "absentToday": "absent today",
+      "overdueCount": "overdue"
+    },
+    "alerts": {
+      "title": "Alerts Needing Attention",
+      "allClear": "All students performing well",
+      "atRisk": "student at risk",
+      "atRiskPlural": "students at risk"
+    },
+    "sessions": {
+      "title": "Today's Sessions",
+      "empty": "No sessions scheduled for today"
+    },
+    "enrollment": {
+      "title": "Enrollment Trend"
+    }
   },
   "roles": {
     "manager": "Manager",
@@ -213,7 +290,8 @@
       "submit": "Submit Attendance",
       "submitting": "Submitting...",
       "noStudents": "No enrolled students found.",
-      "markAllPresent": "Mark all present"
+      "markAllPresent": "Mark all present",
+      "saveError": "Failed to save attendance. Please try again."
     },
     "announcements": {
       "new": "New Announcement",
@@ -338,7 +416,9 @@
       "student": "Student",
       "title": "Students",
       "topic": "Topic",
-      "weakTopics": "Weak Topics"
+      "weakTopics": "Weak Topics",
+      "course": "Course",
+      "allCourses": "All Courses"
     }
   },
   "student": {
@@ -491,6 +571,25 @@
       "of": "of",
       "passed": "You passed!",
       "quizLoadFailed": "Failed to load quiz",
+      "quickQuiz": "Quick Quiz",
+      "quizHistoryTitle": "Quiz history",
+      "noQuizHistory": "No quizzes yet",
+      "reviewQuiz": "Review answers",
+      "yourAnswer": "Your answer",
+      "correctAnswer": "Correct answer",
+      "retakeQuiz": "Retake quiz",
+      "quizReviewTitle": "Quiz review",
+      "quizGenerating": "Generating...",
+      "quizGeneratingHint": "This may take a few seconds, please wait",
+      "quizSourceLabel": "Choose quiz source",
+      "quizSourceChat": "Chat session",
+      "quizSourceTopic": "Weak topic",
+      "quizSourceLesson": "Course & Lesson",
+      "noRecentChats": "No recent chats",
+      "selectSession": "Select a session",
+      "selectTopic": "Select a topic",
+      "selectCourseForQuiz": "Choose a course",
+      "backToCourses": "Back to courses",
       "recentSessions": "Recent sessions",
       "selectCourseHint": "Select a course first",
       "sendMessage": "Send",
@@ -505,7 +604,56 @@
       "welcomeText": "Hello! I'm here to help you study.",
       "whichCourse": "Which course?",
       "whichLesson": "Which lesson?",
-      "yourWeakTopics": "Your weak topics"
+      "yourWeakTopics": "Your weak topics",
+      "modeSwitch": "Choose mode",
+      "chatMode": "Chat",
+      "quizMode": "Quiz",
+      "quizSetupTitle": "Create a Quiz",
+      "quizSetupSub": "Choose a topic and difficulty level to practice",
+      "topicLabel": "Topic",
+      "topicPlaceholder": "Enter a topic to quiz on...",
+      "levelLabel": "Difficulty",
+      "generateQuiz": "Generate Quiz",
+      "question": "Question",
+      "chooseAnswer": "Choose an answer",
+      "score": "Score",
+      "progress": "Progress",
+      "breakdown": "Results Breakdown",
+      "quizModeTitle": "Practice Quiz",
+      "changeLesson": "Change Lesson",
+      "noResponse": "No response generated. Please try again.",
+      "errorMessage": "Something went wrong. Please try again.",
+      "noSessions": "No chat sessions yet",
+      "noWeakTopics": "No weak topics identified",
+      "welcomeFirstTime": "Welcome to AI Tutor!",
+      "welcomeFirstTimeText": "I'm here to help you study. Select a course and lesson, then ask me anything.",
+      "tutorDesc": "Your personal AI study companion. Ask questions about any lesson, get instant explanations, test yourself with adaptive quizzes, and track the topics you need to strengthen.",
+      "featureExplain": "Instant explanations",
+      "featureQuiz": "Adaptive quizzes",
+      "featureTrack": "Weak topic tracker",
+      "selectLessons": "Select Lessons",
+      "allLessons": "All Lessons",
+      "selectedCount": "{{count}} lesson selected",
+      "selectedCount_other": "{{count}} lessons selected",
+      "startChatWith": "Chat with {{count}} lesson",
+      "startChatWith_other": "Chat with {{count}} lessons",
+      "startChatAll": "Chat with All Lessons",
+      "selectAtLeastOne": "Select at least one lesson",
+      "lessonContextLabel": "{{count}} lesson",
+      "lessonContextLabel_other": "{{count}} lessons",
+      "allLessonsContext": "All {{courseName}} lessons",
+      "chatsTab": "Chats",
+      "weakTopicsTab": "Weak Topics",
+      "quizzesTab": "Quizzes",
+      "loadMore": "Load more",
+      "quizHelperTitle": "Why take a quiz?",
+      "quizHelperWhyTitle": "Find your gaps.",
+      "quizHelperWhyDesc": "Discover exactly what you don't know yet — before it shows up in the exam.",
+      "quizHelperHowTitle": "Active recall works.",
+      "quizHelperHowDesc": "Testing yourself is proven to lock in knowledge far better than re-reading notes.",
+      "quizHelperBenefitTitle": "Track your growth.",
+      "quizHelperBenefitDesc": "Every quiz updates your weak topics list so you always know where to focus next.",
+      "quizHelperInstructions": "Pick a source below, set a difficulty level, then tap Generate — your quiz is ready in seconds."
     }
   },
   "manager": {
@@ -628,7 +776,13 @@
       "dueDate": "Due date",
       "allGrades": "All grades",
       "allStatus": "All status",
-      "searchPlaceholder": "Search by name or email"
+      "searchPlaceholder": "Search by name or email",
+      "newPassword": "New password",
+      "keepCurrentPassword": "Leave blank to keep current",
+      "noGuardians": "No guardians assigned yet.",
+      "guardianSlotsFilled": "Both guardian slots are filled.",
+      "profileTitle": "Student profile",
+      "selected": "selected"
     },
     "announcements": {
       "posting": "Posting...",

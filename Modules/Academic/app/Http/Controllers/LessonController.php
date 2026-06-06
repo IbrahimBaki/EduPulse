@@ -4,7 +4,9 @@ namespace Modules\Academic\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use App\Traits\ApiResponser;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 use Modules\AI\Jobs\SendN8nWebhookJob;
 use Modules\Academic\Http\Requests\StoreLessonRequest;
 use Modules\Academic\Models\Course;
@@ -135,6 +137,45 @@ class LessonController extends Controller
         return response()->file($absolutePath, [
             'Content-Type'        => 'application/pdf',
             'Content-Disposition' => 'inline; filename="' . addslashes($filename) . '"',
+        ]);
+    }
+
+    public function getPdfToken($courseId, $id)
+    {
+        $course = Course::findOrFail($courseId);
+        $lesson = $course->lessons()->findOrFail($id);
+
+        if (auth()->user()->hasRole('teacher') && $course->teacher_id !== auth()->id()) {
+            return $this->ReturnFailed('Unauthorized', 403);
+        }
+
+        if (!$lesson->pdf_path) {
+            return $this->ReturnFailed('No PDF available', 404);
+        }
+
+        $token = Str::random(48);
+        Cache::put("pdf_token:{$token}", $lesson->id, 600);
+
+        return $this->ReturnSuccess(['token' => $token], 'Token generated');
+    }
+
+    public function servePdfByToken($token)
+    {
+        $lessonId = Cache::pull("pdf_token:{$token}");
+
+        if (!$lessonId) {
+            abort(403, 'Invalid or expired PDF token');
+        }
+
+        $lesson = Lesson::withoutGlobalScopes()->findOrFail($lessonId);
+
+        if (!$lesson->pdf_path || !Storage::disk('local')->exists($lesson->pdf_path)) {
+            abort(404, 'PDF not found');
+        }
+
+        return response()->file(Storage::disk('local')->path($lesson->pdf_path), [
+            'Content-Type'        => 'application/pdf',
+            'Content-Disposition' => 'inline; filename="document.pdf"',
         ]);
     }
 }

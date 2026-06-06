@@ -13,7 +13,7 @@ class SystemPromptBuilder
      * Pass $lessonId when chunks should be embedded in the prompt (quiz generation).
      * Omit $lessonId when the PDF is sent directly to the model (explain endpoint).
      */
-    public function build(int $studentId, ?int $lessonId = null, ?string $studentMessage = null, string $mode = 'chat'): string
+    public function build(int $studentId, ?int $lessonId = null, ?string $studentMessage = null, string $mode = 'chat', array $lessonNames = []): string
     {
         $weakTopics = WeakTopic::where('student_id', $studentId)
             ->where('score', '<', 60)
@@ -42,12 +42,34 @@ class SystemPromptBuilder
               . "**نقاط ضعف الطالب:** {$weakList}. ركّز على تقوية الجوانب دي.\n"
               . "**تنسيق الردود — مهم جداً:**\n"
               . "- استخدم Markdown في كل ردودك (## عناوين، **bold**، - قوائم، | جداول |)\n"
-              . "- لو في مقارنة بين حاجتين → استخدم جدول Markdown\n"
+              . "- لو في مقارنة بين حاجتين → استخدم جدول Markdown بالشكل ده بالضبط:\n"
+              . "  | العنوان ١ | العنوان ٢ |\n"
+              . "  | --- | --- |\n"
+              . "  | قيمة | قيمة |\n"
+              . "  **مهم جداً:** صف الفصل يكون `| --- |` بس، من غير نقطتين `:` ومن غير تطويل الشرطات\n"
               . "- لو في خطوات → استخدم قائمة مرتبة 1. 2. 3.\n"
               . "- لو في كود → استخدم \`\`\`code block\`\`\`\n"
-              . "- لو في رسم أو مخطط تدفق → استخدم \`\`\`mermaid\`\`\` block\n"
+              . "- لو طُلب خريطة ذهنية → استخدم \`\`\`mermaid\`\`\` بالشكل ده بالضبط (لا تضف مسافات قبل mindmap أبداً):\n"
+              . "mindmap\n"
+              . "  root((الموضوع الرئيسي))\n"
+              . "    فرع أول\n"
+              . "      تفصيل\n"
+              . "    فرع ثاني\n"
+              . "القاعدة: mindmap في أول السطر بدون أي مسافات، مسافتين (2 spaces) لكل مستوى، root((نص)) للعقدة الرئيسية، نص عادي للعقد الأخرى\n"
+              . "- لو في مخطط تدفق → استخدم \`\`\`mermaid\`\`\` مع graph TD\n"
               . "- ابدأ دايما بملخص سريع في سطرين، بعدين وسّع الشرح\n"
               . "- الردود تكون شاملة ومنظمة ومفيدة وممتعة للطالب";
+
+        if (!empty($lessonNames)) {
+            $nameList = implode(', ', $lessonNames);
+            $base .= "\n**قاعدة أساسية — مهمة جداً:**\n"
+                   . "- أجب **فقط** من محتوى الملف/الملفات المرفقة ({$nameList})\n"
+                   . "- في كل إجابة اذكر رقم الصفحة اللي جبت منها المعلومة: مثال 📄 (صفحة ٥)\n"
+                   . (count($lessonNames) > 1
+                       ? "- لو أكتر من درس: اذكر اسم الدرس ورقم الصفحة: مثال 📄 (درس: {$lessonNames[0]} - صفحة ٥)\n"
+                       : "")
+                   . "- لو السؤال مش موجود في الملف المرفق، قول: \"الموضوع ده مش موجود في الدرس المرفق\"";
+        }
 
         if (!$lessonId) {
             return $base;

@@ -50,14 +50,17 @@ function ClipboardListIcon() {
 
 type NavItem = { to: string; tKey: string; Icon: () => React.ReactElement }
 
-const NAV_ITEMS: NavItem[] = [
+const MAIN_NAV: NavItem[] = [
   { to: '/parent/dashboard',     tKey: 'nav.dashboard',     Icon: HomeIcon },
   { to: '/parent/children',      tKey: 'nav.myChildren',    Icon: UsersIcon },
   { to: '/parent/attendance',    tKey: 'nav.attendance',    Icon: CalendarIcon },
   { to: '/parent/exams',         tKey: 'nav.examsResults',  Icon: ClipboardListIcon },
   { to: '/parent/fees',          tKey: 'nav.fees',          Icon: CreditCardIcon },
   { to: '/parent/announcements', tKey: 'nav.announcements', Icon: FileTextIcon },
-  { to: '/parent/profile',       tKey: 'nav.profile',       Icon: UserIcon },
+]
+
+const PROFILE_NAV: NavItem[] = [
+  { to: '/parent/profile', tKey: 'nav.profile', Icon: UserIcon },
 ]
 
 export default function ParentLayout() {
@@ -77,6 +80,13 @@ export default function ParentLayout() {
     : ''
   const schoolName = schoolSettings?.academy_name || fallbackName
 
+  const renderNavItem = ({ to, tKey, Icon }: NavItem) => (
+    <NavLink key={to} to={to} className={({ isActive }) => `${styles.navItem} ${isActive ? styles.navActive : ''}`}>
+      <span className={styles.navIcon}><Icon /></span>
+      <span className={styles.navLabel}>{t(tKey)}</span>
+    </NavLink>
+  )
+
   return (
     <RoleGuard role="parent">
       <div className={styles.shell}>
@@ -90,11 +100,9 @@ export default function ParentLayout() {
           </div>
           {schoolName && <div className={styles.schoolLabel}>{schoolName}</div>}
           <nav className={styles.nav} aria-label="Parent navigation">
-            {NAV_ITEMS.map(({ to, tKey, Icon }) => (
-              <NavLink key={to} to={to} className={({ isActive }) => `${styles.navItem} ${isActive ? styles.navActive : ''}`}>
-                <Icon /><span>{t(tKey)}</span>
-              </NavLink>
-            ))}
+            {MAIN_NAV.map(renderNavItem)}
+            <div className={styles.navSection} />
+            {PROFILE_NAV.map(renderNavItem)}
           </nav>
           <TopControls />
           <div className={styles.userFooter}>

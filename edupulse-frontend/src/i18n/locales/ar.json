@@ -17,7 +17,84 @@
     "myChildren": "أبنائي",
     "attendance": "الحضور",
     "examsResults": "الاختبارات والنتائج",
-    "profile": "ملفي الشخصي"
+    "profile": "ملفي الشخصي",
+    "management": "إدارة"
+  },
+  "students": {
+    "columns": {
+      "student": "الطالب",
+      "code": "الكود",
+      "grade": "الصف",
+      "parent": "ولي الأمر",
+      "fees": "الرسوم",
+      "active": "النشاط"
+    },
+    "status": {
+      "pending": "معلق",
+      "paid": "مدفوع",
+      "overdue": "متأخر",
+      "active": "نشط",
+      "inactive": "غير نشط"
+    },
+    "actions": {
+      "add": "إضافة طالب",
+      "export": "تصدير",
+      "edit": "تعديل الطالب",
+      "remove": "إزالة"
+    },
+    "filters": {
+      "allStatuses": "كل الحالات",
+      "allGrades": "كل الصفوف",
+      "searchPlaceholder": "البحث بالاسم أو الإيميل"
+    }
+  },
+  "profile": {
+    "sections": {
+      "academic": "أكاديمي",
+      "contact": "التواصل",
+      "finance": "المالية",
+      "parents": "أولياء الأمور",
+      "enrolledCourses": "المواد المسجلة"
+    },
+    "fields": {
+      "gradeLevel": "المرحلة الدراسية",
+      "studentCode": "كود الطالب",
+      "enrolled": "تاريخ التسجيل",
+      "email": "البريد الإلكتروني",
+      "phone": "الهاتف",
+      "gender": "الجنس",
+      "dateOfBirth": "تاريخ الميلاد",
+      "address": "العنوان",
+      "feeStatus": "حالة الرسوم",
+      "dueDate": "تاريخ الاستحقاق"
+    },
+    "actions": {
+      "addGuardian": "إضافة ولي أمر ثانٍ",
+      "addFirstGuardian": "إضافة ولي أمر"
+    }
+  },
+  "dashboard": {
+    "kpi": {
+      "students": "إجمالي الطلاب",
+      "teachers": "إجمالي المعلمين",
+      "attendance": "الحضور هذا الأسبوع",
+      "collectionRate": "معدل التحصيل",
+      "absentToday": "غائب اليوم",
+      "overdueCount": "متأخر في السداد"
+    },
+    "alerts": {
+      "title": "تنبيهات تحتاج انتباهك",
+      "allClear": "جميع الطلاب يؤدون بشكل جيد",
+      "atRisk": "طالب في خطر",
+      "atRiskPlural": "طلاب في خطر"
+    },
+    "sessions": {
+      "title": "جلسات اليوم",
+      "empty": "لا توجد جلسات مجدولة اليوم"
+    },
+    "enrollment": {
+      "title": "اتجاه التسجيل"
+    }
   },
   "roles": {
     "manager": "مدير",
@@ -213,7 +290,8 @@
       "submit": "تسجيل الحضور",
       "submitting": "جارٍ التسجيل...",
       "noStudents": "لا يوجد طلاب مسجّلون.",
-      "markAllPresent": "تعيين الجميع حاضرين"
+      "markAllPresent": "تعيين الجميع حاضرين",
+      "saveError": "فشل حفظ الحضور. يرجى المحاولة مرة أخرى."
     },
     "announcements": {
       "new": "إعلان جديد",
@@ -338,7 +416,9 @@
       "student": "الطالب",
       "title": "الطلاب",
       "topic": "الموضوع",
-      "weakTopics": "الموضوعات الضعيفة"
+      "weakTopics": "الموضوعات الضعيفة",
+      "course": "المادة",
+      "allCourses": "جميع المواد"
     }
   },
   "student": {
@@ -392,7 +472,7 @@
         "lessons": "الدروس",
         "schedule": "الجدول",
         "progress": "تقدمي",
-        "askAi": "اسأل الذكاء الاصطناعي",
+        "askAi": "اسأل المعلم الذكي",
         "myProgress": "تقدمي",
         "noLessons": "لا توجد دروس",
         "noLessonsHint": "لم يتم إضافة دروس لهذه المادة بعد",
@@ -491,6 +571,25 @@
       "of": "من",
       "passed": "اجتزت الاختبار",
       "quizLoadFailed": "فشل تحميل الاختبار",
+      "quickQuiz": "كويز سريع",
+      "quizHistoryTitle": "سجل الاختبارات",
+      "noQuizHistory": "لا توجد اختبارات سابقة",
+      "reviewQuiz": "مراجعة الإجابات",
+      "yourAnswer": "إجابتك",
+      "correctAnswer": "الإجابة الصحيحة",
+      "retakeQuiz": "إعادة الاختبار",
+      "quizReviewTitle": "مراجعة الاختبار",
+      "quizGenerating": "جاري الإنشاء...",
+      "quizGeneratingHint": "قد يستغرق الأمر بضع ثوانٍ، يرجى الانتظار",
+      "quizSourceLabel": "اختر مصدر الاختبار",
+      "quizSourceChat": "من محادثة",
+      "quizSourceTopic": "موضوع ضعيف",
+      "quizSourceLesson": "من درس",
+      "noRecentChats": "لا توجد محادثات سابقة",
+      "selectSession": "اختر محادثة",
+      "selectTopic": "اختر موضوعاً",
+      "selectCourseForQuiz": "اختر مادة للاختبار",
+      "backToCourses": "رجوع للمواد",
       "recentSessions": "المحادثات الأخيرة",
       "selectCourseHint": "اختر مادة أولاً",
       "sendMessage": "إرسال",
@@ -505,7 +604,56 @@
       "welcomeText": "أهلاً! أنا هنا لمساعدتك في الدراسة.",
       "whichCourse": "أي مادة؟",
       "whichLesson": "أي درس؟",
-      "yourWeakTopics": "موضوعاتك الضعيفة"
+      "yourWeakTopics": "موضوعاتك الضعيفة",
+      "modeSwitch": "اختر الوضع",
+      "chatMode": "محادثة",
+      "quizMode": "اختبار",
+      "quizSetupTitle": "إنشاء اختبار",
+      "quizSetupSub": "اختر موضوعاً ومستوى صعوبة للتدرب",
+      "topicLabel": "الموضوع",
+      "topicPlaceholder": "أدخل موضوعاً للاختبار...",
+      "levelLabel": "مستوى الصعوبة",
+      "generateQuiz": "إنشاء اختبار",
+      "question": "سؤال",
+      "chooseAnswer": "اختر إجابة",
+      "score": "النتيجة",
+      "progress": "التقدم",
+      "breakdown": "تفصيل النتائج",
+      "quizModeTitle": "اختبار تدريبي",
+      "changeLesson": "تغيير الدرس",
+      "noResponse": "لم يتم توليد رد. يرجى المحاولة مرة أخرى.",
+      "errorMessage": "حدث خطأ ما. يرجى المحاولة مرة أخرى.",
+      "noSessions": "لا توجد محادثات بعد",
+      "noWeakTopics": "لم يتم تحديد موضوعات ضعيفة",
+      "welcomeFirstTime": "مرحباً بك في المعلم الذكي!",
+      "welcomeFirstTimeText": "أنا هنا لمساعدتك في الدراسة. اختر مادة ودرساً ثم اسألني أي شيء.",
+      "tutorDesc": "مرافقك الذكي للدراسة. اسأل عن أي درس واحصل على شروحات فورية، اختبر نفسك بكويزات تكيّفية، وتابع الموضوعات التي تحتاج إلى تقوية.",
+      "featureExplain": "شروحات فورية",
+      "featureQuiz": "كويزات تكيّفية",
+      "featureTrack": "متابعة نقاط الضعف",
+      "selectLessons": "اختر الدروس",
+      "allLessons": "كل الدروس",
+      "selectedCount": "{{count}} درس محدد",
+      "selectedCount_other": "{{count}} دروس محددة",
+      "startChatWith": "محادثة مع {{count}} درس",
+      "startChatWith_other": "محادثة مع {{count}} دروس",
+      "startChatAll": "محادثة مع كل الدروس",
+      "selectAtLeastOne": "اختر درساً واحداً على الأقل",
+      "lessonContextLabel": "{{count}} درس",
+      "lessonContextLabel_other": "{{count}} دروس",
+      "allLessonsContext": "كل دروس {{courseName}}",
+      "chatsTab": "المحادثات",
+      "weakTopicsTab": "نقاط الضعف",
+      "quizzesTab": "الاختبارات",
+      "loadMore": "عرض المزيد",
+      "quizHelperTitle": "لماذا تحل اختباراً؟",
+      "quizHelperWhyTitle": "اكتشف ثغراتك.",
+      "quizHelperWhyDesc": "تعرّف بالضبط على ما لا تعرفه — قبل أن يظهر في الامتحان.",
+      "quizHelperHowTitle": "الاسترجاع النشط يعمل.",
+      "quizHelperHowDesc": "اختبار نفسك يُثبّت المعلومات أفضل بكثير من إعادة قراءة الملاحظات.",
+      "quizHelperBenefitTitle": "تابع تقدمك.",
+      "quizHelperBenefitDesc": "كل اختبار يُحدّث قائمة نقاط ضعفك حتى تعرف دائماً أين تركّز.",
+      "quizHelperInstructions": "اختر مصدراً أدناه، حدد مستوى الصعوبة، ثم اضغط على إنشاء — اختبارك جاهز في ثوانٍ."
     }
   },
   "manager": {
@@ -628,7 +776,13 @@
       "dueDate": "تاريخ الاستحقاق",
       "allGrades": "جميع المراحل",
       "allStatus": "جميع الحالات",
-      "searchPlaceholder": "البحث بالاسم أو البريد الإلكتروني"
+      "searchPlaceholder": "البحث بالاسم أو البريد الإلكتروني",
+      "newPassword": "كلمة مرور جديدة",
+      "keepCurrentPassword": "اتركها فارغة للإبقاء على الحالية",
+      "noGuardians": "لم يُضَف أي ولي أمر بعد.",
+      "guardianSlotsFilled": "تم ملء مكانَي ولي الأمر.",
+      "profileTitle": "ملف الطالب",
+      "selected": "محدد"
     },
     "announcements": {
       "posting": "جارٍ النشر...",

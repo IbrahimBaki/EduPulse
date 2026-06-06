@@ -26,6 +26,8 @@ interface Schedule {
   status: 'scheduled' | 'live' | 'completed' | 'cancelled'
   description: string | null
   meeting_url: string | null
+  course?: { id: number; name: string }
+  course_id?: number
 }
 
 interface CreateSchedulePayload {
@@ -125,9 +127,8 @@ async function fetchCourses() {
   return (Array.isArray(raw) ? raw : (raw.data ?? [])) as Course[]
 }
 
-async function fetchSchedules(courseId: number | string) {
-  if (!courseId) return []
-  const { data } = await api.get(`/manager/courses/${courseId}/schedules`)
+async function fetchSchedules() {
+  const { data } = await api.get('/manager/schedules')
   const raw = data.data
   return (Array.isArray(raw) ? raw : (raw.data ?? [])) as Schedule[]
 }
@@ -194,16 +195,19 @@ export default function SchedulePage() {
     queryFn: fetchCourses,
   })
 
-  const { data: schedules, isLoading: schedulesLoading, isError, refetch } = useQuery({
-    queryKey: ['manager-schedules', selectedCourseId],
-    queryFn: () => fetchSchedules(selectedCourseId!),
-    enabled: !!selectedCourseId,
+  const { data: allSchedules = [], isLoading: schedulesLoading, isError, refetch } = useQuery({
+    queryKey: ['manager-schedules'],
+    queryFn: fetchSchedules,
   })
+
+  const schedules = selectedCourseId
+    ? allSchedules.filter(s => s.course_id === selectedCourseId)
+    : allSchedules
 
   const createMutation = useMutation({
     mutationFn: (payload: CreateSchedulePayload) => createScheduleApi(Number(selectedCourseId), payload),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['manager-schedules', selectedCourseId] })
+      queryClient.invalidateQueries({ queryKey: ['manager-schedules'] })
       setSlideOverOpen(false)
       setFormValues({ title: '', starts_at: '', ends_at: '', type: 'online', description: '', meeting_url: '' })
     },
@@ -246,7 +250,7 @@ export default function SchedulePage() {
         <div>
           <h1 className={styles.pageTitle}>{t('manager.schedule.title')}</h1>
           <p className={styles.pageCount}>
-            {selectedCourse ? `${t('manager.schedule.viewingScheduleFor')} ${selectedCourse.name}` : t('manager.schedule.selectCoursePrompt')}
+            {schedulesLoading ? t('common.loading') : selectedCourseId ? `${t('manager.schedule.viewingScheduleFor')} ${selectedCourse?.name}` : `${allSchedules.length} session${allSchedules.length !== 1 ? 's' : ''}`}
           </p>
         </div>
 
@@ -286,13 +290,7 @@ export default function SchedulePage() {
       </div>
 
       <main>
-        {!selectedCourseId ? (
-          <div className={styles.emptyState}>
-            <IconCalendar />
-            <h3 className={styles.emptyTitle}>{t('manager.schedule.noCourseSelected')}</h3>
-            <p className={styles.emptyText}>{t('manager.schedule.noCourseSelectedHint')}</p>
-          </div>
-        ) : schedulesLoading ? (
+        {schedulesLoading ? (
           <div className={`${styles.calendarContainer} ${styles.skeleton}`} style={{ height: '600px' }} />
         ) : isError ? (
           <div className={styles.emptyState}>
@@ -330,6 +328,11 @@ export default function SchedulePage() {
             <p style={{ fontSize: '0.8125rem', color: 'var(--text-secondary)', marginBottom: '16px' }}>
               {popover.session.description || t('manager.schedule.noDescription')}
             </p>
+            {popover.session.course && (
+              <p style={{ fontSize: '0.8125rem', fontWeight: 600, marginBottom: '12px', color: 'var(--text-primary)' }}>
+                {popover.session.course.name}
+              </p>
+            )}
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginBottom: '20px' }}>
               <div>
                 <span className={styles.label} style={{ fontSize: '0.6875rem' }}>{t('manager.schedule.type')}</span>
@@ -417,6 +420,7 @@ function WeekView({ sessions, currentDate, onSessionClick }: {
                 return (
                   <div key={s.id} className={styles.sessionBlock} style={{ top: `${top}px`, height: `${Math.max(dM, 34)}px`, color: 'var(--color-blue)' }} onClick={(e) => onSessionClick(e, s)}>
                     <div className={styles.sessionTitle}>{s.title}</div>
+                    {s.course && <div style={{ fontSize: '0.6em', opacity: 0.75 }}>{s.course.name}</div>}
                     <div className={styles.sessionTime}>{sH}:{sM.toString().padStart(2, '0')}</div>
                   </div>
                 )
@@ -455,7 +459,10 @@ function MonthView({ sessions, currentDate, onSessionClick }: {
             <div key={i} className={`${styles.monthCell} ${d.getMonth() !== currentDate.getMonth() ? styles.monthCellOther : ''} ${isToday ? styles.monthCellToday : ''}`}>
               <div className={styles.dayNumber}>{d.getDate()}</div>
               {daySessions.slice(0, 3).map(s => (
-                <div key={s.id} className={styles.monthEvent} onClick={(e) => onSessionClick(e, s)}>{s.title}</div>
+                <div key={s.id} className={styles.monthEvent} onClick={(e) => onSessionClick(e, s)}>
+                  {s.title}
+                  {s.course && <span style={{ opacity: 0.7 }}> · {s.course.name}</span>}
+                </div>
               ))}
               {daySessions.length > 3 && <div style={{ fontSize: '0.625rem', color: 'var(--text-muted)', textAlign: 'center' }}>+ {daySessions.length - 3} more</div>}
             </div>
@@ -479,6 +486,7 @@ function ListView({ sessions }: { sessions: Schedule[] }) {
             <div className={styles.listCardMeta}>
               <span className={styles.statusBadge} style={{ background: 'oklch(22% 0.026 255)' }}>{s.type === 'online' ? t('common.online') : s.type === 'recorded' ? t('common.recorded') : t('common.inPerson')}</span>
               <span>&bull;</span><span>{s.status === 'live' ? t('common.live') : s.status === 'completed' ? t('common.completed') : s.status === 'cancelled' ? t('common.cancelled') : t('common.scheduled')}</span>
+              {s.course && <><span>&bull;</span><span>{s.course.name}</span></>}
             </div>
           </div>
           <div className={styles.pageActions}><button className={`${styles.btn} ${styles.btnOutline} ${styles.btnIcon}`}>...</button></div>

@@ -132,10 +132,22 @@ class ScheduleController extends Controller
 
         $schedules = Schedule::whereIn('course_id', $teacherCourseIds)
             ->with(['course:id,name,subject_id', 'course.subject:id,name'])
-            ->orderByDesc('starts_at')
-            ->paginate(20);
+            ->orderBy('starts_at')
+            ->get();
 
         return $this->ReturnSuccess($schedules, 'Schedules retrieved');
+    }
+
+    public function managerAllSchedules()
+    {
+        $query = Schedule::with(['course:id,name', 'teacher:id,name'])
+            ->orderBy('starts_at');
+
+        if ($courseId = request('course_id')) {
+            $query->where('course_id', $courseId);
+        }
+
+        return $this->ReturnSuccess($query->get(), 'Schedules retrieved');
     }
 
     public function upcomingSchedules()

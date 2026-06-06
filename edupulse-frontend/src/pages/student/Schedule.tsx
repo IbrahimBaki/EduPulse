@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useCallback } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
 import api from '../../lib/axios'
@@ -22,6 +22,7 @@ interface Session {
 
 type GroupKey = 'today' | 'tomorrow' | 'this_week' | 'later'
 type TypeFilter = 'all' | 'online' | 'offline' | 'today'
+type ViewMode = 'list' | 'week'
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -64,6 +65,33 @@ function formatTimeRange(starts_at: string, ends_at: string): string {
   return `${fmt(starts_at)} – ${fmt(ends_at)}`
 }
 
+function getWeekDates(anchor: Date): Date[] {
+  const d = new Date(anchor)
+  d.setDate(d.getDate() - d.getDay())
+  return Array.from({ length: 7 }, (_, i) => {
+    const day = new Date(d)
+    day.setDate(d.getDate() + i)
+    return day
+  })
+}
+
+function sameDay(a: Date, b: Date): boolean {
+  return a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth() && a.getDate() === b.getDate()
+}
+
+function formatTime(iso: string): string {
+  return new Date(iso).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })
+}
+
+function formatWeekRange(dates: Date[]): string {
+  const first = dates[0], last = dates[6]
+  const opts: Intl.DateTimeFormatOptions = { month: 'short', day: 'numeric' }
+  if (first.getMonth() === last.getMonth()) {
+    return `${first.toLocaleDateString('en-US', opts)} – ${last.getDate()}, ${last.getFullYear()}`
+  }
+  return `${first.toLocaleDateString('en-US', opts)} – ${last.toLocaleDateString('en-US', opts)}, ${last.getFullYear()}`
+}
+
 
 // ─── Icons ────────────────────────────────────────────────────────────────────
 
@@ -96,6 +124,40 @@ function ExternalLinkIcon() {
   return (
     <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
       <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/>
+    </svg>
+  )
+}
+
+function GridIcon() {
+  return (
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/>
+      <rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/>
+    </svg>
+  )
+}
+
+function ListIcon() {
+  return (
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/>
+      <line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/>
+    </svg>
+  )
+}
+
+function ChevronLeftIcon() {
+  return (
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <polyline points="15 18 9 12 15 6"/>
+    </svg>
+  )
+}
+
+function ChevronRightIcon() {
+  return (
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <polyline points="9 18 15 12 9 6"/>
     </svg>
   )
 }
@@ -176,6 +238,19 @@ function SessionCard({ s }: { s: Session }) {
 export default function StudentSchedule() {
   const { t } = useTranslation()
   const [typeFilter, setTypeFilter] = useState<TypeFilter>('all')
+  const [view, setView] = useState<ViewMode>('list')
+  const today = new Date()
+  const [anchor, setAnchor] = useState(today)
+  const weekDates = useMemo(() => getWeekDates(anchor), [anchor])
+  const DAY_NAMES = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
+
+  const goWeek = useCallback((dir: -1 | 1) => {
+    setAnchor(prev => {
+      const d = new Date(prev)
+      d.setDate(d.getDate() + dir * 7)
+      return d
+    })
+  }, [])
 
   const { data: sessions = [], isLoading, isError, refetch } = useQuery<Session[]>({
     queryKey: ['student-schedules'],
@@ -211,6 +286,17 @@ export default function StudentSchedule() {
 
   const hasAny = ORDER.some(k => grouped[k].length > 0)
 
+  const sessionsForDay = (day: Date) =>
+    filtered.filter(s => sameDay(new Date(s.starts_at), day))
+      .sort((a, b) => a.starts_at.localeCompare(b.starts_at))
+
+  const chipClass = (s: Session) => {
+    if (s.status === 'live' || isLive(s)) return styles.calChipLive
+    if (s.status === 'completed') return styles.calChipCompleted
+    if (s.status === 'cancelled') return styles.calChipCancelled
+    return styles.calChipScheduled
+  }
+
   return (
     <div className={styles.page}>
       <header className={styles.pageHead}>
@@ -233,7 +319,42 @@ export default function StudentSchedule() {
             {label}
           </button>
         ))}
+
+        <div className={styles.viewToggle} role="group" aria-label="View toggle">
+          <button
+            type="button"
+            className={`${styles.viewBtn} ${view === 'list' ? styles.viewBtnActive : ''}`}
+            onClick={() => setView('list')}
+            aria-label="List view"
+            aria-pressed={view === 'list'}
+          >
+            <ListIcon />
+          </button>
+          <button
+            type="button"
+            className={`${styles.viewBtn} ${view === 'week' ? styles.viewBtnActive : ''}`}
+            onClick={() => setView('week')}
+            aria-label="Week view"
+            aria-pressed={view === 'week'}
+          >
+            <GridIcon />
+          </button>
+        </div>
       </div>
+
+      {/* ── Week navigator (calendar view only) ── */}
+      {view === 'week' && (
+        <div className={styles.weekNav}>
+          <button type="button" className={styles.weekNavBtn} onClick={() => goWeek(-1)} aria-label="Previous week">
+            <ChevronLeftIcon />
+          </button>
+          <span className={styles.weekLabel}>{formatWeekRange(weekDates)}</span>
+          <button type="button" className={styles.weekNavBtn} onClick={() => goWeek(1)} aria-label="Next week">
+            <ChevronRightIcon />
+          </button>
+          <button type="button" className={styles.todayBtn} onClick={() => setAnchor(today)}>{t('teacher.schedule.today')}</button>
+        </div>
+      )}
 
       {isLoading ? (
         <div className={styles.content}>
@@ -245,6 +366,51 @@ export default function StudentSchedule() {
           <p className={styles.emptyTitle}>{t('common.errorLoadFailed')}</p>
           <button type="button" className={styles.retryBtn} onClick={() => refetch()}>{t('common.retry')}</button>
         </div>
+      ) : view === 'week' ? (
+        /* ── Week calendar grid ── */
+        <div className={styles.weekGrid} role="grid" aria-label="Weekly schedule">
+          {weekDates.map((day, i) => {
+            const isToday = sameDay(day, today)
+            const daySessions = sessionsForDay(day)
+            return (
+              <div key={i} className={styles.weekDayCol} role="gridcell">
+                <div className={styles.weekDayHeader}>
+                  <div className={styles.weekDayName}>{DAY_NAMES[i]}</div>
+                  <div className={isToday ? styles.weekDayNumToday : styles.weekDayNum} aria-current={isToday ? 'date' : undefined}>
+                    {day.getDate()}
+                  </div>
+                </div>
+                <div className={styles.weekDayBody}>
+                  {daySessions.map(s => {
+                    const live = isLive(s)
+                    const soon = isSoon(s)
+                    const joinable = canJoin(s)
+                    return (
+                      <button
+                        key={s.id}
+                        type="button"
+                        className={`${styles.calChip} ${chipClass(s)}`}
+                        data-joinable={joinable ? 'true' : undefined}
+                        onClick={() => {
+                          if (joinable && s.jitsi_url) window.open(s.jitsi_url, '_blank', 'noopener,noreferrer')
+                        }}
+                        aria-label={`${s.title}, ${s.course?.name}, ${formatTime(s.starts_at)}`}
+                      >
+                        <span className={styles.calChipTitle}>
+                          {live && <span className={styles.calLiveDot} />}
+                          {!live && soon && <span className={styles.calSoonDot} />}
+                          {s.title}
+                        </span>
+                        {s.course && <span className={styles.calChipCourse}>{s.course.name}</span>}
+                        <span className={styles.calChipTime}>{formatTime(s.starts_at)} – {formatTime(s.ends_at)}</span>
+                      </button>
+                    )
+                  })}
+                </div>
+              </div>
+            )
+          })}
+        </div>
       ) : !hasAny ? (
         <div className={styles.emptyState}>
           <div style={{ color: 'var(--text-muted)' }}><CalendarEmptyIcon /></div>
@@ -252,6 +418,7 @@ export default function StudentSchedule() {
           <p className={styles.emptyText}>{t('student.schedule.noUpcomingSessionsHint')}</p>
         </div>
       ) : (
+        /* ── List view ── */
         <div className={styles.content}>
           {ORDER.map(key => grouped[key].length === 0 ? null : (
             <section key={key}>

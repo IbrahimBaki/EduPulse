@@ -269,23 +269,34 @@ function FileIcon() {
   )
 }
 
+function ExternalLinkIcon() {
+  return (
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/>
+      <polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/>
+    </svg>
+  )
+}
+
 // ─── PDF Viewer modal ─────────────────────────────────────────────────────────
 
 function PdfViewer({ courseId, lessonId, title, onClose }: { courseId: string; lessonId: number; title: string; onClose: () => void }) {
-  const [blobUrl, setBlobUrl] = useState<string | null>(null)
-  const [error, setError]     = useState(false)
-  const urlRef = useRef<string | null>(null)
+  const [iframeSrc, setIframeSrc] = useState<string | null>(null)
+  const [error, setError]         = useState(false)
 
   useEffect(() => {
-    api.get(`/teacher/courses/${courseId}/lessons/${lessonId}/pdf`, { responseType: 'blob' })
-      .then(res => {
-        const url = URL.createObjectURL(new Blob([res.data], { type: 'application/pdf' }))
-        urlRef.current = url
-        setBlobUrl(url)
-      })
-      .catch(() => setError(true))
+    let active = true
 
-    return () => { if (urlRef.current) URL.revokeObjectURL(urlRef.current) }
+    api.get(`/teacher/courses/${courseId}/lessons/${lessonId}/pdf-token`)
+      .then(res => {
+        if (!active) return
+        const token: string | undefined = res.data?.data?.token
+        if (!token) { setError(true); return }
+        setIframeSrc(`/api/v1/pdf/${token}`)
+      })
+      .catch(() => { if (active) setError(true) })
+
+    return () => { active = false }
   }, [courseId, lessonId])
 
   return (
@@ -293,19 +304,33 @@ function PdfViewer({ courseId, lessonId, title, onClose }: { courseId: string; l
       <div className={styles.pdfModal} onClick={e => e.stopPropagation()}>
         <div className={styles.pdfHeader}>
           <span className={styles.pdfTitle}>{title}</span>
-          <button type="button" className={styles.pdfCloseBtn} onClick={onClose} aria-label="Close PDF viewer"><CloseIcon /></button>
+          <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+            {iframeSrc && (
+              <a
+                href={iframeSrc}
+                target="_blank"
+                rel="noopener noreferrer"
+                className={styles.pdfCloseBtn}
+                title="Open in new tab"
+                aria-label="Open PDF in new tab"
+              >
+                <ExternalLinkIcon />
+              </a>
+            )}
+            <button type="button" className={styles.pdfCloseBtn} onClick={onClose} aria-label="Close PDF viewer"><CloseIcon /></button>
+          </div>
         </div>
         <div className={styles.pdfBody}>
           {error ? (
             <p className={styles.pdfError}>Failed to load PDF. Please try again.</p>
-          ) : !blobUrl ? (
+          ) : !iframeSrc ? (
             <div className={styles.pdfLoading}>
               <span className={styles.pdfSpinner} />
               <p>Loading PDF…</p>
             </div>
           ) : (
             <iframe
-              src={blobUrl}
+              src={iframeSrc}
               title={title}
               className={styles.pdfFrame}
               aria-label={`PDF: ${title}`}

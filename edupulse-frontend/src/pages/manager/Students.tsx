@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next'
 import api from '../../lib/axios'
 import styles from './Students.module.css'
 import UserAvatar from '../../components/UserAvatar'
+import { translateStatus } from '../../utils/translateStatus'
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -154,6 +155,7 @@ async function updateFeeStatusApi(id: number, payload: { fee_status: string; fee
 // ─── FeeBadge ─────────────────────────────────────────────────────────────────
 
 function FeeBadge({ status }: { status: string | null | undefined }) {
+  const { t } = useTranslation()
   if (!status) return <span className={styles.badgeNone}>—</span>
   const cls: Record<string, string> = {
     paid: styles.badgePaid,
@@ -162,7 +164,7 @@ function FeeBadge({ status }: { status: string | null | undefined }) {
   }
   return (
     <span className={cls[status] ?? styles.badgeNone}>
-      {status.charAt(0).toUpperCase() + status.slice(1)}
+      {translateStatus(status, t)}
     </span>
   )
 }
@@ -341,26 +343,28 @@ function AddStudentForm({ gradeLevels, onSuccess, onCancel }: {
   const inp = (hasErr?: string) => `${styles.formInput}${hasErr ? ' ' + styles.inputError : ''}`
   const sel = (hasErr?: string) => `${styles.formSelect}${hasErr ? ' ' + styles.inputError : ''}`
 
+  const { t } = useTranslation()
+
   return (
     <form className={styles.addForm} onSubmit={handleSubmit} noValidate>
       {serverError && <div className={styles.formBanner} role="alert">{serverError}</div>}
 
       <div className={styles.formSection}>
-        <p className={styles.formSectionHeading}>Account</p>
+        <p className={styles.formSectionHeading}>{t('manager.teachers.account')}</p>
         <div className={styles.formGroup}>
-          <label className={styles.formLabel} htmlFor="fs-name">Full name <span aria-hidden>*</span></label>
+          <label className={styles.formLabel} htmlFor="fs-name">{t('manager.teachers.fullName')} <span aria-hidden>*</span></label>
           <input id="fs-name" type="text" className={inp(errors.name)} value={form.name}
             onChange={e => field('name', e.target.value)} autoComplete="name" />
           {errors.name && <p className={styles.fieldErr}>{errors.name}</p>}
         </div>
         <div className={styles.formGroup}>
-          <label className={styles.formLabel} htmlFor="fs-email">Email <span aria-hidden>*</span></label>
+          <label className={styles.formLabel} htmlFor="fs-email">{t('profile.fields.email')} <span aria-hidden>*</span></label>
           <input id="fs-email" type="email" className={inp(errors.email)} value={form.email}
             onChange={e => field('email', e.target.value)} autoComplete="email" />
           {errors.email && <p className={styles.fieldErr}>{errors.email}</p>}
         </div>
         <div className={styles.formGroup}>
-          <label className={styles.formLabel} htmlFor="fs-pw">Password <span aria-hidden>*</span></label>
+          <label className={styles.formLabel} htmlFor="fs-pw">{t('manager.teachers.password')} <span aria-hidden>*</span></label>
           <input id="fs-pw" type="password" className={inp(errors.password)} value={form.password}
             onChange={e => field('password', e.target.value)} autoComplete="new-password" />
           {errors.password && <p className={styles.fieldErr}>{errors.password}</p>}
@@ -368,66 +372,66 @@ function AddStudentForm({ gradeLevels, onSuccess, onCancel }: {
       </div>
 
       <div className={styles.formSection}>
-        <p className={styles.formSectionHeading}>Academic</p>
+        <p className={styles.formSectionHeading}>{t('profile.sections.academic')}</p>
         <div className={styles.formGroup}>
-          <label className={styles.formLabel} htmlFor="fs-grade">Grade level <span aria-hidden>*</span></label>
+          <label className={styles.formLabel} htmlFor="fs-grade">{t('profile.fields.gradeLevel')} <span aria-hidden>*</span></label>
           <select id="fs-grade" className={sel(errors.grade_level_id)}
             value={form.grade_level_id}
             onChange={e => field('grade_level_id', e.target.value ? Number(e.target.value) : '')}>
-            <option value="">Select grade level</option>
+            <option value="">{t('manager.students.selectGrade')}</option>
             {gradeLevels.map(g => <option key={g.id} value={g.id}>{g.name}</option>)}
           </select>
           {errors.grade_level_id && <p className={styles.fieldErr}>{errors.grade_level_id}</p>}
         </div>
         <div className={styles.formGroup}>
-          <label className={styles.formLabel} htmlFor="fs-enroll">Enrollment date</label>
+          <label className={styles.formLabel} htmlFor="fs-enroll">{t('profile.fields.enrolled')}</label>
           <input id="fs-enroll" type="date" className={styles.formInput} value={form.enrollment_date}
             onChange={e => field('enrollment_date', e.target.value)} />
         </div>
       </div>
 
       <div className={styles.formSection}>
-        <p className={styles.formSectionHeading}>Guardian (optional)</p>
+        <p className={styles.formSectionHeading}>{t('profile.sections.parents')}</p>
         <div className={styles.formGroup}>
-          <label className={styles.formLabel}>Parent</label>
+          <label className={styles.formLabel}>{t('students.columns.parent')}</label>
           <ParentSingleCombobox value={selectedParent} onChange={setSelectedParent} />
         </div>
       </div>
 
       <div className={styles.formSection}>
-        <p className={styles.formSectionHeading}>Personal</p>
+        <p className={styles.formSectionHeading}>{t('manager.teachers.contact')}</p>
         <div className={styles.formRow}>
           <div className={styles.formGroup}>
-            <label className={styles.formLabel} htmlFor="fs-phone">Phone</label>
+            <label className={styles.formLabel} htmlFor="fs-phone">{t('profile.fields.phone')}</label>
             <input id="fs-phone" type="tel" className={styles.formInput} value={form.phone}
               onChange={e => field('phone', e.target.value)} autoComplete="tel" />
           </div>
           <div className={styles.formGroup}>
-            <label className={styles.formLabel} htmlFor="fs-gender">Gender</label>
+            <label className={styles.formLabel} htmlFor="fs-gender">{t('profile.fields.gender')}</label>
             <select id="fs-gender" className={styles.formSelect} value={form.gender}
               onChange={e => field('gender', e.target.value)}>
               <option value="">—</option>
-              <option value="male">Male</option>
-              <option value="female">Female</option>
+              <option value="male">{t('common.male')}</option>
+              <option value="female">{t('common.female')}</option>
             </select>
           </div>
         </div>
         <div className={styles.formGroup}>
-          <label className={styles.formLabel} htmlFor="fs-dob">Date of birth</label>
+          <label className={styles.formLabel} htmlFor="fs-dob">{t('profile.fields.dateOfBirth')}</label>
           <input id="fs-dob" type="date" className={styles.formInput} value={form.date_of_birth}
             onChange={e => field('date_of_birth', e.target.value)} />
         </div>
         <div className={styles.formGroup}>
-          <label className={styles.formLabel} htmlFor="fs-addr">Address</label>
+          <label className={styles.formLabel} htmlFor="fs-addr">{t('profile.fields.address')}</label>
           <textarea id="fs-addr" rows={2} className={styles.formTextarea} value={form.address}
             onChange={e => field('address', e.target.value)} />
         </div>
       </div>
 
       <div className={styles.formFooter}>
-        <button type="button" className={styles.formCancel} onClick={onCancel}>Cancel</button>
+        <button type="button" className={styles.formCancel} onClick={onCancel}>{t('common.cancel')}</button>
         <button type="submit" className={styles.formSubmit} disabled={mutation.isPending}>
-          {mutation.isPending ? 'Adding…' : 'Add student'}
+          {mutation.isPending ? t('manager.students.adding') : t('students.actions.add')}
         </button>
       </div>
     </form>
@@ -727,6 +731,7 @@ function StudentEditForm({ data, gradeLevels, onSuccess, onCancel }: {
     mutation.mutate(payload)
   }
 
+  const { t } = useTranslation()
   const inp = (hasErr?: string) => `${styles.formInput}${hasErr ? ' ' + styles.inputError : ''}`
   const sel = (hasErr?: string) => `${styles.formSelect}${hasErr ? ' ' + styles.inputError : ''}`
 
@@ -735,85 +740,85 @@ function StudentEditForm({ data, gradeLevels, onSuccess, onCancel }: {
       {serverError && <div className={styles.formBanner} role="alert">{serverError}</div>}
 
       <div className={styles.formSection}>
-        <p className={styles.formSectionHeading}>Account</p>
+        <p className={styles.formSectionHeading}>{t('manager.teachers.account')}</p>
         <div className={styles.formGroup}>
-          <label className={styles.formLabel} htmlFor="se-name">Full name <span aria-hidden>*</span></label>
+          <label className={styles.formLabel} htmlFor="se-name">{t('manager.teachers.fullName')} <span aria-hidden>*</span></label>
           <input id="se-name" type="text" className={inp(errors.name)} value={name}
             onChange={e => { setName(e.target.value); clearErr('name'); setServerError(null) }} />
           {errors.name && <p className={styles.fieldErr}>{errors.name}</p>}
         </div>
         <div className={styles.formGroup}>
-          <label className={styles.formLabel} htmlFor="se-email">Email <span aria-hidden>*</span></label>
+          <label className={styles.formLabel} htmlFor="se-email">{t('profile.fields.email')} <span aria-hidden>*</span></label>
           <input id="se-email" type="email" className={inp(errors.email)} value={email}
             onChange={e => { setEmail(e.target.value); clearErr('email'); setServerError(null) }} />
           {errors.email && <p className={styles.fieldErr}>{errors.email}</p>}
         </div>
         <div className={styles.formGroup}>
-          <label className={styles.formLabel} htmlFor="se-phone">Phone</label>
+          <label className={styles.formLabel} htmlFor="se-phone">{t('profile.fields.phone')}</label>
           <input id="se-phone" type="tel" className={styles.formInput} value={phone}
             onChange={e => setPhone(e.target.value)} />
         </div>
         <div className={styles.formGroup}>
-          <label className={styles.formLabel} htmlFor="se-pw">New password</label>
+          <label className={styles.formLabel} htmlFor="se-pw">{t('manager.students.newPassword')}</label>
           <input id="se-pw" type="password" className={inp(errors.password)} value={password}
-            placeholder="Leave blank to keep current"
+            placeholder={t('manager.students.keepCurrentPassword')}
             onChange={e => { setPassword(e.target.value); clearErr('password') }}
             autoComplete="new-password" />
           {errors.password && <p className={styles.fieldErr}>{errors.password}</p>}
         </div>
         <div className={styles.formGroup} style={{ flexDirection: 'row', alignItems: 'center', gap: '10px' }}>
-          <label className={styles.formLabel} style={{ marginBottom: 0 }}>Active</label>
-          <Toggle checked={isActive} onChange={() => setIsActive(a => !a)} label="Active status" />
+          <label className={styles.formLabel} style={{ marginBottom: 0 }}>{t('students.columns.active')}</label>
+          <Toggle checked={isActive} onChange={() => setIsActive(a => !a)} label={t('students.columns.active')} />
         </div>
       </div>
 
       <div className={styles.formSection}>
-        <p className={styles.formSectionHeading}>Academic</p>
+        <p className={styles.formSectionHeading}>{t('profile.sections.academic')}</p>
         <div className={styles.formGroup}>
-          <label className={styles.formLabel} htmlFor="se-grade">Grade level <span aria-hidden>*</span></label>
+          <label className={styles.formLabel} htmlFor="se-grade">{t('profile.fields.gradeLevel')} <span aria-hidden>*</span></label>
           <select id="se-grade" className={sel(errors.grade_level_id)} value={gradeId}
             onChange={e => { setGradeId(e.target.value ? Number(e.target.value) : ''); clearErr('grade_level_id') }}>
-            <option value="">Select grade level</option>
+            <option value="">{t('manager.students.selectGrade')}</option>
             {gradeLevels.map(g => <option key={g.id} value={g.id}>{g.name}</option>)}
           </select>
           {errors.grade_level_id && <p className={styles.fieldErr}>{errors.grade_level_id}</p>}
         </div>
         <div className={styles.formGroup}>
-          <label className={styles.formLabel} htmlFor="se-enroll">Enrollment date</label>
+          <label className={styles.formLabel} htmlFor="se-enroll">{t('profile.fields.enrolled')}</label>
           <input id="se-enroll" type="date" className={styles.formInput} value={enrollDate}
             onChange={e => setEnrollDate(e.target.value)} />
         </div>
       </div>
 
       <div className={styles.formSection}>
-        <p className={styles.formSectionHeading}>Personal</p>
+        <p className={styles.formSectionHeading}>{t('manager.teachers.contact')}</p>
         <div className={styles.formRow}>
           <div className={styles.formGroup}>
-            <label className={styles.formLabel} htmlFor="se-gender">Gender</label>
+            <label className={styles.formLabel} htmlFor="se-gender">{t('profile.fields.gender')}</label>
             <select id="se-gender" className={styles.formSelect} value={gender}
               onChange={e => setGender(e.target.value)}>
               <option value="">—</option>
-              <option value="male">Male</option>
-              <option value="female">Female</option>
+              <option value="male">{t('common.male')}</option>
+              <option value="female">{t('common.female')}</option>
             </select>
           </div>
           <div className={styles.formGroup}>
-            <label className={styles.formLabel} htmlFor="se-dob">Date of birth</label>
+            <label className={styles.formLabel} htmlFor="se-dob">{t('profile.fields.dateOfBirth')}</label>
             <input id="se-dob" type="date" className={styles.formInput} value={dob}
               onChange={e => setDob(e.target.value)} />
           </div>
         </div>
         <div className={styles.formGroup}>
-          <label className={styles.formLabel} htmlFor="se-addr">Address</label>
+          <label className={styles.formLabel} htmlFor="se-addr">{t('profile.fields.address')}</label>
           <textarea id="se-addr" rows={2} className={styles.formTextarea} value={address}
             onChange={e => setAddress(e.target.value)} />
         </div>
       </div>
 
       <div className={styles.formFooter}>
-        <button type="button" className={styles.formCancel} onClick={onCancel}>Cancel</button>
+        <button type="button" className={styles.formCancel} onClick={onCancel}>{t('common.cancel')}</button>
         <button type="submit" className={styles.formSubmit} disabled={mutation.isPending}>
-          {mutation.isPending ? 'Saving…' : 'Save changes'}
+          {mutation.isPending ? t('common.saving') : t('common.save')}
         </button>
       </div>
     </form>
@@ -850,6 +855,8 @@ function FeeStatusInlineEdit({ studentId, feeStatus, feeDueDate, onCancel, onSuc
     },
   })
 
+  const { t } = useTranslation()
+
   return (
     <form
       className={styles.feeEditForm}
@@ -862,28 +869,28 @@ function FeeStatusInlineEdit({ studentId, feeStatus, feeDueDate, onCancel, onSuc
         className={styles.feeSelect}
         value={status}
         onChange={e => setStatus(e.target.value)}
-        aria-label="Fee status"
+        aria-label={t('profile.fields.feeStatus')}
         disabled={mut.isPending}
       >
-        <option value="paid">Paid</option>
-        <option value="pending">Pending</option>
-        <option value="overdue">Overdue</option>
+        <option value="paid">{t('students.status.paid')}</option>
+        <option value="pending">{t('students.status.pending')}</option>
+        <option value="overdue">{t('students.status.overdue')}</option>
       </select>
       <input
         type="date"
         className={styles.feeDateInput}
         value={dueDate}
         onChange={e => setDueDate(e.target.value)}
-        aria-label="Due date"
+        aria-label={t('profile.fields.dueDate')}
         disabled={mut.isPending}
       />
       <div className={styles.feeEditActions}>
         <button type="button" className={styles.feeEditCancel} onClick={onCancel} disabled={mut.isPending}>
-          Cancel
+          {t('common.cancel')}
         </button>
         <button type="submit" className={styles.enrollSubmitBtn} disabled={mut.isPending}
           style={{ height: '30px' }}>
-          {mut.isPending ? '…' : 'Save'}
+          {mut.isPending ? '…' : t('common.save')}
         </button>
       </div>
       {error && <p className={styles.enrollError} role="alert" style={{ width: '100%' }}>{error}</p>}
@@ -903,6 +910,7 @@ function DRow({ label, children }: { label: string; children: ReactNode }) {
 }
 
 function StudentDetailPanel({ id }: { id: number }) {
+  const { t } = useTranslation()
   const qc = useQueryClient()
   const [isEditing, setIsEditing]       = useState(false)
   const [editingFee, setEditingFee]     = useState(false)
@@ -945,8 +953,8 @@ function StudentDetailPanel({ id }: { id: number }) {
   if (isError || !data) {
     return (
       <div className={styles.dError}>
-        <p>Failed to load student details.</p>
-        <button type="button" className={styles.retryBtn} onClick={() => refetch()}>Try again</button>
+        <p>{t('manager.students.failedToLoad')}</p>
+        <button type="button" className={styles.retryBtn} onClick={() => refetch()}>{t('common.retry')}</button>
       </div>
     )
   }
@@ -974,7 +982,7 @@ function StudentDetailPanel({ id }: { id: number }) {
           <p className={styles.dCode}>{p?.student_code ?? '—'}</p>
           <div className={styles.dPills}>
             <span className={data.is_active ? styles.pillActive : styles.pillInactive}>
-              {data.is_active ? 'Active' : 'Inactive'}
+              {translateStatus(data.is_active ? 'active' : 'inactive', t)}
             </span>
             {p?.fee_status && <FeeBadge status={p.fee_status} />}
           </div>
@@ -986,45 +994,45 @@ function StudentDetailPanel({ id }: { id: number }) {
             <svg width="11" height="11" viewBox="0 0 11 11" fill="none" aria-hidden="true">
               <path d="M7.5 1.5l2 2L3 10H1V8L7.5 1.5z" stroke="currentColor" strokeWidth="1.4" strokeLinejoin="round"/>
             </svg>
-            Edit student
+            {t('students.actions.edit')}
           </button>
         </div>
       </div>
 
       <section className={styles.dSection}>
-        <h3 className={styles.dSectionTitle}>Academic</h3>
+        <h3 className={styles.dSectionTitle}>{t('profile.sections.academic')}</h3>
         <dl className={styles.dGrid}>
-          <DRow label="Grade level">{p?.grade_level?.name}</DRow>
-          <DRow label="Student code">{p?.student_code}</DRow>
-          <DRow label="Enrolled">{fmt(p?.enrollment_date)}</DRow>
+          <DRow label={t('profile.fields.gradeLevel')}>{p?.grade_level?.name}</DRow>
+          <DRow label={t('profile.fields.studentCode')}>{p?.student_code}</DRow>
+          <DRow label={t('profile.fields.enrolled')}>{fmt(p?.enrollment_date)}</DRow>
         </dl>
       </section>
 
       <section className={styles.dSection}>
-        <h3 className={styles.dSectionTitle}>Contact</h3>
+        <h3 className={styles.dSectionTitle}>{t('profile.sections.contact')}</h3>
         <dl className={styles.dGrid}>
-          <DRow label="Email">{data.email}</DRow>
-          <DRow label="Phone">{data.phone}</DRow>
-          <DRow label="Gender">
-            {p?.gender ? p.gender.charAt(0).toUpperCase() + p.gender.slice(1) : null}
+          <DRow label={t('profile.fields.email')}>{data.email}</DRow>
+          <DRow label={t('profile.fields.phone')}>{data.phone}</DRow>
+          <DRow label={t('profile.fields.gender')}>
+            {p?.gender ? translateStatus(p.gender, t) : null}
           </DRow>
-          <DRow label="Date of birth">{fmt(p?.date_of_birth)}</DRow>
-          <DRow label="Address">{p?.address}</DRow>
+          <DRow label={t('profile.fields.dateOfBirth')}>{fmt(p?.date_of_birth)}</DRow>
+          <DRow label={t('profile.fields.address')}>{p?.address}</DRow>
         </dl>
       </section>
 
       <section className={styles.dSection}>
         <div className={styles.dSectionHeader}>
-          <h3 className={styles.dSectionTitle} style={{ margin: 0 }}>Finance</h3>
+          <h3 className={styles.dSectionTitle} style={{ margin: 0 }}>{t('profile.sections.finance')}</h3>
           {!editingFee && (
             <button type="button" className={styles.dSectionHeaderBtn} onClick={() => setEditingFee(true)}>
-              Edit
+              {t('common.edit')}
             </button>
           )}
         </div>
         <dl className={styles.dGrid}>
-          <DRow label="Fee status"><FeeBadge status={p?.fee_status} /></DRow>
-          <DRow label="Due date">{fmt(p?.fee_due_date)}</DRow>
+          <DRow label={t('profile.fields.feeStatus')}><FeeBadge status={p?.fee_status} /></DRow>
+          <DRow label={t('profile.fields.dueDate')}>{fmt(p?.fee_due_date)}</DRow>
         </dl>
         {editingFee && (
           <FeeStatusInlineEdit
@@ -1039,7 +1047,7 @@ function StudentDetailPanel({ id }: { id: number }) {
 
       <section className={styles.dSection}>
         <div className={styles.dSectionHeader}>
-          <h3 className={styles.dSectionTitle} style={{ margin: 0 }}>Parents / Guardians</h3>
+          <h3 className={styles.dSectionTitle} style={{ margin: 0 }}>{t('profile.sections.parents')}</h3>
           <span className={styles.guardianCapacity}>{data.parents.length}/2</span>
         </div>
         {data.parents.length > 0 ? (
@@ -1062,7 +1070,7 @@ function StudentDetailPanel({ id }: { id: number }) {
                   </div>
                   <button
                     type="button"
-                    aria-label={`Remove ${parent.name}`}
+                    aria-label={`${t('students.actions.remove')} ${parent.name}`}
                     disabled={removingParentIds.has(parent.id)}
                     onClick={() => removeParentMut.mutate(parent.id)}
                     style={{
@@ -1081,14 +1089,14 @@ function StudentDetailPanel({ id }: { id: number }) {
                       fontFamily: 'inherit',
                     }}
                   >
-                    {removingParentIds.has(parent.id) ? '…' : 'Remove'}
+                    {removingParentIds.has(parent.id) ? '…' : t('students.actions.remove')}
                   </button>
                 </li>
               )
             })}
           </ul>
         ) : (
-          <p className={styles.dPlaceholder}>No guardians assigned yet.</p>
+          <p className={styles.dPlaceholder}>{t('manager.students.noGuardians')}</p>
         )}
         {data.parents.length < 2 ? (
           <div style={{ marginTop: '12px' }}>
@@ -1100,17 +1108,17 @@ function StudentDetailPanel({ id }: { id: number }) {
               textTransform: 'uppercase',
               marginBottom: '8px',
             }}>
-              {data.parents.length === 1 ? 'Add second guardian' : 'Add guardian'}
+              {data.parents.length === 1 ? t('profile.actions.addGuardian') : t('profile.actions.addFirstGuardian')}
             </p>
             <AssignParentInline studentId={data.id} />
           </div>
         ) : (
-          <p className={styles.guardianSlotNote}>Both guardian slots are filled.</p>
+          <p className={styles.guardianSlotNote}>{t('manager.students.guardianSlotsFilled')}</p>
         )}
       </section>
 
       <section className={styles.dSection}>
-        <h3 className={styles.dSectionTitle}>Enrolled Courses</h3>
+        <h3 className={styles.dSectionTitle}>{t('profile.sections.enrolledCourses')}</h3>
         {data.enrollments && data.enrollments.length > 0 ? (
           <ul className={styles.enrolledList}>
             {data.enrollments.map(e => (
@@ -1139,6 +1147,7 @@ function StudentDetailPanel({ id }: { id: number }) {
 // ─── StudentsPage ─────────────────────────────────────────────────────────────
 
 export default function StudentsPage() {
+  const { t } = useTranslation()
   const qc = useQueryClient()
 
   const [page, setPage]           = useState(1)
@@ -1243,9 +1252,9 @@ export default function StudentsPage() {
       {/* Header */}
       <div className={styles.pageHead}>
         <div>
-          <h1 className={styles.pageTitle}>Students</h1>
+          <h1 className={styles.pageTitle}>{t('common.students')}</h1>
           {pagination && (
-            <p className={styles.pageCount}>{pagination.total.toLocaleString()} total</p>
+            <p className={styles.pageCount}>{pagination.total.toLocaleString()} {t('manager.teachers.total')}</p>
           )}
         </div>
         <div className={styles.pageActions}>
@@ -1254,13 +1263,13 @@ export default function StudentsPage() {
               <path d="M1.5 9.5v2h10v-2M6.5 1v8M4 5.5l2.5 3 2.5-3"
                 stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
             </svg>
-            Export
+            {t('students.actions.export')}
           </button>
           <button type="button" className={styles.addBtn} onClick={openAdd}>
             <svg width="13" height="13" viewBox="0 0 13 13" fill="none">
               <path d="M6.5 1v11M1 6.5h11" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round"/>
             </svg>
-            Add student
+            {t('students.actions.add')}
           </button>
         </div>
       </div>
@@ -1274,13 +1283,13 @@ export default function StudentsPage() {
           </svg>
           <input
             type="search"
-            placeholder="Search by name or email"
+            placeholder={t('students.filters.searchPlaceholder')}
             className={styles.searchInput}
             value={search}
             onChange={e => setSearch(e.target.value)}
           />
           {search && (
-            <button type="button" className={styles.clearSearch} onClick={() => setSearch('')} aria-label="Clear search">
+            <button type="button" className={styles.clearSearch} onClick={() => setSearch('')} aria-label={t('common.search')}>
               <svg width="11" height="11" viewBox="0 0 11 11" fill="none">
                 <path d="M1 1l9 9M10 1L1 10" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
               </svg>
@@ -1290,14 +1299,14 @@ export default function StudentsPage() {
         <div className={styles.filters}>
           <select className={styles.filterSelect} value={gradeId}
             onChange={e => setGradeId(e.target.value)}>
-            <option value="">All grades</option>
+            <option value="">{t('students.filters.allGrades')}</option>
             {gradesQ.data?.map(g => <option key={g.id} value={String(g.id)}>{g.name}</option>)}
           </select>
           <select className={styles.filterSelect} value={activeFilter}
             onChange={e => setActiveFilter(e.target.value)}>
-            <option value="">All status</option>
-            <option value="1">Active</option>
-            <option value="0">Inactive</option>
+            <option value="">{t('students.filters.allStatuses')}</option>
+            <option value="1">{t('students.status.active')}</option>
+            <option value="0">{t('students.status.inactive')}</option>
           </select>
         </div>
       </div>
@@ -1329,12 +1338,12 @@ export default function StudentsPage() {
                     aria-label="Select all"
                   />
                 </th>
-                <th className={styles.th}>Student</th>
-                <th className={styles.th}>Code</th>
-                <th className={`${styles.th} ${styles.hideOnMobile}`}>Grade</th>
-                <th className={`${styles.th} ${styles.hideOnMobile}`}>Parent</th>
-                <th className={styles.th}>Fees</th>
-                <th className={`${styles.th} ${styles.thCenter}`}>Active</th>
+                <th className={styles.th}>{t('students.columns.student')}</th>
+                <th className={styles.th}>{t('students.columns.code')}</th>
+                <th className={`${styles.th} ${styles.hideOnMobile}`}>{t('students.columns.grade')}</th>
+                <th className={`${styles.th} ${styles.hideOnMobile}`}>{t('students.columns.parent')}</th>
+                <th className={styles.th}>{t('students.columns.fees')}</th>
+                <th className={`${styles.th} ${styles.thCenter}`}>{t('students.columns.active')}</th>
               </tr>
             </thead>
             <tbody>
@@ -1350,16 +1359,16 @@ export default function StudentsPage() {
                           stroke="currentColor" strokeWidth="1.75" strokeLinecap="round"/>
                       </svg>
                       <p className={styles.stateMsg}>
-                        {hasFilters ? 'No students match your filters.' : 'No students yet.'}
+                        {hasFilters ? t('manager.students.noStudentsFilter') : t('manager.students.noStudents')}
                       </p>
                       {hasFilters ? (
                         <button type="button" className={styles.stateCta}
                           onClick={() => { setSearch(''); setGradeId(''); setActiveFilter('') }}>
-                          Clear filters
+                          {t('manager.students.clear')}
                         </button>
                       ) : (
                         <button type="button" className={styles.stateCta} onClick={openAdd}>
-                          Add first student
+                          {t('manager.students.addStudent')}
                         </button>
                       )}
                     </div>
@@ -1462,20 +1471,20 @@ export default function StudentsPage() {
       {/* Bulk action bar */}
       {selected.size > 0 && (
         <div className={styles.bulkBar} role="region" aria-label="Bulk actions">
-          <span className={styles.bulkCount}>{selected.size} selected</span>
+          <span className={styles.bulkCount}>{selected.size} {t('manager.students.selected')}</span>
           <div className={styles.bulkActions}>
             <button type="button" className={styles.bulkActivate}
-              onClick={bulkActivate} disabled={bulkBusy}>Activate</button>
+              onClick={bulkActivate} disabled={bulkBusy}>{t('manager.students.activate')}</button>
             <button type="button" className={styles.bulkDeactivate}
-              onClick={bulkDeactivate} disabled={bulkBusy}>Deactivate</button>
+              onClick={bulkDeactivate} disabled={bulkBusy}>{t('manager.students.deactivate')}</button>
             <button type="button" className={styles.bulkClear}
-              onClick={() => setSelected(new Set())}>Clear</button>
+              onClick={() => setSelected(new Set())}>{t('manager.students.clear')}</button>
           </div>
         </div>
       )}
 
       {/* Add student slide-over */}
-      <SlideOver open={addOpen} onClose={() => setAddOpen(false)} title="Add student">
+      <SlideOver open={addOpen} onClose={() => setAddOpen(false)} title={t('students.actions.add')}>
         <AddStudentForm
           key={addKey}
           gradeLevels={gradesQ.data ?? []}
@@ -1488,7 +1497,7 @@ export default function StudentsPage() {
       <SlideOver
         open={detailId !== null}
         onClose={() => setDetailId(null)}
-        title="Student profile"
+        title={t('manager.students.profileTitle')}
         width={520}
       >
         {detailId !== null && <StudentDetailPanel id={detailId} />}

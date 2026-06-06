@@ -66,33 +66,6 @@ interface PaginatedAtRisk {
   total: number
 }
 
-interface FinanceSummary {
-  total_expected: number
-  collected: number
-  pending: number
-  overdue: number
-  collection_rate: string | number
-  overdue_students: Array<{ id?: number; name?: string }>
-}
-
-interface RecentStudent {
-  id: number
-  name: string
-  email: string
-  avatar_url?: string | null
-  student_code: string
-  grade_level: string
-  parent_name: string | null
-  is_active: boolean
-}
-
-interface PaginatedStudents {
-  data: RecentStudent[]
-  current_page: number
-  per_page: number
-  total: number
-}
-
 interface TrendPoint {
   month: string
   count: number
@@ -104,11 +77,6 @@ function parseRate(s: string | number | null | undefined): number {
   if (s == null) return 0
   if (typeof s === 'number') return s
   return parseFloat(String(s).replace('%', '')) || 0
-}
-
-function formatCurrency(n: number | null | undefined): string {
-  if (n == null) return '0'
-  return Number(n).toLocaleString('en-US', { maximumFractionDigits: 0 })
 }
 
 function formatTime(iso: string): string {
@@ -225,22 +193,6 @@ function CalendarEmptyIcon() {
   )
 }
 
-function UsersEmptyIcon() {
-  return (
-    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.25" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-      <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>
-    </svg>
-  )
-}
-
-function DollarEmptyIcon() {
-  return (
-    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.25" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-      <line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
-    </svg>
-  )
-}
-
 // ─── EmptyState ───────────────────────────────────────────────────────────────
 
 function EmptyState({
@@ -279,30 +231,38 @@ function Skeleton({ w = '100%', h = '14px', radius = '4px' }: { w?: string; h?: 
   )
 }
 
-// ─── Stat card ────────────────────────────────────────────────────────────────
+// ─── Zone A: KPI cell ─────────────────────────────────────────────────────────
 
-function StatCard({
+function KpiCell({
   label,
   value,
   suffix = '',
-  sub,
+  delta,
+  deltaColor,
   loading,
   accent,
 }: {
   label: string
   value: number
   suffix?: string
-  sub?: string
+  delta?: string
+  deltaColor?: 'amber' | 'red'
   loading: boolean
   accent?: string
 }) {
   const animated = useCountUp(value, !loading)
 
+  const deltaClass = [
+    styles.kpiDelta,
+    deltaColor === 'amber' ? styles.kpiDeltaAmber : '',
+    deltaColor === 'red'   ? styles.kpiDeltaRed   : '',
+  ].filter(Boolean).join(' ')
+
   return (
-    <div className={styles.statCard}>
-      <span className={styles.statLabel}>{label}</span>
+    <div className={styles.kpiCell}>
+      <span className={styles.kpiLabel}>{label}</span>
       <span
-        className={`${styles.statValue}${accent && !loading ? ' ' + styles.statValuePulse : ''}`}
+        className={`${styles.kpiNumber}${accent && !loading ? ' ' + styles.statValuePulse : ''}`}
         style={accent ? { color: accent } : undefined}
       >
         {loading
@@ -310,9 +270,9 @@ function StatCard({
           : <>{animated.toLocaleString()}{suffix}</>
         }
       </span>
-      {sub && (
-        <span className={styles.statSub}>
-          {loading ? <Skeleton w="60%" h="11px" /> : sub}
+      {delta && (
+        <span className={deltaClass}>
+          {loading ? <Skeleton w="60%" h="11px" /> : delta}
         </span>
       )}
     </div>
@@ -494,9 +454,9 @@ function AtRiskStudents({
   )
 }
 
-// ─── Upcoming sessions ────────────────────────────────────────────────────────
+// ─── Zone D: Today's sessions (horizontal scroll) ────────────────────────────
 
-function UpcomingSessions({
+function ZoneDSessions({
   sessions,
   loading,
   onSchedule,
@@ -506,33 +466,23 @@ function UpcomingSessions({
   onSchedule?: () => void
 }) {
   const { t } = useTranslation()
+
   return (
-    <div className={styles.panel}>
-      <div className={styles.panelHead}>
-        <h2 className={styles.panelTitle}>{t('manager.dashboard.sessionsToday')}</h2>
+    <div className={styles.sessionsZone}>
+      <div className={styles.sessionsZoneHead}>
+        <h2 className={styles.sessionsZoneTitle}>{t('manager.dashboard.sessionsToday')}</h2>
         {!loading && (
-          <span className={styles.panelCount}>{sessions?.length ?? 0}</span>
+          <span className={styles.sessionsZoneCount}>{sessions?.length ?? 0}</span>
         )}
       </div>
 
       {loading ? (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-          {[1, 2, 3].map(i => (
-            <div
-              key={i}
-              style={{
-                padding: '10px 12px',
-                background: 'var(--surface-panel)',
-                borderRadius: '8px',
-                border: '1px solid var(--neutral-border)',
-                display: 'flex',
-                flexDirection: 'column',
-                gap: 5,
-              }}
-            >
+        <div className={styles.sessionScrollTrack}>
+          {[1, 2, 3, 4].map(i => (
+            <div key={i} className={styles.sessionCardSkeleton}>
               <Skeleton w="38%" h="11px" />
-              <Skeleton w="62%" h="13px" />
-              <Skeleton w="50%" h="10px" />
+              <Skeleton w="70%" h="13px" />
+              <Skeleton w="52%" h="10px" />
             </div>
           ))}
         </div>
@@ -544,186 +494,25 @@ function UpcomingSessions({
           onAction={onSchedule}
         />
       ) : (
-        <ul className={styles.sessionList} aria-label={t('manager.dashboard.sessionsToday')}>
+        <div className={styles.sessionScrollTrack} role="list" aria-label={t('manager.dashboard.sessionsToday')}>
           {sessions.map(s => {
             const courseName = typeof s.course === 'object' ? s.course?.name : s.course
             const teacherName = typeof s.teacher === 'object' ? s.teacher?.name : s.teacher
             return (
-              <li key={s.id} className={styles.sessionRow}>
+              <div key={s.id} className={styles.sessionCard} role="listitem">
                 <span className={styles.sessionTime}>{formatTime(s.starts_at)}</span>
                 {s.title && <span className={styles.sessionTitle}>{s.title}</span>}
                 <span className={styles.sessionMeta}>
                   {[courseName, teacherName].filter(Boolean).join(' · ')}
                 </span>
                 {s.enrolled_count != null && (
-                  <span className={styles.sessionEnrolled}>{s.enrolled_count} {t('manager.dashboard.students')}</span>
+                  <span className={styles.sessionEnrolled}>
+                    {s.enrolled_count} {t('manager.dashboard.students')}
+                  </span>
                 )}
-              </li>
+              </div>
             )
           })}
-        </ul>
-      )}
-    </div>
-  )
-}
-
-// ─── Recent enrollments ───────────────────────────────────────────────────────
-
-function RecentEnrollments({
-  data,
-  loading,
-  error,
-  refetch,
-  onAdd,
-}: {
-  data?: RecentStudent[]
-  loading: boolean
-  error: boolean
-  refetch: () => void
-  onAdd?: () => void
-}) {
-  const { t } = useTranslation()
-  return (
-    <div className={styles.panel}>
-      <div className={styles.panelHead}>
-        <h2 className={styles.panelTitle}>{t('manager.dashboard.recentEnrollments')}</h2>
-      </div>
-
-      {loading ? (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-          {[1, 2, 3, 4, 5].map(i => (
-            <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-              <Skeleton w="28px" h="28px" radius="50%" />
-              <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 4 }}>
-                <Skeleton w="55%" h="12px" />
-                <Skeleton w="35%" h="10px" />
-              </div>
-            </div>
-          ))}
-        </div>
-      ) : error ? (
-        <div className={styles.errorInline} role="alert">
-          <AlertIcon />
-          <span>{t('manager.dashboard.failedToLoad')}</span>
-          <button type="button" onClick={refetch} className={styles.retryBtnSmall}>{t('manager.dashboard.retry')}</button>
-        </div>
-      ) : !data?.length ? (
-        <EmptyState
-          icon={<UsersEmptyIcon />}
-          message={t('manager.dashboard.noStudentsEnrolled')}
-          action={t('manager.dashboard.addStudent')}
-          onAction={onAdd}
-        />
-      ) : (
-        <ul className={styles.enrollList} aria-label={t('manager.dashboard.recentEnrollments')}>
-          {data.map(s => (
-            <li key={s.id} className={styles.enrollRow}>
-              <UserAvatar name={s.name} avatarUrl={s.avatar_url} className={styles.enrollAvatar} />
-              <div className={styles.enrollInfo}>
-                <div className={styles.enrollName}>{s.name}</div>
-                <div className={styles.enrollGrade}>{s.grade_level}</div>
-              </div>
-              <span className={styles.enrollCode}>{s.student_code}</span>
-            </li>
-          ))}
-        </ul>
-      )}
-    </div>
-  )
-}
-
-// ─── Finance summary ──────────────────────────────────────────────────────────
-
-function FinanceSummary({
-  data,
-  loading,
-  error,
-  refetch,
-}: {
-  data?: FinanceSummary
-  loading: boolean
-  error: boolean
-  refetch: () => void
-}) {
-  const { t } = useTranslation()
-  const rate = data ? parseRate(data.collection_rate) : 0
-  const navigate = useNavigate()
-
-  return (
-    <div className={styles.panel}>
-      <div className={styles.panelHead}>
-        <h2 className={styles.panelTitle}>{t('manager.dashboard.finance')}</h2>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-          {data && (data.overdue_students?.length ?? 0) > 0 && (
-            <span className={styles.overdueBadge}>
-              {data.overdue_students.length} {t('manager.dashboard.overdueCount')}
-            </span>
-          )}
-          <button
-            type="button"
-            onClick={() => navigate('/manager/finance')}
-            className={styles.viewAllBtn}
-            style={{ fontSize: '0.6875rem', fontWeight: 600, color: 'var(--color-blue)', background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}
-          >
-            {t('manager.dashboard.manage')}
-          </button>
-        </div>
-      </div>
-
-      {loading ? (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-          <Skeleton w="100%" h="12px" />
-          <Skeleton w="100%" h="12px" />
-          <Skeleton w="100%" h="6px" radius="999px" />
-          <Skeleton w="45%" h="11px" />
-          <div style={{ height: 1, background: 'var(--neutral-border)' }} />
-          <Skeleton w="100%" h="12px" />
-          <Skeleton w="100%" h="12px" />
-        </div>
-      ) : error ? (
-        <div className={styles.errorInline} role="alert">
-          <AlertIcon />
-          <span>{t('manager.dashboard.failedToLoad')}</span>
-          <button type="button" onClick={refetch} className={styles.retryBtnSmall}>{t('manager.dashboard.retry')}</button>
-        </div>
-      ) : !data ? (
-        <EmptyState icon={<DollarEmptyIcon />} message={t('manager.dashboard.financeUnavailable')} />
-      ) : (
-        <div className={styles.financeStack}>
-          <div className={styles.financeRow}>
-            <span className={styles.financeLabel}>{t('manager.dashboard.expected')}</span>
-            <span className={styles.financeAmount}>EGP {formatCurrency(data.total_expected)}</span>
-          </div>
-          <div className={styles.financeRow}>
-            <span className={styles.financeLabel}>{t('manager.dashboard.collected')}</span>
-            <span className={`${styles.financeAmount} ${styles.financeCollected}`}>
-              EGP {formatCurrency(data.collected)}
-            </span>
-          </div>
-          <div
-            className={styles.progressWrap}
-            role="progressbar"
-            aria-valuenow={rate}
-            aria-valuemin={0}
-            aria-valuemax={100}
-            aria-label={`${rate}% collected`}
-          >
-            <div className={styles.progressBar} style={{ width: `${rate}%` }} />
-          </div>
-          <span className={styles.progressRate}>{rate}{t('manager.dashboard.collectionRate')}</span>
-          <div className={styles.financeDivider} />
-          <div className={styles.financeRow}>
-            <span className={styles.financeLabel}>{t('manager.dashboard.pending')}</span>
-            <span className={`${styles.financeAmount} ${styles.financePending}`}>
-              EGP {formatCurrency(data.pending)}
-            </span>
-          </div>
-          <div className={styles.financeRow}>
-            <span className={styles.financeLabel}>{t('manager.dashboard.overdue')}</span>
-            <span className={`${styles.financeAmount} ${styles.financeOverdue}`}>
-              EGP {formatCurrency(data.overdue)}
-            </span>
-          </div>
         </div>
       )}
     </div>
@@ -783,28 +572,6 @@ export default function ManagerDashboard() {
     staleTime: 5 * 60 * 1000,
   })
 
-  const {
-    data: financeData,
-    isLoading: financeLoading,
-    isError: financeError,
-    refetch: financeRefetch,
-  } = useQuery<FinanceSummary>({
-    queryKey: ['manager-finance'],
-    queryFn: () => api.get('/manager/finance/summary').then(r => r.data.data),
-    staleTime: 5 * 60 * 1000,
-  })
-
-  const {
-    data: studentsPage,
-    isLoading: studentsLoading,
-    isError: studentsError,
-    refetch: studentsRefetch,
-  } = useQuery<PaginatedStudents>({
-    queryKey: ['manager-recent-students'],
-    queryFn: () =>
-      api.get('/manager/students', { params: { per_page: 5, page: 1 } }).then(r => r.data.data),
-    staleTime: 5 * 60 * 1000,
-  })
 
   const attendanceRate = dash?.attendance?.this_week_rate
     ? parseRate(dash.attendance.this_week_rate)
@@ -834,64 +601,54 @@ export default function ManagerDashboard() {
         </div>
       )}
 
-      <div className={styles.statsRow}>
-        <StatCard
+      {/* Zone A — Hero KPI strip */}
+      <div className={styles.kpiStrip}>
+        <KpiCell
           label={t('manager.dashboard.totalStudents')}
           value={dash?.totals?.students ?? 0}
-          sub={dash?.academics ? `${dash.academics.at_risk_students} ${t('manager.dashboard.atRisk')}` : undefined}
+          delta={dash?.academics ? `${dash.academics.at_risk_students} ${t('manager.dashboard.atRisk')}` : undefined}
+          deltaColor={dash?.academics?.at_risk_students ? 'amber' : undefined}
           loading={dashLoading}
         />
-        <StatCard
+        <KpiCell
           label={t('manager.dashboard.totalTeachers')}
           value={dash?.totals?.teachers ?? 0}
           loading={dashLoading}
         />
-        <StatCard
+        <KpiCell
           label={t('manager.dashboard.activeCourses')}
           value={dash?.totals?.active_courses ?? 0}
-          sub={dash?.totals ? t('manager.dashboard.ofTotal', { total: dash.totals.courses }) : undefined}
+          delta={dash?.totals ? t('manager.dashboard.ofTotal', { total: dash.totals.courses }) : undefined}
           loading={dashLoading}
         />
-        <StatCard
+        <KpiCell
           label={t('manager.dashboard.attendanceThisWeek')}
           value={attendanceRate}
           suffix="%"
-          sub={dash?.attendance ? `${dash.attendance.absent_today} ${t('manager.dashboard.absentToday')}` : undefined}
+          delta={dash?.attendance ? `${dash.attendance.absent_today} ${t('manager.dashboard.absentToday')}` : undefined}
+          deltaColor={dash?.attendance?.absent_today ? 'amber' : undefined}
           loading={dashLoading}
           accent={attendanceRate > 0 && attendanceRate < 70 ? 'var(--color-amber)' : undefined}
         />
       </div>
 
-      <div className={styles.middleRow}>
-        <EnrollmentTrend data={trendData} loading={trendLoading} error={trendError} />
+      {/* Zone B + C — Alert panel + Enrollment chart */}
+      <div className={styles.alertChart}>
         <AtRiskStudents
           data={atRiskPage?.data}
           loading={atRiskLoading}
           error={atRiskError}
           refetch={atRiskRefetch}
         />
+        <EnrollmentTrend data={trendData} loading={trendLoading} error={trendError} />
       </div>
 
-      <div className={styles.bottomRow}>
-        <UpcomingSessions
-          sessions={dash?.upcoming_sessions}
-          loading={dashLoading}
-          onSchedule={() => navigate('/manager/schedule')}
-        />
-        <RecentEnrollments
-          data={studentsPage?.data}
-          loading={studentsLoading}
-          error={studentsError}
-          refetch={studentsRefetch}
-          onAdd={() => navigate('/manager/students')}
-        />
-        <FinanceSummary
-          data={financeData}
-          loading={financeLoading}
-          error={financeError}
-          refetch={financeRefetch}
-        />
-      </div>
+      {/* Zone D — Today's sessions (horizontal scroll) */}
+      <ZoneDSessions
+        sessions={dash?.upcoming_sessions}
+        loading={dashLoading}
+        onSchedule={() => navigate('/manager/schedule')}
+      />
 
     </div>
   )

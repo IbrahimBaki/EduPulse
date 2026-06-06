@@ -28,6 +28,8 @@ class SendN8nWebhookJob implements ShouldQueue
         'weekly_parent_report',
         'schedule_created',
         'schedule_cancelled',
+        'student_absent',
+        'session_live',
     ];
 
     public function handle(): void
@@ -59,7 +61,8 @@ class SendN8nWebhookJob implements ShouldQueue
             return;
         }
 
-        $response = Http::timeout(10)->post("{$baseUrl}/{$this->webhookType}", $this->payload);
+        $webhookPath = str_replace('_', '-', $this->webhookType);
+        $response = Http::timeout(10)->post("{$baseUrl}/{$webhookPath}", $this->payload);
 
         $log->update([
             'status'        => $response->successful() ? 'sent' : 'failed',

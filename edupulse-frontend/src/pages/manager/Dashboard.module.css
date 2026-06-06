@@ -38,37 +38,32 @@
   margin-block-start: 5px;
 }
 
-/* ─── Stats row ───────────────────────────────────────────────────────────── */
+/* ─── Zone A — Hero KPI strip ─────────────────────────────────────────────── */
 
-.statsRow {
+.kpiStrip {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  gap: 14px;
   margin-block-end: 20px;
-}
-
-.statCard {
-  background: var(--surface-elevated);
   border: 1px solid var(--neutral-border);
   border-radius: var(--radius-lg);
-  padding: 20px 22px 18px;
-  display: flex;
-  flex-direction: column;
-  gap: 0;
-  transition:
-    transform 180ms var(--ease-out-quart),
-    box-shadow 180ms var(--ease-out-quart),
-    border-color 180ms var(--ease-out-quart);
+  overflow: hidden;
+  background: var(--surface-elevated);
   animation: fadeSlideUp 0.5s var(--ease-out-expo) both;
 }
 
-.statCard:hover {
-  transform: translateY(-2px);
-  box-shadow: var(--shadow-md), 0 0 0 1px oklch(62% 0.26 255 / 0.15);
-  border-color: oklch(62% 0.26 255 / 0.3);
+.kpiCell {
+  padding: 22px 24px 20px;
+  border-inline-end: 1px solid var(--neutral-border);
+  display: flex;
+  flex-direction: column;
+  gap: 0;
 }
 
-.statLabel {
+.kpiCell:last-child {
+  border-inline-end: none;
+}
+
+.kpiLabel {
   font-size: 0.6875rem;
   font-weight: 600;
   color: var(--text-secondary);
@@ -77,9 +72,9 @@
   line-height: 1;
 }
 
-.statValue {
+.kpiNumber {
   display: block;
-  font-size: clamp(2.25rem, 3vw, 3rem);
+  font-size: clamp(1.75rem, 3vw, 2.5rem);
   font-weight: 700;
   color: var(--text-primary);
   letter-spacing: -0.04em;
@@ -88,27 +83,112 @@
   margin-block-start: 10px;
 }
 
-.statSub {
+.kpiDelta {
   font-size: 0.75rem;
   color: var(--text-muted);
-  margin-block-start: 7px;
+  margin-block-start: 6px;
 }
 
-/* ─── Middle row ──────────────────────────────────────────────────────────── */
+.kpiDeltaAmber {
+  color: var(--color-amber);
+  font-weight: 600;
+}
 
-.middleRow {
+.kpiDeltaRed {
+  color: var(--color-red);
+  font-weight: 600;
+}
+
+/* ─── Zone B + C — Alert + Enrollment chart ───────────────────────────────── */
+
+.alertChart {
   display: grid;
-  grid-template-columns: 3fr 2fr;
+  grid-template-columns: 35fr 65fr;
   gap: 14px;
   margin-block-end: 14px;
 }
 
-/* ─── Bottom row ──────────────────────────────────────────────────────────── */
+/* ─── Zone D — Today's sessions (horizontal scroll) ──────────────────────── */
 
-.bottomRow {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 14px;
+.sessionsZone {
+  background: var(--surface-elevated);
+  border: 1px solid var(--neutral-border);
+  border-radius: var(--radius-lg);
+  padding: 18px 22px;
+  animation: fadeSlideUp 0.5s var(--ease-out-expo) both;
+  animation-delay: 0.1s;
+}
+
+.sessionsZoneHead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-block-end: 14px;
+}
+
+.sessionsZoneTitle {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  letter-spacing: -0.01em;
+  margin: 0;
+}
+
+.sessionsZoneCount {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.sessionScrollTrack {
+  display: flex;
+  gap: 12px;
+  overflow-x: auto;
+  padding-block-end: 6px;
+  scrollbar-width: none;
+}
+
+.sessionScrollTrack::-webkit-scrollbar {
+  display: none;
+}
+
+.sessionCard {
+  min-width: 200px;
+  flex-shrink: 0;
+  padding: 12px 14px;
+  background: var(--surface-panel);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--neutral-border);
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  transition:
+    background 150ms var(--ease-out-quart),
+    border-color 150ms var(--ease-out-quart);
+  animation: fadeSlideUp 0.28s var(--ease-out-quart) both;
+}
+
+.sessionCard:hover {
+  background: var(--surface-elevated);
+  border-color: oklch(62% 0.26 255 / 0.2);
+}
+
+.sessionScrollTrack .sessionCard:nth-child(1) { animation-delay: 0s;    }
+.sessionScrollTrack .sessionCard:nth-child(2) { animation-delay: 0.05s; }
+.sessionScrollTrack .sessionCard:nth-child(3) { animation-delay: 0.1s;  }
+.sessionScrollTrack .sessionCard:nth-child(4) { animation-delay: 0.15s; }
+.sessionScrollTrack .sessionCard:nth-child(5) { animation-delay: 0.2s;  }
+
+.sessionCardSkeleton {
+  min-width: 200px;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  padding: 12px 14px;
+  background: var(--surface-panel);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--neutral-border);
 }
 
 /* ─── Panel (shared section container) ───────────────────────────────────── */

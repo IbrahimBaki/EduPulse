@@ -24,6 +24,7 @@ interface Student {
   avg_quiz_score: number | null
   weak_topics_count: number
   last_activity_at?: string
+  enrolled_courses?: { id: number; name: string }[]
 }
 
 interface StudentDetail {
@@ -111,6 +112,7 @@ function SkeletonRow() {
           </div>
         </div>
       </td>
+      <td><span className={styles.skeleton} style={{ display: 'block', height: 14, width: 110 }} /></td>
       <td><span className={styles.skeleton} style={{ display: 'block', height: 14, width: 100 }} /></td>
       <td><span className={styles.skeleton} style={{ display: 'block', height: 14, width: 40 }} /></td>
       <td><span className={styles.skeleton} style={{ display: 'block', height: 18, width: 28 }} /></td>
@@ -289,8 +291,10 @@ export default function TeacherStudents() {
 
   const { data: students = [], isLoading, isError, refetch } = useQuery<Student[]>({
     queryKey: ['teacher-students', courseId],
-    queryFn: () => api.get(`/teacher/courses/${courseId}/students`).then(r => normalizeArray<Student>(r.data.data ?? r.data)),
-    enabled: !!courseId,
+    queryFn: () => {
+      const params = courseId ? `?course_id=${courseId}` : ''
+      return api.get(`/teacher/students${params}`).then(r => normalizeArray<Student>(r.data.data ?? r.data))
+    },
     staleTime: 2 * 60 * 1000,
   })
 
@@ -300,11 +304,9 @@ export default function TeacherStudents() {
         <div>
           <h1 className={styles.pageTitle}>{t('teacher.students.title')}</h1>
           <p className={styles.pageSubtitle}>
-            {!courseId
-              ? t('teacher.students.selectCoursePrompt')
-              : isLoading
-                ? t('common.loading')
-                : `${students.length} student${students.length !== 1 ? 's' : ''}`}
+            {isLoading
+              ? t('common.loading')
+              : `${students.length} student${students.length !== 1 ? 's' : ''}`}
           </p>
         </div>
       </header>
@@ -316,18 +318,12 @@ export default function TeacherStudents() {
           onChange={e => setCourseId(e.target.value)}
           aria-label={t('teacher.students.selectCourse')}
         >
-          <option value="">{t('teacher.students.selectCourse')}</option>
+          <option value="">{t('teacher.students.allCourses')}</option>
           {courses.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
         </select>
       </div>
 
-      {!courseId ? (
-        <div className={styles.emptyState}>
-          <div style={{ color: 'oklch(44% 0.018 255)' }}><UsersIcon /></div>
-          <p className={styles.emptyTitle}>{t('teacher.students.selectCourseTitle')}</p>
-          <p className={styles.emptyText}>{t('teacher.students.selectCourseText')}</p>
-        </div>
-      ) : isError ? (
+      {isError ? (
         <div className={styles.emptyState}>
           <div style={{ color: 'var(--color-amber)' }}><AlertIcon /></div>
           <p className={styles.emptyTitle}>{t('common.errorLoadFailed')}</p>
@@ -345,6 +341,7 @@ export default function TeacherStudents() {
             <thead>
               <tr>
                 <th>{t('teacher.students.student')}</th>
+                <th>{t('teacher.students.course')}</th>
                 <th>{t('teacher.students.attendance')}</th>
                 <th>{t('teacher.students.avgScore')}</th>
                 <th>{t('teacher.students.weakTopics')}</th>
@@ -373,6 +370,11 @@ export default function TeacherStudents() {
                             <div className={styles.studentCode}>{s.code}</div>
                           </div>
                         </div>
+                      </td>
+                      <td>
+                        <span style={{ fontSize: '0.8125rem', color: 'var(--text-primary)' }}>
+                          {s.enrolled_courses?.map(c => c.name).join(', ') || '—'}
+                        </span>
                       </td>
                       <td>
                         <div className={styles.inlineProgress}>
@@ -413,13 +415,16 @@ export default function TeacherStudents() {
         </div>
       )}
 
-      {selectedStudent && courseId && (
-        <StudentDetailPanel
-          student={selectedStudent}
-          courseId={courseId}
-          onClose={() => setSelectedStudent(null)}
-        />
-      )}
+      {selectedStudent && (() => {
+        const effectiveCourseId = courseId || String(selectedStudent.enrolled_courses?.[0]?.id ?? '')
+        return effectiveCourseId ? (
+          <StudentDetailPanel
+            student={selectedStudent}
+            courseId={effectiveCourseId}
+            onClose={() => setSelectedStudent(null)}
+          />
+        ) : null
+      })()}
     </div>
   )
 }

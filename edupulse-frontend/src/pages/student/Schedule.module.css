@@ -2,7 +2,7 @@
 
 .page {
   padding: 40px 48px;
-  max-width: 860px;
+  max-width: 1280px;
   display: flex;
   flex-direction: column;
   gap: 24px;
@@ -358,6 +358,205 @@
 .retryBtn:hover {
   background: var(--surface-elevated);
   color: var(--text-primary);
+}
+
+/* ─── View toggle ─────────────────────────────────────────────────────────── */
+
+.viewToggle {
+  display: flex;
+  gap: 2px;
+  margin-inline-start: auto;
+}
+
+.viewBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--neutral-border);
+  background: transparent;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: background var(--dur-fast), color var(--dur-fast);
+}
+
+.viewBtn:hover { background: var(--surface-elevated); color: var(--text-primary); }
+.viewBtnActive { background: var(--color-blue); border-color: var(--color-blue); color: oklch(99% 0.005 255); }
+.viewBtn:focus-visible { outline: 2px solid var(--color-blue); outline-offset: 2px; }
+
+/* ─── Week navigator ──────────────────────────────────────────────────────── */
+
+.weekNav {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.weekNavBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--neutral-border);
+  background: transparent;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: background var(--dur-fast), color var(--dur-fast);
+}
+
+.weekNavBtn:hover { background: var(--surface-elevated); color: var(--text-primary); }
+.weekNavBtn:focus-visible { outline: 2px solid var(--color-blue); outline-offset: 2px; }
+
+.weekLabel {
+  font-size: 0.9375rem;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  color: var(--text-primary);
+  font-variant-numeric: tabular-nums;
+}
+
+.todayBtn {
+  height: 28px;
+  padding-inline: 12px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--neutral-border);
+  background: transparent;
+  color: var(--text-secondary);
+  font-size: 0.75rem;
+  font-weight: 600;
+  font-family: var(--font-sans);
+  cursor: pointer;
+  transition: background var(--dur-fast), color var(--dur-fast);
+}
+
+.todayBtn:hover { background: var(--surface-elevated); color: var(--text-primary); }
+.todayBtn:focus-visible { outline: 2px solid var(--color-blue); outline-offset: 2px; }
+
+/* ─── Week grid ───────────────────────────────────────────────────────────── */
+
+.weekGrid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 1px;
+  background: var(--neutral-border);
+  border: 1px solid var(--neutral-border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+}
+
+.weekDayCol {
+  background: var(--surface-elevated);
+  min-height: 300px;
+  display: flex;
+  flex-direction: column;
+}
+
+.weekDayHeader {
+  padding: 10px 10px 8px;
+  border-bottom: 1px solid var(--neutral-border);
+  text-align: center;
+  background: var(--surface-panel);
+}
+
+.weekDayName {
+  font-size: 0.625rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: var(--text-muted);
+}
+
+.weekDayNum {
+  font-size: 1.0625rem;
+  font-weight: 700;
+  color: var(--text-secondary);
+  font-variant-numeric: tabular-nums;
+  line-height: 1.3;
+}
+
+.weekDayNumToday {
+  color: oklch(99% 0.005 255);
+  background: var(--color-blue);
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 2px auto 0;
+  font-size: 0.875rem;
+}
+
+.weekDayBody {
+  flex: 1;
+  padding: 6px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+/* ─── Session chip (week view) ────────────────────────────────────────────── */
+
+.calChip {
+  padding: 5px 8px;
+  border-radius: var(--radius-sm);
+  font-size: 0.6875rem;
+  font-weight: 600;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  border: none;
+  text-align: start;
+  width: 100%;
+  font-family: var(--font-sans);
+  cursor: default;
+}
+
+.calChip[data-joinable='true'] {
+  cursor: pointer;
+  transition: filter 150ms;
+}
+
+.calChip[data-joinable='true']:hover { filter: brightness(1.15); }
+.calChip:focus-visible { outline: 2px solid var(--color-blue); outline-offset: 2px; }
+
+.calChipScheduled { background: var(--color-blue-dim); color: var(--color-blue); }
+.calChipLive      { background: oklch(68% 0.18 148 / 0.15); color: oklch(68% 0.18 148); }
+.calChipCompleted { background: oklch(32% 0.02 255 / 0.35); color: var(--text-muted); }
+.calChipCancelled { background: oklch(32% 0.02 255 / 0.2); color: var(--text-muted); opacity: 0.6; }
+
+.calChipTitle  { font-size: 0.6875rem; font-weight: 600; line-height: 1.2; }
+.calChipCourse { font-size: 0.5625rem; opacity: 0.75; font-weight: 400; line-height: 1.2; margin-block-start: 1px; }
+.calChipTime   { font-size: 0.5625rem; opacity: 0.8; font-variant-numeric: tabular-nums; }
+
+.calLiveDot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: oklch(68% 0.18 148);
+  display: inline-block;
+  margin-inline-end: 4px;
+  animation: calPulseLive 1.5s ease-in-out infinite;
+  flex-shrink: 0;
+}
+
+.calSoonDot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--color-amber);
+  display: inline-block;
+  margin-inline-end: 4px;
+  flex-shrink: 0;
+}
+
+@keyframes calPulseLive {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50%       { opacity: 0.5; transform: scale(0.7); }
 }
 
 /* ─── Responsive ──────────────────────────────────────────────────────────── */

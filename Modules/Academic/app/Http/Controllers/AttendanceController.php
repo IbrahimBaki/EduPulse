@@ -19,7 +19,7 @@ class AttendanceController extends Controller
     {
         $schedule = Schedule::findOrFail($scheduleId);
 
-        if ($schedule->course->teacher_id !== auth()->id()) {
+        if ($schedule->teacher_id !== auth()->id()) {
             return $this->ReturnFailed('Unauthorized', 403);
         }
 
@@ -43,7 +43,7 @@ class AttendanceController extends Controller
     {
         $schedule = Schedule::findOrFail($scheduleId);
 
-        if ($schedule->course->teacher_id !== auth()->id()) {
+        if ($schedule->teacher_id !== auth()->id()) {
             return $this->ReturnFailed('Unauthorized', 403);
         }
 

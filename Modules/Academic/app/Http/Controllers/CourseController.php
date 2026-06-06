@@ -167,17 +167,106 @@ class CourseController extends Controller
             ->with(['student.studentProfile', 'course:id,name'])
             ->get();
 
-        $students = $enrollments->groupBy('student_id')->map(function ($grouped) {
+        $studentIds = $enrollments->pluck('student_id')->unique();
+
+        $weakTopicsCount = WeakTopic::whereIn('student_id', $studentIds)
+            ->selectRaw('student_id, COUNT(*) as cnt')
+            ->groupBy('student_id')
+            ->pluck('cnt', 'student_id');
+
+        $avgScores = QuizAttempt::whereIn('student_id', $studentIds)
+            ->selectRaw('student_id, ROUND(AVG(score),1) as avg_score')
+            ->groupBy('student_id')
+            ->pluck('avg_score', 'student_id');
+
+        $lastActivity = QuizAttempt::whereIn('student_id', $studentIds)
+            ->selectRaw('student_id, MAX(created_at) as last_at')
+            ->groupBy('student_id')
+            ->pluck('last_at', 'student_id');
+
+        $students = $enrollments->groupBy('student_id')->map(function ($grouped) use ($weakTopicsCount, $avgScores, $lastActivity) {
             $student = $grouped->first()->student;
             $data = $student->toArray();
             $data['enrolled_courses'] = $grouped->map(fn($e) => [
                 'id'   => $e->course->id,
                 'name' => $e->course->name,
             ])->values();
+            $data['weak_topics_count'] = $weakTopicsCount->get($student->id, 0);
+            $data['avg_quiz_score']    = $avgScores->get($student->id);
+            $data['last_activity_at']  = $lastActivity->get($student->id);
+            $data['attendance_rate']   = 0;
             return $data;
         })->values();
 
         return $this->ReturnSuccess($students, 'Students retrieved');
+    }
+
+    public function studentDetail($courseId, $studentId)
+    {
+        $course = Course::findOrFail($courseId);
+
+        if ($course->teacher_id !== auth()->id()) {
+            return $this->ReturnFailed('Unauthorized', 403);
+        }
+
+        $enrollment = \Modules\Academic\Models\Enrollment::where('course_id', $courseId)
+            ->where('student_id', $studentId)
+            ->firstOrFail();
+
+        $student = $enrollment->student()->with('studentProfile.gradeLevel')->first();
+
+        $weakTopics = WeakTopic::where('student_id', $studentId)
+            ->orderBy('score')
+            ->get(['topic', 'score']);
+
+        $recentQuizAttempts = QuizAttempt::where('student_id', $studentId)
+            ->latest()
+            ->limit(5)
+            ->get(['topic', 'score', 'level', 'created_at'])
+            ->map(fn($q) => [
+                'topic'        => $q->topic,
+                'score'        => $q->score,
+                'level'        => $q->level,
+                'attempted_at' => $q->created_at,
+            ]);
+
+        $scheduleIds    = \Modules\Academic\Models\Schedule::where('course_id', $courseId)->pluck('id');
+        $totalSchedules = $scheduleIds->count();
+
+        $byStatus = \Modules\Academic\Models\Attendance::whereIn('schedule_id', $scheduleIds)
+            ->where('student_id', $studentId)
+            ->selectRaw('status, COUNT(*) as cnt')
+            ->groupBy('status')
+            ->pluck('cnt', 'status');
+
+        $present  = (int) $byStatus->get('present', 0);
+        $absent   = (int) $byStatus->get('absent', 0);
+        $late     = (int) $byStatus->get('late', 0);
+        $excused  = (int) $byStatus->get('excused', 0);
+        $attendanceRate = $totalSchedules > 0 ? round($present / $totalSchedules * 100) : 0;
+
+        $avgScore = QuizAttempt::where('student_id', $studentId)->avg('score');
+
+        $data = [
+            'id'                   => $student->id,
+            'name'                 => $student->name,
+            'code'                 => $student->studentProfile?->student_code ?? '',
+            'grade_level'          => $student->studentProfile?->gradeLevel?->name,
+            'attendance_rate'      => $attendanceRate,
+            'avg_quiz_score'       => $avgScore ? round($avgScore, 1) : null,
+            'weak_topics_count'    => $weakTopics->count(),
+            'last_activity_at'     => QuizAttempt::where('student_id', $studentId)->latest()->value('created_at'),
+            'weak_topics'          => $weakTopics,
+            'recent_quiz_attempts' => $recentQuizAttempts,
+            'attendance_breakdown' => [
+                'present' => $present,
+                'absent'  => $absent,
+                'late'    => $late,
+                'excused' => $excused,
+            ],
+        ];
+
+        return $this->ReturnSuccess($data, 'Student detail retrieved');
     }
 
     public function enrolledCourses()

@@ -62,17 +62,20 @@ function LogOutIcon() {
 
 type NavItem = { to: string; tKey: string; Icon: () => React.ReactElement }
 
-const NAV_ITEMS: NavItem[] = [
-  { to: '/manager/dashboard',     tKey: 'nav.dashboard',     Icon: HomeIcon },
-  { to: '/manager/students',      tKey: 'nav.students',      Icon: UsersIcon },
-  { to: '/manager/parents',       tKey: 'nav.parents',       Icon: FamilyIcon },
-  { to: '/manager/teachers',      tKey: 'nav.teachers',      Icon: TeachersIcon },
-  { to: '/manager/courses',       tKey: 'nav.courses',       Icon: BookOpenIcon },
-  { to: '/manager/schedule',      tKey: 'nav.schedule',      Icon: CalendarIcon },
-  { to: '/manager/finance',       tKey: 'nav.finance',       Icon: FinanceIcon },
-  { to: '/manager/announcements', tKey: 'nav.announcements',  Icon: MegaphoneIcon },
+const MAIN_NAV: NavItem[] = [
+  { to: '/manager/dashboard',  tKey: 'nav.dashboard', Icon: HomeIcon },
+  { to: '/manager/students',   tKey: 'nav.students',  Icon: UsersIcon },
+  { to: '/manager/parents',    tKey: 'nav.parents',   Icon: FamilyIcon },
+  { to: '/manager/teachers',   tKey: 'nav.teachers',  Icon: TeachersIcon },
+  { to: '/manager/courses',    tKey: 'nav.courses',   Icon: BookOpenIcon },
+  { to: '/manager/schedule',   tKey: 'nav.schedule',  Icon: CalendarIcon },
+]
+
+const MGMT_NAV: NavItem[] = [
+  { to: '/manager/finance',       tKey: 'nav.finance',      Icon: FinanceIcon },
+  { to: '/manager/announcements', tKey: 'nav.announcements', Icon: MegaphoneIcon },
   { to: '/manager/school-profile', tKey: 'nav.schoolProfile', Icon: BuildingIcon },
-  { to: '/manager/settings',      tKey: 'nav.settings',       Icon: SettingsIcon },
+  { to: '/manager/settings',      tKey: 'nav.settings',      Icon: SettingsIcon },
 ]
 
 export default function ManagerLayout() {
@@ -92,6 +95,13 @@ export default function ManagerLayout() {
     : ''
   const schoolName = schoolSettings?.academy_name || fallbackName
 
+  const renderNavItem = ({ to, tKey, Icon }: NavItem) => (
+    <NavLink key={to} to={to} className={({ isActive }) => `${styles.navItem} ${isActive ? styles.navActive : ''}`}>
+      <span className={styles.navIcon}><Icon /></span>
+      <span className={styles.navLabel}>{t(tKey)}</span>
+    </NavLink>
+  )
+
   return (
     <RoleGuard role="manager">
       <div className={styles.shell}>
@@ -105,11 +115,9 @@ export default function ManagerLayout() {
           </div>
           {schoolName && <div className={styles.schoolLabel}>{schoolName}</div>}
           <nav className={styles.nav} aria-label="Manager navigation">
-            {NAV_ITEMS.map(({ to, tKey, Icon }) => (
-              <NavLink key={to} to={to} className={({ isActive }) => `${styles.navItem} ${isActive ? styles.navActive : ''}`}>
-                <Icon /><span>{t(tKey)}</span>
-              </NavLink>
-            ))}
+            {MAIN_NAV.map(renderNavItem)}
+            <div className={styles.navSection}>{t('nav.management')}</div>
+            {MGMT_NAV.map(renderNavItem)}
           </nav>
           <TopControls />
           <div className={styles.userFooter}>

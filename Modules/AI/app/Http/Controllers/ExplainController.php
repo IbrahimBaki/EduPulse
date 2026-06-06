@@ -16,23 +16,44 @@ class ExplainController extends Controller
     public function explain(Request $request)
     {
         $data = $request->validate([
-            'message'    => 'required|string|max:1000',
-            'lesson_id'  => 'nullable|integer|exists:lessons,id',
-            'session_id' => 'nullable|integer|exists:chat_sessions,id',
-            'topic'      => 'nullable|string|max:120',
+            'message'      => 'required|string|max:1000',
+            'lesson_id'    => 'nullable|integer|exists:lessons,id',
+            'lesson_ids'   => 'nullable|array',
+            'lesson_ids.*' => 'integer|exists:lessons,id',
+            'session_id'   => 'nullable|integer|exists:chat_sessions,id',
+            'topic'        => 'nullable|string|max:120',
         ]);
 
         $student = $request->user();
 
-        // Chunks are not needed here — PDF is sent directly or no content is attached
-        $systemPrompt = app(SystemPromptBuilder::class)->build($student->id);
+        // Normalise to a flat list of lesson IDs
+        $lessonIds       = $data['lesson_ids'] ?? (isset($data['lesson_id']) ? [$data['lesson_id']] : []);
+        $primaryLessonId = count($lessonIds) === 1 ? $lessonIds[0] : null;
 
-        $isNew = !isset($data['session_id']);
+        // Collect PDF paths and lesson names BEFORE building the system prompt
+        $pdfPaths    = [];
+        $lessonNames = [];
+        if (!empty($lessonIds)) {
+            $lessons = Lesson::whereIn('id', $lessonIds)->get();
+            foreach ($lessons as $lesson) {
+                if ($lesson->pdf_path) {
+                    $absolute = Storage::disk('local')->path($lesson->pdf_path);
+                    if (file_exists($absolute)) {
+                        $pdfPaths[]    = $absolute;
+                        $lessonNames[] = $lesson->title;
+                    }
+                }
+            }
+        }
+
+        $systemPrompt = app(SystemPromptBuilder::class)->build($student->id, null, null, 'chat', $lessonNames);
+
+        $isNew   = !isset($data['session_id']);
         $session = !$isNew
             ? ChatSession::where('student_id', $student->id)->findOrFail($data['session_id'])
             : ChatSession::create([
                 'student_id' => $student->id,
-                'lesson_id'  => $data['lesson_id'] ?? null,
+                'lesson_id'  => $primaryLessonId,
                 'topic'      => $data['topic'] ?? mb_substr($data['message'], 0, 80),
             ]);
 
@@ -53,22 +74,13 @@ class ExplainController extends Controller
             'content'    => $data['message'],
         ]);
 
-        $pdfPath = null;
-        if ($data['lesson_id'] ?? null) {
-            $lesson = Lesson::find($data['lesson_id']);
-            if ($lesson?->pdf_path) {
-                $absolute = Storage::disk('local')->path($lesson->pdf_path);
-                if (file_exists($absolute)) {
-                    $pdfPath = $absolute;
-                }
-            }
-        }
-
         try {
             $gemini = app(GeminiService::class);
-            $reply  = $pdfPath
-                ? $gemini->chatWithPdf($systemPrompt, $history, $pdfPath)
-                : $gemini->chat($systemPrompt, $history);
+            $reply  = match (true) {
+                count($pdfPaths) > 1  => $gemini->chatWithMultiplePdfs($systemPrompt, $history, $pdfPaths),
+                count($pdfPaths) === 1 => $gemini->chatWithPdf($systemPrompt, $history, $pdfPaths[0]),
+                default               => $gemini->chat($systemPrompt, $history),
+            };
         } catch (\RuntimeException $e) {
             return $this->ReturnFailed($e->getMessage(), 502);
         }

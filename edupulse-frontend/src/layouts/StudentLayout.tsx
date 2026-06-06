@@ -120,7 +120,7 @@ function LogOutIcon() {
 
 type NavItem = { to: string; tKey: string; Icon: () => React.ReactElement; notif?: boolean }
 
-const NAV_ITEMS: NavItem[] = [
+const MAIN_NAV: NavItem[] = [
   { to: '/student/dashboard',     tKey: 'nav.dashboard',     Icon: HomeIcon },
   { to: '/student/courses',       tKey: 'nav.courses',       Icon: BookOpenIcon },
   { to: '/student/ai-tutor',      tKey: 'nav.aiTutor',       Icon: SparklesIcon },
@@ -128,8 +128,13 @@ const NAV_ITEMS: NavItem[] = [
   { to: '/student/schedule',      tKey: 'nav.schedule',      Icon: CalendarIcon },
   { to: '/student/announcements', tKey: 'nav.announcements', Icon: FileTextIcon, notif: true },
   { to: '/student/fees',          tKey: 'nav.fees',          Icon: CreditCardIcon },
-  { to: '/student/profile',       tKey: 'nav.profile',       Icon: UserIcon },
 ]
+
+const PROFILE_NAV: NavItem[] = [
+  { to: '/student/profile', tKey: 'nav.profile', Icon: UserIcon },
+]
+
+const NAV_ITEMS: NavItem[] = [...MAIN_NAV, ...PROFILE_NAV]
 
 // ─── Component ───────────────────────────────────────────────────────────────
 
@@ -182,7 +187,7 @@ export default function StudentLayout() {
           {schoolName && <div className={styles.schoolLabel}>{schoolName}</div>}
 
           <nav className={styles.nav} aria-label="Student navigation">
-            {NAV_ITEMS.map(({ to, tKey, Icon, notif }) => (
+            {MAIN_NAV.map(({ to, tKey, Icon, notif }) => (
               <NavLink
                 key={to}
                 to={to}
@@ -190,13 +195,26 @@ export default function StudentLayout() {
                   `${styles.navItem} ${isActive ? styles.navActive : ''}`
                 }
               >
-                <Icon />
-                <span>{t(tKey)}</span>
+                <span className={styles.navIcon}><Icon /></span>
+                <span className={styles.navLabel}>{t(tKey)}</span>
                 {notif && unreadCount > 0 && (
                   <span className={styles.navBadge} aria-label={`${unreadCount} unread`}>
                     {unreadCount > 99 ? '99+' : unreadCount}
                   </span>
                 )}
+              </NavLink>
+            ))}
+            <div className={styles.navSection} />
+            {PROFILE_NAV.map(({ to, tKey, Icon }) => (
+              <NavLink
+                key={to}
+                to={to}
+                className={({ isActive }) =>
+                  `${styles.navItem} ${isActive ? styles.navActive : ''}`
+                }
+              >
+                <span className={styles.navIcon}><Icon /></span>
+                <span className={styles.navLabel}>{t(tKey)}</span>
               </NavLink>
             ))}
           </nav>

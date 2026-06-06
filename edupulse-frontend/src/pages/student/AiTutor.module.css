@@ -1,4 +1,18 @@
-/* ─── Shell: full-height two-panel split ─────────────────────────────────── */
+/* ─── Utility ─────────────────────────────────────────────────────────────── */
+
+.srOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* ─── Shell: full-height two-panel split ──────────────────────────────────── */
 
 .shell {
   display: flex;
@@ -48,10 +62,120 @@
   border-color: var(--neutral-border-strong);
 }
 
+.newTopicBtn:focus-visible {
+  outline: 2px solid var(--color-blue);
+  outline-offset: 2px;
+}
+
+/* ─── Sidebar tabs ────────────────────────────────────────────────────────── */
+
+.sidebarTabs {
+  display: flex;
+  border-bottom: 1.5px solid var(--neutral-border);
+  margin-block-end: 14px;
+}
+
+.sidebarTab {
+  position: relative;
+  flex: 1;
+  padding: 7px 4px 9px;
+  border: none;
+  background: transparent;
+  color: var(--text-muted);
+  font-size: 0.73rem;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  text-align: center;
+  white-space: nowrap;
+  transition: color var(--dur-fast);
+}
+
+.sidebarTab::after {
+  content: '';
+  position: absolute;
+  bottom: -1.5px;
+  inset-inline: 10%;
+  height: 2px;
+  border-radius: 2px 2px 0 0;
+  background: var(--color-blue);
+  opacity: 0;
+  transition: opacity var(--dur-fast);
+}
+
+.sidebarTab:hover {
+  color: var(--text-primary);
+}
+
+.sidebarTab:focus-visible {
+  outline: 2px solid var(--color-blue);
+  outline-offset: 2px;
+}
+
+.sidebarTabActive {
+  color: var(--color-blue);
+}
+
+.sidebarTabActive::after {
+  opacity: 1;
+}
+
+.tabCount {
+  position: absolute;
+  top: -7px;
+  inset-inline-end: 4px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 15px;
+  height: 15px;
+  padding: 0 3px;
+  border-radius: 999px;
+  background: var(--neutral-border);
+  color: var(--text-muted);
+  font-size: 0.6rem;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.sidebarTabActive .tabCount {
+  background: var(--color-blue);
+  color: #fff;
+}
+
+/* ─── Load more button ────────────────────────────────────────────────────── */
+
+.loadMoreBtn {
+  width: 100%;
+  padding: 7px 10px;
+  margin-block-start: 4px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--neutral-border);
+  background: transparent;
+  color: var(--text-secondary);
+  font-size: 0.775rem;
+  font-weight: 500;
+  font-family: inherit;
+  cursor: pointer;
+  transition: background var(--dur-fast), color var(--dur-fast), border-color var(--dur-fast);
+}
+
+.loadMoreBtn:hover {
+  background: var(--surface-elevated);
+  color: var(--text-primary);
+  border-color: var(--neutral-border-strong);
+}
+
+.loadMoreBtn:focus-visible {
+  outline: 2px solid var(--color-blue);
+  outline-offset: 2px;
+}
+
 /* ─── Sidebar sections ────────────────────────────────────────────────────── */
 
 .historySection,
-.weakSection {
+.weakSection,
+.quizHistorySection {
   display: flex;
   flex-direction: column;
   gap: 8px;
@@ -65,6 +189,39 @@
   text-transform: uppercase;
   color: var(--text-muted);
   padding-inline-start: 4px;
+}
+
+.sidebarEmpty {
+  font-size: 0.8125rem;
+  color: var(--text-muted);
+  padding: 8px 4px;
+  line-height: 1.5;
+}
+
+/* ─── Skeleton ────────────────────────────────────────────────────────────── */
+
+.skeleton {
+  border-radius: var(--radius-sm);
+  background: linear-gradient(
+    90deg,
+    var(--surface-elevated) 25%,
+    var(--neutral-border) 50%,
+    var(--surface-elevated) 75%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.6s ease-in-out infinite;
+}
+
+@keyframes shimmer {
+  0%   { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+.skeletonItem {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 8px 10px;
 }
 
 /* ─── History list ────────────────────────────────────────────────────────── */
@@ -81,16 +238,26 @@
   gap: 2px;
   padding: 8px 10px;
   border-radius: var(--radius-md);
-  border: none;
+  border: 1px solid transparent;
   background: transparent;
   text-align: start;
   cursor: pointer;
-  transition: background var(--dur-fast);
+  transition: background var(--dur-fast), border-color var(--dur-fast);
   width: 100%;
 }
 
 .historyItem:hover {
   background: var(--surface-elevated);
+}
+
+.historyItem:focus-visible {
+  outline: 2px solid var(--color-blue);
+  outline-offset: 2px;
+}
+
+.historyItemActive {
+  background: var(--surface-elevated);
+  border-color: var(--neutral-border);
 }
 
 .historyTopic {
@@ -148,10 +315,9 @@
 
 .weakPill {
   display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 8px;
-  padding: 7px 10px;
+  flex-direction: column;
+  gap: 5px;
+  padding: 8px 10px;
   border-radius: var(--radius-md);
   border: 1px solid transparent;
   background: transparent;
@@ -159,16 +325,29 @@
   font-family: inherit;
   transition: background var(--dur-fast);
   width: 100%;
+  text-align: start;
 }
 
 .weakPill:hover {
   background: var(--surface-elevated);
 }
 
+.weakPill:focus-visible {
+  outline: 2px solid var(--color-blue);
+  outline-offset: 2px;
+}
+
+.weakPillRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
 .weakName {
   font-size: 0.8125rem;
   font-weight: 500;
-  text-align: start;
+  color: var(--text-primary);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -178,6 +357,19 @@
   font-size: 0.72rem;
   font-weight: 700;
   flex-shrink: 0;
+}
+
+.weakBar {
+  height: 3px;
+  background: var(--surface-elevated);
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.weakBarFill {
+  height: 100%;
+  border-radius: 999px;
+  transition: width 0.4s var(--ease-out-expo);
 }
 
 /* ─── Main panel ──────────────────────────────────────────────────────────── */
@@ -197,7 +389,7 @@
   display: flex;
   align-items: center;
   gap: 10px;
-  padding: 12px 20px;
+  padding: 10px 20px;
   border-block-end: 1px solid var(--neutral-border);
   background: var(--surface-panel);
   flex-shrink: 0;
@@ -220,6 +412,11 @@
 .menuBtn:hover {
   background: var(--surface-elevated);
   color: var(--text-primary);
+}
+
+.menuBtn:focus-visible {
+  outline: 2px solid var(--color-blue);
+  outline-offset: 2px;
 }
 
 .topBarCenter {
@@ -260,30 +457,41 @@
   flex-shrink: 0;
 }
 
-.quizBtn {
-  padding: 7px 14px;
-  border-radius: var(--radius-md);
+/* ─── Mode switcher (segmented control) ──────────────────────────────────── */
+
+.modeSwitch {
+  display: flex;
+  gap: 2px;
+  padding: 3px;
+  border-radius: calc(var(--radius-md) + 1px);
+  background: var(--surface-elevated);
   border: 1px solid var(--neutral-border);
+  flex-shrink: 0;
+}
+
+.modeTab {
+  padding: 5px 14px;
+  border-radius: calc(var(--radius-md) - 2px);
+  border: none;
   background: transparent;
   color: var(--text-secondary);
   font-size: 0.8125rem;
   font-weight: 600;
   font-family: inherit;
   cursor: pointer;
-  transition: background var(--dur-fast), color var(--dur-fast), border-color var(--dur-fast);
+  transition: background var(--dur-fast), color var(--dur-fast), box-shadow var(--dur-fast);
   white-space: nowrap;
-  flex-shrink: 0;
 }
 
-.quizBtn:hover:not(:disabled) {
-  background: var(--color-blue-dim);
-  border-color: var(--color-blue);
-  color: var(--color-blue);
+.modeTabActive {
+  background: var(--surface-panel);
+  color: var(--text-primary);
+  box-shadow: 0 1px 3px oklch(0% 0 0 / 0.18);
 }
 
-.quizBtn:disabled {
-  opacity: 0.4;
-  cursor: not-allowed;
+.modeTab:focus-visible {
+  outline: 2px solid var(--color-blue);
+  outline-offset: 2px;
 }
 
 /* ─── Messages area ───────────────────────────────────────────────────────── */
@@ -298,7 +506,7 @@
   scroll-behavior: smooth;
 }
 
-/* ─── Welcome state ───────────────────────────────────────────────────────── */
+/* ─── Welcome / empty state ───────────────────────────────────────────────── */
 
 .welcomeState {
   flex: 1;
@@ -309,6 +517,11 @@
   gap: 12px;
   text-align: center;
   padding: 40px 24px;
+}
+
+.welcomeFirstTime .welcomeIcon {
+  width: 72px;
+  height: 72px;
 }
 
 .welcomeIcon {
@@ -377,6 +590,11 @@
   color: var(--color-blue);
 }
 
+.welcomeTopicBtn:focus-visible {
+  outline: 2px solid var(--color-blue);
+  outline-offset: 2px;
+}
+
 /* ─── Message bubbles ─────────────────────────────────────────────────────── */
 
 .messageWrap {
@@ -407,6 +625,10 @@
   word-break: break-word;
 }
 
+[dir="rtl"] .userBubble {
+  border-radius: 18px 18px 18px 4px;
+}
+
 .aiAvatar {
   width: 28px;
   height: 28px;
@@ -430,6 +652,10 @@
   line-height: 1.65;
   word-break: break-word;
   max-width: 100%;
+}
+
+[dir="rtl"] .aiBubble {
+  border-radius: 18px 4px 18px 18px;
 }
 
 .aiBubble p { margin-block-end: 8px; }
@@ -493,9 +719,7 @@
   color: var(--text-secondary);
   vertical-align: top;
 }
-.aiBubble tr:nth-child(even) td {
-  background: var(--surface-panel);
-}
+.aiBubble tr:nth-child(even) td { background: var(--surface-panel); }
 .aiBubble blockquote {
   border-inline-start: 3px solid var(--color-blue);
   margin-inline-start: 0;
@@ -512,6 +736,23 @@
   margin-block: 10px;
   overflow-x: auto;
   text-align: center;
+}
+
+.mermaidDl {
+  display: block;
+  margin: -4px auto 10px;
+  padding: 4px 14px;
+  font-size: 0.8rem;
+  background: transparent;
+  border: 1px solid var(--neutral-border);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  color: var(--text-muted);
+  transition: background 0.15s, color 0.15s;
+}
+.mermaidDl:hover {
+  background: var(--surface-panel);
+  color: var(--text-primary);
 }
 
 /* ─── Typing indicator ────────────────────────────────────────────────────── */
@@ -547,13 +788,72 @@
 /* ─── Input area ──────────────────────────────────────────────────────────── */
 
 .inputArea {
-  padding: 16px 24px 20px;
+  padding: 12px 24px 20px;
   border-block-start: 1px solid var(--neutral-border);
   background: var(--surface-panel);
   display: flex;
   flex-direction: column;
   gap: 8px;
   flex-shrink: 0;
+}
+
+.contextRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.changeLessonBtn {
+  padding: 2px 8px;
+  border-radius: 999px;
+  border: 1px solid var(--neutral-border);
+  background: transparent;
+  color: var(--text-muted);
+  font-size: 0.72rem;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  transition: background var(--dur-fast), color var(--dur-fast), border-color var(--dur-fast);
+}
+
+.changeLessonBtn:hover {
+  background: var(--surface-elevated);
+  color: var(--text-secondary);
+  border-color: var(--neutral-border-strong);
+}
+
+.changeLessonBtn:focus-visible {
+  outline: 2px solid var(--color-blue);
+  outline-offset: 2px;
+}
+
+.quickQuizBtn {
+  padding: 2px 10px;
+  border-radius: 999px;
+  border: 1px solid var(--color-blue);
+  background: transparent;
+  color: var(--color-blue);
+  font-size: 0.72rem;
+  font-weight: 700;
+  font-family: inherit;
+  cursor: pointer;
+  transition: background var(--dur-fast), color var(--dur-fast);
+  white-space: nowrap;
+}
+
+.quickQuizBtn:hover {
+  background: var(--color-blue);
+  color: #fff;
+}
+
+.quickQuizBtn:focus-visible {
+  outline: 2px solid var(--color-blue);
+  outline-offset: 2px;
+}
+
+.quickQuizBtn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 
 .inputRow {
@@ -582,6 +882,7 @@
 .textInput:focus {
   outline: none;
   border-color: var(--color-blue);
+  box-shadow: 0 0 0 3px var(--color-blue-glow);
 }
 
 .textInput::placeholder {
@@ -612,24 +913,32 @@
   cursor: not-allowed;
 }
 
+.sendBtn:focus-visible {
+  outline: 2px solid var(--color-blue);
+  outline-offset: 2px;
+}
+
 .inputHint {
   font-size: 0.72rem;
   color: var(--text-muted);
   text-align: center;
 }
 
-/* ─── Quiz overlay ────────────────────────────────────────────────────────── */
+/* ─── Quiz container (inline, replaces overlay) ───────────────────────────── */
 
-.quizOverlay {
-  position: absolute;
-  inset: 0;
-  background: oklch(13.5% 0.022 255 / 0.96);
-  backdrop-filter: blur(4px);
+.quizContainer {
+  flex: 1;
+  overflow-y: auto;
   display: flex;
-  align-items: center;
+  flex-direction: column;
+}
+
+.quizPanelWrapper {
+  flex: 1;
+  display: flex;
+  align-items: flex-start;
   justify-content: center;
-  z-index: 100;
-  padding: 24px;
+  padding: 32px 24px 40px;
 }
 
 .quizPanel {
@@ -638,11 +947,12 @@
   border-radius: var(--radius-xl);
   width: 100%;
   max-width: 560px;
-  max-height: 88vh;
-  overflow-y: auto;
   display: flex;
   flex-direction: column;
+  overflow: hidden;
 }
+
+/* ─── Quiz header ─────────────────────────────────────────────────────────── */
 
 .quizHeader {
   display: flex;
@@ -693,11 +1003,12 @@
   color: var(--text-primary);
 }
 
-.quizLoading,
-.quizBody,
-.quizResults {
-  padding: 24px 22px;
+.quizClose:focus-visible {
+  outline: 2px solid var(--color-blue);
+  outline-offset: 2px;
 }
+
+/* ─── Quiz loading state ──────────────────────────────────────────────────── */
 
 .quizLoading {
   display: flex;
@@ -714,12 +1025,20 @@
   gap: 6px;
 }
 
+.quizErrorText {
+  color: var(--color-red);
+  font-weight: 600;
+  text-align: center;
+}
+
 /* ─── Quiz body ───────────────────────────────────────────────────────────── */
 
 .quizBody {
   display: flex;
   flex-direction: column;
   gap: 20px;
+  padding: 24px 22px;
+  outline: none;
 }
 
 .progressBar {
@@ -751,13 +1070,18 @@
   line-height: 1.45;
 }
 
+/* ─── Quiz options (radio group) ──────────────────────────────────────────── */
+
 .options {
   display: flex;
   flex-direction: column;
   gap: 8px;
+  border: none;
+  padding: 0;
+  margin: 0;
 }
 
-.optionBtn {
+.optionItem {
   display: flex;
   align-items: center;
   gap: 12px;
@@ -769,14 +1093,19 @@
   font-size: 0.9375rem;
   font-family: inherit;
   cursor: pointer;
-  text-align: start;
-  transition: background var(--dur-fast), border-color var(--dur-fast), color var(--dur-fast);
+  transition: background var(--dur-fast), border-color var(--dur-fast), color var(--dur-fast), opacity var(--dur-fast);
   width: 100%;
 }
 
-.optionBtn:hover {
+.optionItem:hover {
   border-color: var(--neutral-border-strong);
   color: var(--text-primary);
+}
+
+.optionItem:focus-within {
+  outline: 2px solid var(--color-blue);
+  outline-offset: 2px;
+  border-color: var(--color-blue);
 }
 
 .optionSelected {
@@ -785,7 +1114,12 @@
   color: var(--color-blue);
 }
 
-.optionLabel {
+.optionDimmed {
+  opacity: 0.45;
+  pointer-events: none;
+}
+
+.optionKey {
   width: 26px;
   height: 26px;
   border-radius: 50%;
@@ -798,7 +1132,7 @@
   flex-shrink: 0;
 }
 
-.optionSelected .optionLabel {
+.optionSelected .optionKey {
   background: var(--color-blue);
   color: oklch(97% 0.01 255);
 }
@@ -807,6 +1141,8 @@
   flex: 1;
   line-height: 1.45;
 }
+
+/* ─── Next / Submit button ────────────────────────────────────────────────── */
 
 .nextBtn {
   display: inline-flex;
@@ -835,6 +1171,11 @@
   cursor: not-allowed;
 }
 
+.nextBtn:focus-visible {
+  outline: 2px solid var(--color-blue);
+  outline-offset: 2px;
+}
+
 /* ─── Quiz results ────────────────────────────────────────────────────────── */
 
 .quizResults {
@@ -842,6 +1183,7 @@
   flex-direction: column;
   align-items: center;
   gap: 20px;
+  padding: 24px 22px;
 }
 
 .scoreCircle {
@@ -878,7 +1220,7 @@
   display: flex;
   flex-direction: column;
   gap: 6px;
-  max-height: 220px;
+  max-height: 240px;
   overflow-y: auto;
 }
 
@@ -891,13 +1233,8 @@
   font-size: 0.8125rem;
 }
 
-.breakdownCorrect {
-  background: oklch(65% 0.2 145 / 0.1);
-}
-
-.breakdownWrong {
-  background: var(--color-red-dim);
-}
+.breakdownCorrect { background: oklch(65% 0.2 145 / 0.1); }
+.breakdownWrong   { background: var(--color-red-dim); }
 
 .breakdownIcon {
   font-weight: 700;
@@ -906,7 +1243,7 @@
 }
 
 .breakdownCorrect .breakdownIcon { color: oklch(65% 0.2 145); }
-.breakdownWrong  .breakdownIcon { color: var(--color-red); }
+.breakdownWrong  .breakdownIcon  { color: var(--color-red); }
 
 .breakdownContent {
   display: flex;
@@ -951,8 +1288,11 @@
   transition: background var(--dur-fast);
 }
 
-.nextLevelBtn:hover {
-  background: var(--color-blue-hover);
+.nextLevelBtn:hover { background: var(--color-blue-hover); }
+
+.nextLevelBtn:focus-visible {
+  outline: 2px solid var(--color-blue);
+  outline-offset: 2px;
 }
 
 .backToChatBtn {
@@ -973,9 +1313,14 @@
   color: var(--text-primary);
 }
 
-/* ─── Selection pane (course + lesson steps) ─────────────────────────────── */
+.backToChatBtn:focus-visible {
+  outline: 2px solid var(--color-blue);
+  outline-offset: 2px;
+}
 
-.selectionPane {
+/* ─── Quiz setup panel ────────────────────────────────────────────────────── */
+
+.quizSetup {
   flex: 1;
   overflow-y: auto;
   display: flex;
@@ -984,38 +1329,842 @@
   padding: 48px 24px 40px;
 }
 
-.selectionInner {
+.quizSetupInner {
   width: 100%;
-  max-width: 600px;
+  max-width: 520px;
   display: flex;
   flex-direction: column;
-  gap: 28px;
+  gap: 24px;
+}
+
+.quizSetupField {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.quizSetupLabel {
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  letter-spacing: 0.01em;
+}
+
+.quizSetupInput {
+  width: 100%;
+  padding: 10px 14px;
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--neutral-border);
+  background: var(--surface-input);
+  color: var(--text-primary);
+  font-size: 0.9375rem;
+  font-family: inherit;
+  transition: border-color var(--dur-fast);
+}
+
+.quizSetupInput:focus {
+  outline: none;
+  border-color: var(--color-blue);
+  box-shadow: 0 0 0 3px var(--color-blue-glow);
+}
+
+.quizSetupInput::placeholder {
+  color: var(--text-muted);
+}
+
+/* ─── Quiz helper card ──────────────────────────────────────────────────────── */
+
+.quizHelperCard {
+  background: oklch(from var(--color-blue) l c h / 0.07);
+  border: 1px solid oklch(from var(--color-blue) l c h / 0.18);
+  border-inline-start: 3px solid var(--color-blue);
+  border-radius: var(--radius-md);
+  padding: 14px 16px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.quizHelperHeading {
+  font-size: 0.8125rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.quizHelperList {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.quizHelperList li {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  line-height: 1.45;
+}
+
+.quizHelperList li strong {
+  color: var(--text-primary);
+  font-weight: 600;
+}
+
+.quizHelperIcon {
+  flex-shrink: 0;
+  font-size: 0.9rem;
+  margin-block-start: 1px;
+}
+
+.quizHelperInstructions {
+  margin: 0;
+  padding-block-start: 6px;
+  border-block-start: 1px solid oklch(from var(--color-blue) l c h / 0.15);
+  font-size: 0.775rem;
+  color: var(--text-muted);
+  line-height: 1.5;
+}
+
+/* Level radio group */
+
+.levelFieldset {
+  border: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.levelOptions {
+  display: flex;
+  gap: 8px;
+}
+
+.levelOption {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 9px 12px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--neutral-border);
+  background: var(--surface-elevated);
+  color: var(--text-secondary);
+  font-size: 0.875rem;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  transition: background var(--dur-fast), color var(--dur-fast), border-color var(--dur-fast);
+  text-align: center;
+}
+
+.levelOptionActive {
+  border-color: var(--color-blue);
+  background: var(--color-blue-dim);
+  color: var(--color-blue);
+}
+
+.levelOption:focus-within {
+  outline: 2px solid var(--color-blue);
+  outline-offset: 2px;
+}
+
+/* Weak topic shortcuts in quiz setup */
+
+.weakSuggestions {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.weakSuggestionsLabel {
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.weakSuggestionPills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.weakSuggestionPill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 12px;
+  border-radius: 999px;
+  border: 1px solid var(--neutral-border);
+  background: var(--surface-elevated);
+  color: var(--text-secondary);
+  font-size: 0.8125rem;
+  font-weight: 500;
+  font-family: inherit;
+  cursor: pointer;
+  transition: background var(--dur-fast), color var(--dur-fast), border-color var(--dur-fast);
+}
+
+.weakSuggestionPill:hover {
+  background: var(--color-blue-dim);
+  border-color: var(--color-blue);
+  color: var(--color-blue);
+}
+
+.weakSuggestionPillActive {
+  background: var(--color-blue-dim);
+  border-color: var(--color-blue);
+  color: var(--color-blue);
+}
+
+.weakSuggestionPill:focus-visible {
+  outline: 2px solid var(--color-blue);
+  outline-offset: 2px;
+}
+
+.weakSuggestionScore {
+  font-size: 0.68rem;
+  font-weight: 700;
+  opacity: 0.7;
+}
+
+.quizStartBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  padding: 12px 28px;
+  border-radius: var(--radius-md);
+  border: none;
+  background: var(--color-blue);
+  color: oklch(97% 0.01 255);
+  font-size: 0.9375rem;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  transition: background var(--dur-fast), opacity var(--dur-fast);
+  align-self: flex-start;
+}
+
+.quizStartBtn:hover:not(:disabled) {
+  background: var(--color-blue-hover);
+}
+
+.quizStartBtn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.quizStartBtn:focus-visible {
+  outline: 2px solid var(--color-blue);
+  outline-offset: 2px;
+}
+
+.quizStartBtnLoading {
+  opacity: 0.85;
+  cursor: wait;
+}
+
+.quizBtnSpinner {
+  width: 14px;
+  height: 14px;
+  border: 2px solid oklch(97% 0.01 255 / 0.35);
+  border-top-color: oklch(97% 0.01 255);
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+  flex-shrink: 0;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.quizGeneratingHint {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  text-align: center;
+  margin-top: 4px;
+}
+
+/* ─── Quiz history sidebar section ───────────────────────────────────────── */
+
+.quizHistoryList {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.quizHistoryItem {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  padding: 7px 10px;
+  border-radius: var(--radius-sm);
+  border: 1px solid transparent;
+  background: transparent;
+  text-align: start;
+  cursor: pointer;
+  font-family: inherit;
+  transition: background var(--dur-fast), border-color var(--dur-fast);
+}
+
+.quizHistoryItem:hover {
+  background: var(--surface-elevated);
+  border-color: var(--neutral-border);
+}
+
+.quizHistoryItem:focus-visible {
+  outline: 2px solid var(--color-blue);
+  outline-offset: 2px;
+}
+
+.quizHistoryTopic {
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: var(--text-primary);
+}
+
+.quizHistoryMeta {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.quizScoreBadge {
+  font-size: 0.68rem;
+  font-weight: 700;
+  padding: 1px 6px;
+  border-radius: 999px;
+  border: 1px solid currentColor;
+}
+
+.quizScorePass  { color: oklch(55% 0.18 145); }
+.quizScoreFail  { color: var(--color-red); }
+
+.quizHistoryDate {
+  font-size: 0.68rem;
+  color: var(--text-muted);
+  margin-inline-start: auto;
+}
+
+/* ─── Quiz review overlay ─────────────────────────────────────────────────── */
+
+.reviewOverlay {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  background: oklch(0% 0 0 / 0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+}
+
+.reviewPanel {
+  background: var(--surface-base);
+  border: 1px solid var(--neutral-border);
+  border-radius: var(--radius-lg, 16px);
+  width: 100%;
+  max-width: 600px;
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.reviewHeader {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 20px 20px 16px;
+  border-bottom: 1px solid var(--neutral-border);
+  flex-shrink: 0;
+}
+
+.reviewHeaderInfo {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.reviewTitleLabel {
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.reviewTopic {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin: 0;
+}
+
+.reviewMeta {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.reviewScoreBadge {
+  font-size: 0.75rem;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 999px;
+  border: 1.5px solid currentColor;
+}
+
+.reviewCloseBtn {
+  padding: 4px;
+  border: none;
+  background: transparent;
+  color: var(--text-muted);
+  cursor: pointer;
+  border-radius: 6px;
+  display: flex;
+  flex-shrink: 0;
+  transition: color var(--dur-fast), background var(--dur-fast);
+}
+
+.reviewCloseBtn:hover {
+  color: var(--text-primary);
+  background: var(--surface-elevated);
+}
+
+.reviewCloseBtn:focus-visible {
+  outline: 2px solid var(--color-blue);
+  outline-offset: 2px;
+}
+
+.reviewBody {
+  flex: 1;
+  overflow-y: auto;
+  padding: 16px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.reviewLoading {
+  display: flex;
+  justify-content: center;
+  padding: 32px 0;
+}
+
+.reviewQuestion {
+  border-radius: var(--radius-md);
+  border: 1px solid var(--neutral-border);
+  padding: 12px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.reviewQuestionCorrect { border-color: oklch(65% 0.2 145 / 0.5); background: oklch(65% 0.2 145 / 0.05); }
+.reviewQuestionWrong   { border-color: var(--color-red, oklch(62% 0.26 25)) ; background: oklch(62% 0.26 25 / 0.05); }
+
+.reviewQuestionHeader {
+  display: flex;
+  gap: 8px;
+  align-items: flex-start;
+}
+
+.reviewQuestionNum {
+  font-size: 0.875rem;
+  font-weight: 700;
+  flex-shrink: 0;
+  width: 18px;
+}
+
+.reviewQuestionCorrect .reviewQuestionNum { color: oklch(55% 0.18 145); }
+.reviewQuestionWrong   .reviewQuestionNum { color: var(--color-red); }
+
+.reviewQuestionText {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--text-primary);
+  margin: 0;
+  line-height: 1.5;
+}
+
+.reviewAnswerRow {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.8125rem;
+  padding-inline-start: 26px;
+}
+
+.reviewAnswerLabel {
+  color: var(--text-muted);
+  flex-shrink: 0;
+}
+
+.reviewAnswerVal {
+  font-weight: 600;
+  padding: 1px 8px;
+  border-radius: 999px;
+  border: 1px solid currentColor;
+}
+
+.reviewAnswerCorrect { color: oklch(55% 0.18 145); }
+.reviewAnswerWrong   { color: var(--color-red); }
+
+.reviewExplanation {
+  font-size: 0.78rem;
+  color: var(--text-secondary);
+  margin: 0;
+  padding-inline-start: 26px;
+  line-height: 1.55;
+}
+
+.reviewFooter {
+  display: flex;
+  gap: 10px;
+  padding: 14px 20px;
+  border-top: 1px solid var(--neutral-border);
+  flex-shrink: 0;
+  flex-wrap: wrap;
+}
+
+/* ─── Quiz source selector ────────────────────────────────────────────────── */
+
+.quizSourceGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+}
+
+.quizSourceCard {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 14px 8px;
+  border-radius: var(--radius-md);
+  border: 1.5px solid var(--neutral-border);
+  background: var(--surface-elevated);
+  cursor: pointer;
+  transition: border-color var(--dur-fast), background var(--dur-fast);
+  font-family: inherit;
+}
+
+.quizSourceCard:hover {
+  border-color: var(--color-blue);
+  background: var(--color-blue-dim);
+}
+
+.quizSourceCardActive {
+  border-color: var(--color-blue);
+  background: var(--color-blue-dim);
+}
+
+.quizSourceCardIcon {
+  font-size: 1.4rem;
+  line-height: 1;
+}
+
+.quizSourceCardLabel {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  text-align: center;
+}
+
+.quizSourceCardActive .quizSourceCardLabel {
+  color: var(--color-blue);
+}
+
+.quizSourceCard:focus-visible {
+  outline: 2px solid var(--color-blue);
+  outline-offset: 2px;
+}
+
+/* ─── Quiz source content areas ───────────────────────────────────────────── */
+
+.quizTopicContent {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.quizTopicGrid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  max-height: 180px;
+  overflow-y: auto;
+  padding-block: 2px;
+}
+
+.quizEmptyHint {
+  font-size: 0.8125rem;
+  color: var(--text-muted);
+  text-align: center;
+  padding: 14px 0;
+}
+
+/* Session list */
+.quizSessionList {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  max-height: 200px;
+  overflow-y: auto;
+  padding-inline-end: 2px;
+}
+
+.quizSessionItem {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 9px 12px;
+  border-radius: var(--radius-sm);
+  border: 1.5px solid transparent;
+  background: var(--surface-elevated);
+  text-align: start;
+  cursor: pointer;
+  transition: border-color var(--dur-fast), background var(--dur-fast);
+  font-family: inherit;
+}
+
+.quizSessionItem:hover {
+  border-color: var(--color-blue);
+  background: var(--color-blue-dim);
+}
+
+.quizSessionItemActive {
+  border-color: var(--color-blue);
+  background: var(--color-blue-dim);
+}
+
+.quizSessionTopic {
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: var(--text-primary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.quizSessionMeta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.quizSessionItem:focus-visible {
+  outline: 2px solid var(--color-blue);
+  outline-offset: 2px;
+}
+
+/* Lesson picker (compact course → lesson) */
+.quizLessonPicker {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-height: 210px;
+  overflow-y: auto;
+}
+
+.quizPickerSkeleton {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.skeletonBlock {
+  height: 38px;
+  border-radius: var(--radius-sm);
+  background: var(--surface-elevated);
+  animation: pulse 1.4s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.4; }
+}
+
+.quizCourseGrid {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.quizCourseCard {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 12px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--neutral-border);
+  background: var(--surface-elevated);
+  cursor: pointer;
+  text-align: start;
+  transition: border-color var(--dur-fast), background var(--dur-fast);
+  font-family: inherit;
+}
+
+.quizCourseCard:hover {
+  border-color: var(--color-blue);
+  background: var(--color-blue-dim);
+}
+
+.quizCourseCard:focus-visible {
+  outline: 2px solid var(--color-blue);
+  outline-offset: 2px;
+}
+
+.quizCourseAvatar {
+  width: 28px;
+  height: 28px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.6875rem;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.quizCourseName {
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: var(--text-primary);
+}
+
+.quizBackBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 8px;
+  border-radius: 6px;
+  border: 1px solid var(--neutral-border);
+  background: transparent;
+  color: var(--text-secondary);
+  font-size: 0.75rem;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  transition: background var(--dur-fast);
+  align-self: flex-start;
+  flex-shrink: 0;
+}
+
+.quizBackBtn:hover {
+  background: var(--surface-elevated);
+}
+
+.quizBackBtn:focus-visible {
+  outline: 2px solid var(--color-blue);
+  outline-offset: 2px;
+}
+
+.quizLessonList {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.quizLessonItem {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 10px;
+  border-radius: var(--radius-sm);
+  border: 1.5px solid transparent;
+  background: var(--surface-elevated);
+  cursor: pointer;
+  transition: border-color var(--dur-fast), background var(--dur-fast);
+}
+
+.quizLessonItem:hover {
+  border-color: var(--color-blue);
+  background: var(--color-blue-dim);
+}
+
+.quizLessonItemActive {
+  border-color: var(--color-blue);
+  background: var(--color-blue-dim);
+}
+
+.quizLessonIdx {
+  font-size: 0.6875rem;
+  font-weight: 700;
+  color: var(--text-muted);
+  width: 16px;
+  text-align: center;
+  flex-shrink: 0;
+}
+
+.quizLessonTitle {
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: var(--text-primary);
+  flex: 1;
+}
+
+/* ─── Selection pane (course + lesson steps) ──────────────────────────────── */
+
+.selectionPane {
+  flex: 1;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 32px 24px 48px;
+}
+
+.selectionInner {
+  width: 100%;
+  max-width: 560px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  margin-block: auto;
 }
 
 .selectionHeader {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 10px;
+  gap: 12px;
   text-align: center;
+  padding-block-end: 8px;
 }
 
 .selectionIcon {
-  width: 56px;
-  height: 56px;
-  border-radius: 50%;
+  width: 72px;
+  height: 72px;
+  border-radius: 20px;
   background: var(--color-blue-dim);
   color: var(--color-blue);
   display: flex;
   align-items: center;
   justify-content: center;
   margin-block-end: 4px;
+  box-shadow: 0 0 0 10px oklch(62% 0.26 255 / 0.06), 0 8px 28px oklch(62% 0.26 255 / 0.18);
 }
 
 .selectionTitle {
-  font-size: 1.375rem;
+  font-size: 1.5rem;
   font-weight: 700;
-  letter-spacing: -0.025em;
+  letter-spacing: -0.03em;
   color: var(--text-primary);
 }
 
@@ -1026,17 +2175,49 @@
   line-height: 1.6;
 }
 
+.tutorDesc {
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+  max-width: 48ch;
+  line-height: 1.7;
+  text-align: center;
+}
+
+.tutorFeatures {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: center;
+  margin-block-start: 2px;
+}
+
+.tutorFeature {
+  display: inline-flex;
+  align-items: center;
+  padding: 5px 13px;
+  border-radius: 999px;
+  border: 1px solid var(--neutral-border);
+  background: var(--color-blue-dim);
+  color: var(--color-blue);
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.courseSectionHint {
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  letter-spacing: 0.02em;
+  margin-block-start: 8px;
+  padding-block-start: 16px;
+  border-block-start: 1px solid var(--neutral-border);
+  width: 100%;
+  text-align: center;
+}
+
 .courseNameInline {
   font-weight: 600;
   color: var(--text-secondary);
-}
-
-.selectionLoading {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
-  padding: 40px 0;
 }
 
 .selectionEmpty {
@@ -1046,20 +2227,45 @@
   padding: 32px 0;
 }
 
-/* ─── Course grid ─────────────────────────────────────────────────────────── */
+/* ─── Course grid + skeleton ──────────────────────────────────────────────── */
 
-.courseGrid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
-  gap: 12px;
-}
-
-.courseCard {
-  position: relative;
+.courseGrid,
+.courseSkeletonGrid {
   display: flex;
   flex-direction: column;
   gap: 8px;
-  padding: 18px 16px 16px;
+}
+
+.courseSkeletonCard {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 16px 18px;
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--neutral-border);
+  background: var(--surface-elevated);
+}
+
+.courseAvatarSkeleton {
+  width: 48px;
+  height: 48px;
+  min-width: 48px;
+  border-radius: 12px;
+  flex-shrink: 0;
+}
+
+.courseSkeletonBody {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.courseCard {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 16px 18px;
   border-radius: var(--radius-lg);
   border: 1px solid var(--neutral-border);
   background: var(--surface-elevated);
@@ -1067,12 +2273,45 @@
   cursor: pointer;
   font-family: inherit;
   transition: border-color var(--dur-fast), background var(--dur-fast), box-shadow var(--dur-fast);
+  width: 100%;
 }
 
 .courseCard:hover {
   border-color: var(--color-blue);
-  background: var(--color-blue-dim);
-  box-shadow: 0 0 0 3px oklch(58% 0.22 255 / 0.08);
+  background: oklch(62% 0.26 255 / 0.05);
+  box-shadow: 0 4px 24px oklch(0% 0 0 / 0.24);
+}
+
+.courseCard:focus-visible {
+  outline: 2px solid var(--color-blue);
+  outline-offset: 2px;
+}
+
+.courseAvatar {
+  width: 48px;
+  height: 48px;
+  min-width: 48px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.9375rem;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  flex-shrink: 0;
+  transition: box-shadow var(--dur-fast);
+}
+
+.courseCard:hover .courseAvatar {
+  box-shadow: 0 0 0 3px var(--color-blue-glow);
+}
+
+.courseCardBody {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  min-width: 0;
 }
 
 .courseCardName {
@@ -1080,7 +2319,6 @@
   font-weight: 600;
   color: var(--text-primary);
   line-height: 1.35;
-  padding-inline-end: 20px;
 }
 
 .courseCardMeta {
@@ -1095,8 +2333,6 @@
   align-items: center;
   padding: 2px 8px;
   border-radius: 999px;
-  background: var(--color-blue-dim);
-  color: var(--color-blue);
   font-size: 0.72rem;
   font-weight: 600;
 }
@@ -1107,26 +2343,38 @@
 }
 
 .courseCardArrow {
-  position: absolute;
-  inset-block-start: 18px;
-  inset-inline-end: 14px;
   color: var(--text-muted);
   display: flex;
   align-items: center;
+  flex-shrink: 0;
   transition: color var(--dur-fast), transform var(--dur-fast);
 }
 
 .courseCard:hover .courseCardArrow {
   color: var(--color-blue);
-  transform: translateX(2px);
+  transform: translateX(3px);
 }
 
-/* ─── Lesson list ─────────────────────────────────────────────────────────── */
+[dir="rtl"] .courseCard:hover .courseCardArrow {
+  transform: translateX(-3px);
+}
+
+/* ─── Lesson list + skeleton ──────────────────────────────────────────────── */
 
 .lessonList {
   display: flex;
   flex-direction: column;
   gap: 6px;
+}
+
+.lessonSkeletonItem {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 14px 16px;
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--neutral-border);
+  background: var(--surface-elevated);
 }
 
 .lessonItem {
@@ -1140,13 +2388,19 @@
   text-align: start;
   cursor: pointer;
   font-family: inherit;
-  transition: border-color var(--dur-fast), background var(--dur-fast);
+  transition: border-color var(--dur-fast), background var(--dur-fast), box-shadow var(--dur-fast);
   width: 100%;
 }
 
 .lessonItem:hover {
   border-color: var(--color-blue);
   background: var(--color-blue-dim);
+  box-shadow: 0 8px 32px oklch(0% 0 0 / 0.30);
+}
+
+.lessonItem:focus-visible {
+  outline: 2px solid var(--color-blue);
+  outline-offset: 2px;
 }
 
 .lessonIndex {
@@ -1208,6 +2462,104 @@
   transform: translateX(2px);
 }
 
+[dir="rtl"] .lessonItem:hover .lessonArrow {
+  transform: translateX(-2px);
+}
+
+/* ─── Lesson multi-select ─────────────────────────────────────────────────── */
+
+.lessonCheckbox {
+  width: 18px;
+  height: 18px;
+  border-radius: 5px;
+  border: 1.5px solid var(--neutral-border);
+  background: var(--surface-panel);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: border-color var(--dur-fast), background var(--dur-fast);
+  color: white;
+}
+
+.lessonCheckboxChecked {
+  background: var(--color-blue);
+  border-color: var(--color-blue);
+}
+
+.lessonItemChecked {
+  border-color: oklch(62% 0.26 255 / 0.4);
+  background: var(--color-blue-dim);
+}
+
+.lessonSelectAll {
+  font-weight: 600;
+}
+
+.lessonSelectAll .lessonTitle {
+  font-weight: 600;
+}
+
+.lessonAllBadge {
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: var(--surface-panel);
+  border: 1px solid var(--neutral-border);
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--text-muted);
+  flex-shrink: 0;
+}
+
+.lessonDivider {
+  height: 1px;
+  background: var(--neutral-border);
+  margin: 4px 0;
+}
+
+.lessonConfirmRow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding-top: 16px;
+  border-top: 1px solid var(--neutral-border);
+  margin-top: 8px;
+}
+
+.lessonSelectedCount {
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: var(--color-blue);
+  flex: 1;
+}
+
+.lessonConfirmBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 20px;
+  border-radius: var(--radius-lg);
+  background: var(--color-blue);
+  color: white;
+  font-size: 0.875rem;
+  font-weight: 600;
+  border: none;
+  cursor: pointer;
+  transition: opacity var(--dur-fast), transform var(--dur-fast);
+}
+
+.lessonConfirmBtn:hover:not(:disabled) {
+  opacity: 0.9;
+  transform: translateY(-1px);
+}
+
+.lessonConfirmBtn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+  background: var(--text-muted);
+  transform: none;
+}
+
 /* ─── Back button ─────────────────────────────────────────────────────────── */
 
 .backBtn {
@@ -1232,6 +2584,11 @@
   color: var(--text-primary);
 }
 
+.backBtn:focus-visible {
+  outline: 2px solid var(--color-blue);
+  outline-offset: 2px;
+}
+
 /* ─── Mobile sidebar overlay ──────────────────────────────────────────────── */
 
 .sidebarOverlay {
@@ -1254,7 +2611,15 @@
     transition: transform var(--dur-std) var(--ease-out-quart);
   }
 
+  [dir="rtl"] .sidebar {
+    transform: translateX(100%);
+  }
+
   .sidebarOpen {
+    transform: translateX(0);
+  }
+
+  [dir="rtl"] .sidebarOpen {
     transform: translateX(0);
   }
 
@@ -1272,5 +2637,45 @@
 
   .inputArea {
     padding: 12px 16px 16px;
+  }
+
+  .modeTab {
+    padding: 5px 10px;
+    font-size: 0.75rem;
+  }
+
+  .quizPanelWrapper {
+    padding: 16px;
+  }
+}
+
+/* ─── Reduced motion ──────────────────────────────────────────────────────── */
+
+@media (prefers-reduced-motion: reduce) {
+  .dot {
+    animation: none;
+    opacity: 0.7;
+  }
+
+  .skeleton {
+    animation: none;
+    background: var(--surface-elevated);
+  }
+
+  .progressFill {
+    transition: none;
+  }
+
+  .weakBarFill {
+    transition: none;
+  }
+
+  .sidebar {
+    transition: none;
+  }
+
+  .courseCardArrow,
+  .lessonArrow {
+    transition: none;
   }
 }
